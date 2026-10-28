@@ -41,7 +41,12 @@ Design a style guide for an Android app called Indlela, 360 × 800 px, using ONL
 - Size: 24px default, 20px in compact areas
 - Color: Text primary (#202124) default, Primary (#1a73e8) for active states
 
-**Shared components (Section 8.3):**
+**Logo (derived from app name "Indlela" — isiZulu for "path/way"):**
+- Icon: The letter "I" stylized as a vertical path/road. A 4px-wide vertical line in Primary color (#1a73e8) running top to bottom, with an 8px-diameter circle (Primary) at the top representing a starting point. Total icon height: 32px.
+- Wordmark: "ndlela" in H1 weight (Bold 700), 24px, Text primary (#202124), placed immediately to the right of the icon with 4px gap.
+- Combined: The full logo reads as the path icon + "ndlela" = "Indlela". Overall height 32px. Use on light backgrounds only (Background #ffffff or Surface #f8f9fa).
+- Clear space: Minimum 16px (md) padding around the logo on all sides.
+- Do not add taglines, gradients, or additional decoration.
 1. Button — Primary, secondary, text, disabled, loading (spinner)
 2. TextInput — Default, focused, error (red border + message), disabled
 3. Card — Job card (title, company, wage, transport cost, net gain), Fare card (route, amount, staleness)
@@ -71,7 +76,7 @@ Design screen "S1" for my Android app at 360 × 800 px.
 
 **Layout (Normal):**
 - Top app bar: "Indlela" (H1, centered)
-- Logo placeholder (grey box labelled "TODO: app logo")
+- Logo: The letter "I" of "Indlela" stylized as a vertical path/road — a 4px-wide vertical line in Primary color (#1a73e8) from top to bottom, with a small circle (8px diameter, Primary) at the top representing a starting point/location. The word "Indlela" is set below the icon in H1 weight (Bold 700), 24px, Text primary (#202124), with the "I" replaced by the path icon so the word reads as the icon + "ndlela". The overall logo height is 48px with 8px spacing between icon and wordmark.
 - Pitch text (Body): "Find jobs you can afford to reach. Track minibus taxi fares from your rank."
 - Button: "Sign up" (Primary)
 - Button: "Log in" (Secondary, below)
