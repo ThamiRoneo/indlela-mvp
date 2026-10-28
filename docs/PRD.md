@@ -12,13 +12,14 @@ Oct 27, 2026 · @Melsoft
 | Facilitator / reviewer | Mnelisi Maswanganyi |
 | Link to your original app idea | docs/IDEA.md in the repository |
 | GitHub repository | https://github.com/ThamiRoneo/indlela-mvp |
-| Version | v0.3 |
+| Version | v0.4 |
 | Status | Approved |
 
 ### Change log
 
 | Version | Date | Section(s) changed | What changed | Regenerated? (screens / MASTER.md / none) |
 |---|---|---|---|---|
+| v0.4 | 28 Oct 2026 | 8.1, 10 | Updated S14: in-app form + external link option for job applications | None |
 | v0.3 | 28 Oct 2026 | 8.1, 8.2, 9, 10, 11, 12, 13, 14 | Added S12/S13/S14; updated offline states; wage format daily; added UserActivity entity; bottom nav note | None |
 | v0.2 | 28 Oct 2026 | 8.1, 8.2, 8.3, 9, 10, 11, 12, 13, 14 | Split S2 into S2/S3; added S9, S10, S11; added M1, M2; added 8.2, 8.3, 9 (design values); renumbered screens; added sample content | None |
 | v0.1 | 28 Oct 2026 | All | First draft | None |
@@ -237,7 +238,7 @@ flowchart TD
 | S11 | Profile/Settings | User settings | Budget/rank/logout | F1,F4 | Budget input (ZAR), change rank, delete account |
 | S12 | Privacy Policy | View privacy policy | Read | F1 | Linked from S2 sign-up checkbox |
 | S13 | Password Reset | Reset forgotten password | Submit new password | F1 | Linked from S3 forgot password link |
-| S14 | Application Flow | Apply for a job | Submit application | F3 | Linked from S8 "Apply" button; opens external browser or in-app form |
+| S14 | Application Flow | Apply for a job | Submit application | F3 | Linked from S8 "Apply" button; in-app form (name, phone, email) with option to open employer's external application URL |
 
 **Modals**
 

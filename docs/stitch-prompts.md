@@ -123,7 +123,7 @@ Design screen "S2" for my Android app at 360 × 800 px.
 
 **Sample content:** Email: "lerato.mokoena@gmail.com", password field filled.
 
-**TODOs:** privacy policy screen not in PRD.
+**TODOs:** Resolved — Privacy Policy screen added as S12 in PRD v0.3.
 
 ---
 
@@ -316,7 +316,7 @@ Design screen "S8" for my Android app at 360 × 800 px.
 - Body: "Estimated transport cost: R450 (return)"
 - Body: "Fare source: FareReport, reported 3 days ago"
 - Body: "Net gain: +R3,050" (green, bold)
-- Button: "Apply" (text link, external) — TODO: application flow not in PRD
+- Button: "Apply" (text link) → S14 (in-app form with external link option)
 
 **States (8.2):**
 - Normal: Full job details + transport breakdown
@@ -328,7 +328,7 @@ Design screen "S8" for my Android app at 360 × 800 px.
 
 **Sample content:** Retail Assistant at Shoprite Rustenburg, R3,500/month, R450 transport, net gain +R3,050.
 
-**TODOs:** "Apply" button external link flow not specified in PRD.
+**TODOs:** Resolved — "Apply" button flow added as S14 in PRD v0.3.
 
 ---
 
@@ -569,6 +569,7 @@ Design screen "S14" for my Android app at 360 × 800 px.
 - TextInput: label "Phone number", placeholder "071 234 5678"
 - TextInput: label "Email", placeholder "lerato.mokoena@gmail.com"
 - Button: "Submit application" (Primary)
+- Text link: "Or apply on employer's website" (text button) → external URL
 
 **States (8.2):**
 - Normal: Application form visible
@@ -580,7 +581,7 @@ Design screen "S14" for my Android app at 360 × 800 px.
 
 **Sample content:** Name: "Lerato Mokoena", phone: "071 234 5678", email: "lerato.mokoena@gmail.com".
 
-**TODOs:** Application submission endpoint and external vs in-app flow not specified in PRD.
+**TODOs:** Resolved — Application flow uses in-app form (name, phone, email) with option to open employer's external application URL.
 
 ---
 
