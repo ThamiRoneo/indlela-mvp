@@ -123,7 +123,6 @@ Design screen "S2" for my Android app at 360 × 800 px.
 
 **Sample content:** Email: "lerato.mokoena@gmail.com", password field filled.
 
-**TODOs:** Resolved — Privacy Policy screen added as S12 in PRD v0.3.
 
 ---
 
@@ -328,7 +327,6 @@ Design screen "S8" for my Android app at 360 × 800 px.
 
 **Sample content:** Retail Assistant at Shoprite Rustenburg, R3,500/month, R450 transport, net gain +R3,050.
 
-**TODOs:** Resolved — "Apply" button flow added as S14 in PRD v0.3.
 
 ---
 
@@ -581,7 +579,6 @@ Design screen "S14" for my Android app at 360 × 800 px.
 
 **Sample content:** Name: "Lerato Mokoena", phone: "071 234 5678", email: "lerato.mokoena@gmail.com".
 
-**TODOs:** Resolved — Application flow uses in-app form (name, phone, email) with option to open employer's external application URL.
 
 ---
 
