@@ -75,7 +75,7 @@ Design screen "S1" for my Android app at 360 × 800 px.
 **Spec (Section 8.1):** Purpose: Entry point. Primary action: Sign up or Log in. Features: F1. Notes: Data-light, logo + pitch + 2 buttons.
 
 **Layout (Normal):**
-- Top app bar: "Indlela" (H1, centered)
+- Top app bar: Indlela logo (path icon + "ndlela" wordmark, H1 weight, centered) — same as the logo in the style guide
 - Logo: The letter "I" of "Indlela" stylized as a vertical path/road — a 4px-wide vertical line in Primary color (#1a73e8) from top to bottom, with a small circle (8px diameter, Primary) at the top representing a starting point/location. The word "Indlela" is set below the icon in H1 weight (Bold 700), 24px, Text primary (#202124), with the "I" replaced by the path icon so the word reads as the icon + "ndlela". The overall logo height is 48px with 8px spacing between icon and wordmark.
 - Pitch text (Body): "Find jobs you can afford to reach. Track minibus taxi fares from your rank."
 - Button: "Sign up" (Primary)
