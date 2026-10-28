@@ -113,7 +113,7 @@ Design screen "S2" for my Android app at 360 × 800 px.
 - Empty: N/A
 - Loading: Spinner on button
 - Error: "This email already has an account. Log in instead?" with link; red border + "At least 8 characters, including a number" on password
-- Offline: Not specified
+- Offline: "No connection. Please check your internet."
 - Success: Account created → S3 with banner "Account created. Please verify your email."
 
 **Sample content:** Email: "lerato.mokoena@gmail.com", password field filled.
@@ -146,7 +146,7 @@ Design screen "S3" for my Android app at 360 × 800 px.
 - Empty: N/A
 - Loading: Spinner on button
 - Error: "Please verify your email first." + "Resend email" link; "Too many attempts. Try again in 15 minutes."
-- Offline: Not specified
+- Offline: "No connection. Please check your internet."
 - Success: Verified → S4 or S7
 
 **Sample content:** Email: "lerato.mokoena@gmail.com".
@@ -180,7 +180,7 @@ Design screen "S4" for my Android app at 360 × 800 px.
 - Empty: "No ranks available. Please try again later." + "Retry" button
 - Loading: Spinner (large, full-screen)
 - Error: "Couldn't load ranks. Try again." + "Retry" button
-- Offline: Not specified
+- Offline: "No connection. Please check your internet."
 - Success: Rank saved → S7
 
 **Sample content:** "Rustenburg Taxi Rank — Rustenburg CBD" selected.
@@ -270,10 +270,10 @@ Design screen "S7" for my Android app at 360 × 800 px.
 - Filter chips: "All jobs", "Affordable", "High net gain" (selected/unselected)
 - Section header (H2): "Jobs sorted by net gain"
 - List of Job cards:
-  - Card: title "Retail Assistant", company "Shoprite Rustenburg", wage "R3,500/month", transport cost "R450", net gain "+R3,050" (positive, green)
-  - Card: title "Call Centre Agent", company "Teleperformance", wage "R6,000/month", transport cost "R720", net gain "+R5,280" (positive, green)
-  - Card: title "Warehouse Packer", company "Logistics Co.", wage "R4,200/month", transport cost "R540", net gain "+R3,660" (positive, green)
-  - Card: title "Security Guard", company "Securitas", wage "R5,500/month", transport cost "R900", net gain "+R4,600" (positive, green)
+  - Card: title "Retail Assistant", company "Shoprite Rustenburg", wage "R150/day", transport cost "R450", net gain "+R3,050" (positive, green)
+  - Card: title "Call Centre Agent", company "Teleperformance", wage "R250/day", transport cost "R720", net gain "+R5,280" (positive, green)
+  - Card: title "Warehouse Packer", company "Logistics Co.", wage "R180/day", transport cost "R540", net gain "+R3,660" (positive, green)
+  - Card: title "Security Guard", company "Securitas", wage "R220/day", transport cost "R900", net gain "+R4,600" (positive, green)
 - Each card tappable → S8
 
 **States (8.2):**
@@ -424,7 +424,7 @@ Design screen "S11" for my Android app at 360 × 800 px.
 
 ---
 
-## 12. M1 — Delete Account Modal
+## Questions / Missing or Unclear Items
 
 Design screen "M1" for my Android app at 360 × 800 px.
 - Reuse the style guide and shared components exactly. Keep the header and tab bar identical to my other screens.
@@ -486,15 +486,108 @@ Design screen "M2" for my Android app at 360 × 800 px.
 
 ---
 
+---
+
+## 14. S12 — Privacy Policy
+
+Design screen "S12" for my Android app at 360 × 800 px.
+- Reuse the style guide and shared components exactly. Keep the header and tab bar identical to my other screens.
+- Include every element in the order listed in the spec. Use the exact labels, placeholder text and messages in quotation marks.
+- Fill the screen with the sample content given. Use South African names, places, rand and dates. Never use lorem ipsum.
+- Design the Normal state first, then one extra frame for each other state in the spec (Empty, Loading, Error, Offline, Success).
+- Do not invent features, buttons, screens or text. If something you need is missing, put a grey box labelled "TODO: [what is missing]" and list all TODOs under the design.
+
+**Spec (Section 8.1):** Purpose: View privacy policy. Primary action: Read. Features: F1. Notes: Linked from S2 sign-up checkbox.
+
+**Layout (Normal):**
+- Top app bar: "Privacy Policy" with back button
+- Body text (Body): "Indlela collects your email, nearest rank, weekly transport budget, and fare reports to provide affordable job matching. Your data is stored securely and you can delete your account at any time from Profile & Settings."
+- Button: "Back" (text button) → S2
+
+**States (8.2):**
+- Normal: Policy text visible
+- Empty: N/A
+- Loading: Spinner while loading
+- Error: "Couldn't load policy. Try again." + "Retry" button
+- Offline: "No connection. Please check your internet."
+- Success: N/A
+
+**Sample content:** Policy text as above.
+
+---
+
+## 15. S13 — Password Reset
+
+Design screen "S13" for my Android app at 360 × 800 px.
+- Reuse the style guide and shared components exactly. Keep the header and tab bar identical to my other screens.
+- Include every element in the order listed in the spec. Use the exact labels, placeholder text and messages in quotation marks.
+- Fill the screen with the sample content given. Use South African names, places, rand and dates. Never use lorem ipsum.
+- Design the Normal state first, then one extra frame for each other state in the spec (Empty, Loading, Error, Offline, Success).
+- Do not invent features, buttons, screens or text. If something you need is missing, put a grey box labelled "TODO: [what is missing]" and list all TODOs under the design.
+
+**Spec (Section 8.1):** Purpose: Reset forgotten password. Primary action: Submit new password. Features: F1. Notes: Linked from S3 forgot password link.
+
+**Layout (Normal):**
+- Top app bar: "Reset password" with back button
+- Body text (Body): "Enter your email to receive a password reset link."
+- TextInput: label "Email", placeholder "you@example.com"
+- Button: "Send reset link" (Primary)
+- Text link: "Back to log in" (text button) → S3
+
+**States (8.2):**
+- Normal: Reset form visible
+- Empty: N/A
+- Loading: Spinner on Submit
+- Error: "Couldn't reset password. Try again." + "Retry"
+- Offline: "No connection. Please check your internet."
+- Success: "Password reset. Please log in." → S3
+
+**Sample content:** Email: "lerato.mokoena@gmail.com".
+
+---
+
+## 16. S14 — Application Flow
+
+Design screen "S14" for my Android app at 360 × 800 px.
+- Reuse the style guide and shared components exactly. Keep the header and tab bar identical to my other screens.
+- Include every element in the order listed in the spec. Use the exact labels, placeholder text and messages in quotation marks.
+- Fill the screen with the sample content given. Use South African names, places, rand and dates. Never use lorem ipsum.
+- Design the Normal state first, then one extra frame for each other state in the spec (Empty, Loading, Error, Offline, Success).
+- Do not invent features, buttons, screens or text. If something you need is missing, put a grey box labelled "TODO: [what is missing]" and list all TODOs under the design.
+
+**Spec (Section 8.1):** Purpose: Apply for a job. Primary action: Submit application. Features: F3. Notes: Linked from S8 "Apply" button; opens external browser or in-app form.
+
+**Layout (Normal):**
+- Top app bar: "Apply for Retail Assistant" with back button
+- Body text (Body): "Shoprite Rustenburg — R150/day"
+- TextInput: label "Full name", placeholder "Lerato Mokoena"
+- TextInput: label "Phone number", placeholder "071 234 5678"
+- TextInput: label "Email", placeholder "lerato.mokoena@gmail.com"
+- Button: "Submit application" (Primary)
+
+**States (8.2):**
+- Normal: Application form visible
+- Empty: N/A
+- Loading: Spinner on Submit
+- Error: "Couldn't submit application. Try again." + "Retry"
+- Offline: "No connection. Please check your internet."
+- Success: "Application submitted." → S8
+
+**Sample content:** Name: "Lerato Mokoena", phone: "071 234 5678", email: "lerato.mokoena@gmail.com".
+
+**TODOs:** Application submission endpoint and external vs in-app flow not specified in PRD.
+
+---
+
 ## Questions / Missing or Unclear Items
 
-1. **Privacy policy screen** — S2 references a privacy policy checkbox but no screen is listed in Section 8.1. Added as TODO in S2.
-2. **"Apply" button flow** — S8 references an "Apply" action but no application flow or screen is defined in the PRD. Added as TODO in S8.
-3. **Forgot password flow** — S3 links to "Forgot password?" but no reset screen is listed in Section 8.1. Added as TODO in S3.
-4. **Offline state for S2, S3, S4** — Section 8.2 lists "Not specified" for offline on these screens. Confirm whether offline handling is needed or if they should show a generic "No connection" message.
-5. **Job card wage format** — PRD says "wage_zar" but does not specify display format (monthly vs daily vs hourly). Used "R3,500/month" as sample; confirm.
-6. **Activity screen data model** — S10 (Activity) is not backed by any entity in Section 10 (Data model). Confirm if a new "UserActivity" entity is needed or if it derives from FareReport + notifications.
-7. **Fare Alerts trigger** — S9 shows alerts but Section 4.5 notifications table only defines in-app banners, not a dedicated alerts screen. Confirm S9 is intended or if alerts should only appear as banners on S5.
-8. **Bottom nav on auth screens** — S1, S2, S3 do not list bottom nav in Section 8.1 notes. Assumed no bottom nav on auth/onboarding screens; confirm.
+1. **Privacy policy screen** — RESOLVED: Added as S12 in PRD v0.3.
+2. **"Apply" button flow** — RESOLVED: Added as S14 in PRD v0.3.
+3. **Forgot password flow** — RESOLVED: Added as S13 in PRD v0.3.
+4. **Offline state for S2, S3, S4** — RESOLVED: Generic "No connection. Please check your internet." message.
+5. **Job card wage format** — RESOLVED: Daily format (e.g. R150/day).
+6. **Activity screen data model** — RESOLVED: Added UserActivity entity in PRD v0.3.
+7. **Fare Alerts trigger** — RESOLVED: Keep S9 dedicated screen.
+8. **Bottom nav on auth screens** — RESOLVED: No bottom nav on auth/onboarding screens (S1-S4).
 EOF
 echo "done"
