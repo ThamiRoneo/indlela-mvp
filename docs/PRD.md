@@ -1,5 +1,6 @@
 # PRD — Indlela
 
+Oct 27, 2026 · @Melsoft
 
 ## Document details
 
@@ -11,30 +12,31 @@
 | Facilitator / reviewer | Mnelisi Maswanganyi |
 | Link to your original app idea | docs/IDEA.md in the repository |
 | GitHub repository | https://github.com/ThamiRoneo/indlela-mvp |
-| Version | v0.1 |
+| Version | v0.2 |
 | Status | Approved |
 
 ### Change log
 
 | Version | Date | Section(s) changed | What changed | Regenerated? (screens / MASTER.md / none) |
 |---|---|---|---|---|
+| v0.2 | 28 Oct 2026 | 8.1, 8.2, 8.3, 9, 10, 11, 12, 13, 14 | Split S2 into S2/S3; added S9, S10, S11; added M1, M2; added 8.2, 8.3, 9 (design values); renumbered screens; added sample content | None |
 | v0.1 | 28 Oct 2026 | All | First draft | None |
 
 ## 1. Product overview
 
 **1.1 Product name:** Indlela
 
-**1.2 One-line pitch** : Indlela helps unemployed youth (18-35) in Rustenburg, North West to affordably reach job opportunities so that transport costs do not block them from attending interviews.
+**1.2 One-line pitch:** Indlela helps unemployed youth (18-35) in Rustenburg, North West to affordably reach job opportunities so that transport costs do not block them from attending interviews.
 
-**1.3 Problem statement** : Youth unemployment in North West sits at 58.8% (QLFS Q1:2025), the highest in South Africa. Many first-time job seekers have no work experience and are part of the NEET population (34% of 15-24 nationally). Minibus taxi fares make up a large portion of a job seeker's budget (often up to R1 000/month according to Youth Capital research), and fares continue to rise with petrol prices. Most job boards only show distance or location, with no consideration for affordability. As a result, young people either cannot afford to attend interviews, or have to choose between transport, food and other necessities to do so.
+**1.3 Problem statement:** Youth unemployment in North West sits at 58.8% (QLFS Q1:2025), the highest in South Africa. Many first-time job seekers have no work experience and are part of the NEET population (34% of 15-24 nationally). Minibus taxi fares make up a large portion of a job seeker's budget (often up to R1 000/month according to Youth Capital research), and fares continue to rise with petrol prices. Most job boards only show distance or location, with no consideration for affordability. As a result, young people either cannot afford to attend interviews, or have to choose between transport, food and other necessities to do so.
 
-**1.4 Solution** : Indlela is a mobile-first app that makes job seeking affordable by surfacing only opportunities users can actually reach. It uses a crowdsourced Dynamic Fare Index to keep up-to-date minibus taxi fares per rank and route, and factors in AA fuel price trends to forecast fare increases. Its Affordability-First Job Feed sorts opportunities by net gain (estimated wage - estimated transport cost) and allows users to filter to "Jobs I can afford this week". By building on South Africa's existing rank-based taxi network and caching fares offline for low-data use, Indlela helps users budget ahead and avoid wasting limited money on unaffordable interviews.
+**1.4 Solution:** Indlela is a mobile-first app that makes job seeking affordable by surfacing only opportunities users can actually reach. It uses a crowdsourced Dynamic Fare Index to keep up-to-date minibus taxi fares per rank and route, and factors in AA fuel price trends to forecast fare increases. Its Affordability-First Job Feed sorts opportunities by net gain (estimated wage - estimated transport cost) and allows users to filter to "Jobs I can afford this week". By building on South Africa's existing rank-based taxi network and caching fares offline for low-data use, Indlela helps users budget ahead and avoid wasting limited money on unaffordable interviews.
 
-**1.5 Platform** : Android app (built and tested on Android first). iPhone is a future feature.
+**1.5 Platform:** Android mobile app (built and tested on Android first). iPhone is a future feature.
 
-**1.6 Vision** : To make transport affordability a standard filter in job seeking across South Africa's most transport-constrained communities, starting with North West.
+**1.6 Vision:** To make transport affordability a standard filter in job seeking across South Africa's most transport-constrained communities, starting with North West.
 
-**1.7 Key terms** : 
+**1.7 Key terms:**
 
 | Term | Exact meaning in this app |
 |---|---|
@@ -48,7 +50,7 @@
 
 ## 2. Users, personas and roles
 
-**2.1 Primary user:** Unemployed youth aged 18-35 in Rustenburg, North West. Students or first-time job seekers with little to no work experience. Tech comfort: Low-Medium. Primarily Android phone users on prepaid data with limited budgets for transport and data.
+**2.1 Primary user:** Unemployed youth aged 18-35 in Rustenburg, North West. Students or first-time job seekers with little to no work experience. Tech comfort: Low-Medium. Android mobile users on prepaid data with limited budgets for transport and data.
 
 **2.2 Secondary users:** Job-seeking support partners (e.g. Harambee, SETAs, NGOs) - may distribute limited transport vouchers in future. None in v1.
 
@@ -57,7 +59,7 @@
 | Field | Persona 1 | Persona 2 |
 |---|---|---|
 | Name and age | Lerato Mokoena, 22 | Thabo Molefe, 24 |
-| Role (from 2.4) | Job Seeker | Job Seeker |
+| Role | Job Seeker | Job Seeker |
 | Occupation / situation | Unemployed NEET youth in Rustenburg, living with family | Unemployed first-time job seeker in Boitekong, Rustenburg, looking for entry-level work |
 | Device and connectivity | Android phone, prepaid data (limited) | Android phone, prepaid data (limited) |
 | Tech comfort | Low-Medium | Low-Medium |
@@ -101,11 +103,11 @@
 
 | ID | Feature name | What the user can do | Priority | Goal | Stories | Screens |
 |---|---|---|---|---|---|---|
-| F1 | Onboarding & Accounts | Sign up, log in, log out, set nearest rank, basic profile setup | Must | G1,G2 | US1,US2,US3 | S1,S2,S3,S10 |
-| F2 | Dynamic Fare Index | View fares by rank/route, report/update fare, see fuel-price aware alerts, use offline cached fares | Must | G2,G3 | US4,US5 | S4,S5 |
-| F3 | Affordability-First Job Feed | View jobs sorted by Net Gain, filter "Jobs I can afford this week", set weekly transport budget, view job details with transport cost breakdown | Must | G1,G3 | US6,US7 | S6,S7 |
-| F4 | Fare Alerts & Budgeting | Set weekly transport budget, get alerts when fares likely to increase, see remaining budget estimate | Should | G3 | US8 | S5,S10 |
-| F5 | Data-light & Offline Support | Cache top ranks/fares offline, show cached data when offline, indicate staleness of fares | Should | G3 | US9 | S4,S5 |
+| F1 | Onboarding & Accounts | Sign up, log in, log out, set nearest rank, basic profile setup | Must | G1,G2 | US1,US2,US3 | S1,S2,S3,S4,S11 |
+| F2 | Dynamic Fare Index | View fares by rank/route, report/update fare, see fuel-price aware alerts, use offline cached fares | Must | G2,G3 | US4,US5 | S5,S6 |
+| F3 | Affordability-First Job Feed | View jobs sorted by Net Gain, filter "Jobs I can afford this week", set weekly transport budget, view job details with transport cost breakdown | Must | G1,G3 | US6,US7 | S7,S8 |
+| F4 | Fare Alerts & Budgeting | Set weekly transport budget, get alerts when fares likely to increase, see remaining budget estimate | Should | G3 | US8 | S6,S9,S11 |
+| F5 | Data-light & Offline Support | Cache top ranks/fares offline, show cached data when offline, indicate staleness of fares | Should | G3 | US9 | S5,S6 |
 
 **4.2 MVP definition:** The smallest version is Indlela with a Dynamic Fare Index and an Affordability-First Job Feed.
 
@@ -115,22 +117,22 @@
 
 | ID | Rule | Used by |
 |---|---|---|
-| BR1 | User must set a nearest rank on first use. | F1, S2, S3 |
-| BR2 | Fare valid if reported in last 14 days; else show staleness. | F2, S4, S5 |
-| BR3 | Max 5 Fare Reports per user per day. | F2, S5 |
-| BR4 | Net Gain = Wage - (to-and-fro transport cost) using nearest rank fares. | F3, S6, S7 |
-| BR5 | "Jobs I can afford this week" requires Net Gain >= 0 and within budget. | F3, S6 |
-| BR6 | Weekly transport budget defaults to unset. | F3, F4, S6, S10 |
-| BR7 | If fuel price up >= 5% in 30 days, show fuel-aware alert. | F2, F4, S4, S5 |
-| BR8 | Cache top ranks/routes for 7 days offline. | F5, S4 |
+| BR1 | User must set a nearest rank on first use. | F1, S2, S3, S4 |
+| BR2 | Fare valid if reported in last 14 days; else show staleness. | F2, S5, S6 |
+| BR3 | Max 5 Fare Reports per user per day. | F2, S6 |
+| BR4 | Net Gain = Wage - (to-and-fro transport cost) using nearest rank fares. | F3, S7, S8 |
+| BR5 | "Jobs I can afford this week" requires Net Gain >= 0 and within budget. | F3, S7 |
+| BR6 | Weekly transport budget defaults to unset. | F3, F4, S7, S11 |
+| BR7 | If fuel price up >= 5% in 30 days, show fuel-aware alert. | F2, F4, S5, S6, S9 |
+| BR8 | Cache top ranks/routes for 7 days offline. | F5, S5 |
 
 **4.5 Notifications**
 
 | Trigger | Who receives it | Channel | Exact text | Tapping it opens |
 |---|---|---|---|---|
-| Fares may increase | Users with nearest rank set in affected area | In-app | "Fares may increase soon. Check updated fares for your rank." | S4 |
-| Fare reported successfully | User who submitted | In-app | "Thanks! Fare reported for [Route]." | S4 |
-| Stale fares detected | User viewing feed | In-app | "Some fares are out of date. Report current fares to stay accurate." | S5 |
+| Fares may increase | Users with nearest rank set in affected area | In-app | "Fares may increase soon. Check updated fares for your rank." | S5 |
+| Fare reported successfully | User who submitted | In-app | "Thanks! Fare reported for [Route]." | S5 |
+| Stale fares detected | User viewing feed | In-app | "Some fares are out of date. Report current fares to stay accurate." | S6 |
 
 ## 5. Accounts and sign-in
 
@@ -153,6 +155,12 @@
 **US1:** As a new user, I want to set my nearest rank.  
 T-US1-1: Prompted on onboarding; saved.
 
+**US2:** As a user, I want to create an account so I can report fares.  
+T-US2-1: Given valid email and password (8+ chars, 1 number), I can sign up and log in.
+
+**US3:** As a user, I want to log in.  
+T-US3-1: Given correct credentials, I go to S4 (Set Nearest Rank) if no rank set, otherwise S7 (Home Feed).
+
 **US4:** As a user, I want to see current fares.  
 T-US4-1: Fares shown with staleness; offline cached if available.
 
@@ -162,6 +170,15 @@ T-US5-1: Submit works if under 5/day limit.
 **US6:** As a user, I want to see affordable jobs.  
 T-US6-1: Sorted by Net Gain; filterable.
 
+**US7:** As a user, I want to set my weekly transport budget.  
+T-US7-1: On S11 I can set weekly transport budget (ZAR). Used for affordability filtering.
+
+**US8:** As a user, I want to be alerted if fares may increase.  
+T-US8-1: If fuel-aware condition met (BR7), I see banner on S5/S6 with exact text from 4.5.
+
+**US9:** As a user, I want to use the app with low data/offline.  
+T-US9-1: After first load, top ranks/routes are cached; offline mode shows cached fares with staleness indicator.
+
 **6.2 Edge cases**
 
 | Situation | What the user sees | What the app does |
@@ -170,42 +187,152 @@ T-US6-1: Sorted by Net Gain; filterable.
 | Stale fares (>14 days) | "Last reported X days ago (stale)" | Flagged as stale |
 | Offline, no cache | "No cached fares available." | Cannot calculate transport costs |
 | Over report limit | "You've reported 5 fares today. Try again tomorrow." | Blocked |
+| Fuel price data unavailable | No fuel-aware banner shown | Fail silently |
 
 ## 7. User flows and navigation map
 
-**Flow 1:** Onboarding → Set rank → Home Feed  
-**Flow 2:** Fares → Report Fare  
-**Flow 3:** Feed → Filter affordable jobs
+**Flow 1:** Onboarding → Sign Up → Log In → Set rank → Home Feed  
+**Flow 2:** Fares → Report Fare → Success modal  
+**Flow 3:** Feed → Filter affordable jobs  
+**Flow 4:** Profile → Delete Account → Confirmation modal
 
-**Navigation map:** Tabs S6 Home, S4 Fares, S10 Profile/Settings
+**Navigation map:** Bottom nav on S7, S8, S9, S10, S11: Home, Fares, Alerts, Activity, Profile
 
 ```mermaid
 flowchart TD
-  S1["S1 Welcome"] --> S2["S2 Sign Up/Login"]
-  S2 --> S3["S3 Set Nearest Rank"]
-  S3 --> S6["S6 Home Feed"]
-  S6 --> S7["S7 Job Details"]
-  S4["S4 Fares"] --> S5["S5 Report Fare"]
-  S6 --> S4
-  S6 --> S10["S10 Profile/Settings"]
+  S1["S1 Welcome"] --> S2["S2 Sign Up"]
+  S1 --> S3["S3 Log In"]
+  S2 --> S4["S4 Set Nearest Rank"]
+  S3 --> S4
+  S3 --> S7["S7 Home Feed"]
+  S4 --> S7
+  S7 --> S8["S8 Job Details"]
+  S5["S5 Fares"] --> S6["S6 Report Fare"]
+  S6 --> M2["M2 Report Success"]
+  S7 --> S5
+  S7 --> S9["S9 Fare Alerts"]
+  S7 --> S10["S10 Activity"]
+  S7 --> S11["S11 Profile/Settings"]
+  S11 --> S4
+  S11 --> M1["M1 Delete Account"]
 ```
 
 ## 8. Screens, modals and UI states
 
 **8.1 Screen list**
 
-| ID | Screen name | Purpose | Primary action | Features |
-|---|---|---|---|---|
-| S1 | Welcome | Entry | Sign up/Log in | F1 |
-| S2 | Sign Up / Log In | Auth | Authenticate | F1 |
-| S3 | Set Nearest Rank | Onboarding | Select rank | F1 |
-| S4 | Fares | View fares | View/Report | F2,F4,F5 |
-| S5 | Report Fare | Submit fare | Submit report | F2 |
-| S6 | Home Feed | Jobs feed | Browse/filter | F3,F4 |
-| S7 | Job Details | Details + transport breakdown | View details | F3 |
-| S10 | Profile/Settings | Settings | Budget/rank/logout | F1,F4 |
+| ID | Screen name | Purpose | Primary action | Features | Notes |
+|---|---|---|---|---|---|
+| S1 | Welcome | Entry point | Sign up or Log in | F1 | Data-light, logo + pitch + 2 buttons |
+| S2 | Sign Up | Create account | Register | F1 | Email, password, age checkbox, privacy checkbox |
+| S3 | Log In | Authenticate | Log in | F1 | Email, password, forgot password link |
+| S4 | Set Nearest Rank | Onboarding | Select rank | F1 | Required before feed works fully |
+| S5 | Fares | View fares by route | View/Report | F2,F4,F5 | Staleness, offline banner, fuel alert |
+| S6 | Report Fare | Submit fare | Submit report | F2 | Daily limit enforced (BR3) |
+| S7 | Home Feed | Jobs feed | Browse/filter | F3,F4 | Sorted by Net Gain, affordability filter |
+| S8 | Job Details | Job + transport breakdown | View details | F3 | Fare source, staleness, net gain |
+| S9 | Fare Alerts | Fuel-aware alerts | View alerts | F4 | Shows fare increase warnings |
+| S10 | Activity | User activity log | View activity | — | Fare reports submitted, alerts received |
+| S11 | Profile/Settings | User settings | Budget/rank/logout | F1,F4 | Budget input (ZAR), change rank, delete account |
 
-## 9. Data model
+**Modals**
+
+| ID | Modal name | Trigger | Purpose |
+|---|---|---|---|
+| M1 | Delete Account | Profile → "Delete account" | Confirm permanent deletion |
+| M2 | Report Success | After fare report submitted | Confirm report received |
+
+**8.2 Key UI states per important screen**
+
+| Screen | Normal | Empty | Loading | Error | Offline | Success |
+|---|---|---|---|---|---|---|
+| S1 Welcome | Logo, pitch, Sign up + Log in buttons | N/A | N/A | N/A | N/A | N/A |
+| S2 Sign Up | Form with all fields, Sign up button (enabled when valid) | N/A | Spinner on button | "This email already has an account. Log in instead?" with link; red border + "At least 8 characters, including a number" on password | Not specified | Account created → S3 with banner |
+| S3 Log In | Email + password form, Log in button | N/A | Spinner on button | "Please verify your email first." + "Resend email" link; "Too many attempts. Try again in 15 minutes." | Not specified | Verified → S4 or S7 |
+| S4 Set Nearest Rank | List of ranks, selection highlighted, Confirm enabled | "No ranks available. Please try again later." | Spinner while fetching | "Couldn't load ranks. Try again." | Not specified | Rank saved → S7 |
+| S5 Fares | Routes with fares, staleness per BR2 | "No fares reported for this rank yet. Be the first to report." + "Report fare" | Spinner while fetching | "Couldn't load fares. Try again." | "Offline - showing cached fares" + cached list; if no cache: "No cached fares available. Connect to internet to load fares." | N/A (view screen) |
+| S6 Report Fare | Form (rank, route, amount), Submit enabled | N/A | Spinner on Submit | "You've reported 5 fares today. Try again tomorrow." (BR3); "Failed to submit. Try again." | "No connection. Connect to internet to report fares." | "Thanks! Fare reported for [Route]." → M2 → S5 |
+| S7 Home Feed | Job cards with net gain, toggle visible | "No jobs available. Check back later." or "No affordable jobs this week. Try increasing budget or reporting fares." | Spinner while fetching | "Couldn't load jobs. Try again." | Cached jobs if available; transport costs flagged unknown | N/A (feed screen) |
+| S8 Job Details | Full job details + transport breakdown | N/A | Spinner while fetching | "Couldn't load job details. Try again." | Cached details if available; transport cost flagged if fare stale/unknown | N/A (detail screen) |
+| S9 Fare Alerts | List of alerts with fare increase warnings | "No fare alerts. Your routes are stable." | Spinner while fetching | "Couldn't load alerts. Try again." | "Offline - showing cached alerts" | N/A (view screen) |
+| S10 Activity | List of user activity (fare reports, alerts received) | "No activity yet. When you report fares or receive alerts, you'll see them here." | Spinner while fetching | "Couldn't load activity. Try again." | "Offline - showing cached activity" | N/A (view screen) |
+| S11 Profile/Settings | Settings visible, inputs editable | N/A | Spinner during save | "Couldn't save. Try again." | "No connection. Changes will not be saved." | "Saved." confirmation |
+| M1 Delete Account | Confirmation dialog: "Are you sure? This will permanently delete your account and all data." with "Cancel" and "Delete" buttons | N/A | Spinner on Delete | "Couldn't delete account. Try again." | "No connection. Try again when online." | "Account deleted." → S1 |
+| M2 Report Success | Modal: "Thanks! Fare reported for [Route]." with "OK" button | N/A | N/A | N/A | N/A | Dismiss → S5 |
+
+**8.3 Shared components**
+
+| Component | Variants / states | Used by |
+|---|---|---|
+| Button | Primary, secondary, text, disabled, loading (spinner) | All screens |
+| TextInput | Default, focused, error (red border + message), disabled | S2, S3, S6, S11 |
+| Card | Job card (title, company, wage, transport cost, net gain), Fare card (route, amount, staleness) | S5, S7, S8 |
+| Banner | Alert (fuel increase), info (stale fares), error, success | S5, S6, S7 |
+| Toggle | On/off (affordability filter) | S7 |
+| Filter chip | Selected / unselected | S7 |
+| List item | Default, selected, disabled | S4, S5, S9, S10 |
+| Spinner | Small (inline), large (full-screen loading) | All screens |
+| Empty state | Icon + message + optional action button | S4, S5, S7, S8, S9, S10 |
+| Top app bar | Title, back button, optional action | All screens |
+| Bottom navigation bar | 5 tabs: Home, Fares, Alerts, Activity, Profile | S7, S8, S9, S10, S11 |
+
+**8.4 Accessibility**
+
+- Sufficient color contrast (WCAG AA minimum) for all text.
+- Tappable targets minimum 48x48px (Android standard).
+- Labels on all inputs.
+- Readable text sizes (minimum 14px body).
+- Data-light design for low bandwidth (minimal images, cached data, offline support).
+
+## 9. Design values
+
+**9.1 Color palette**
+
+| Token | Hex | Usage |
+|---|---|---|
+| Primary | #1a73e8 | Primary buttons, links, active nav tab |
+| Secondary | #34a853 | Success states, positive net gain |
+| Background | #ffffff | Screen background |
+| Surface | #f8f9fa | Cards, input backgrounds |
+| Text primary | #202124 | Headings, body text |
+| Text secondary | #5f6368 | Captions, hints, secondary labels |
+| Error | #ea4335 | Error messages, negative states |
+| Warning | #fbbc04 | Stale fare indicators, fuel alerts |
+| Border | #dadce0 | Input borders, dividers |
+| Disabled | #bdc1c6 | Disabled buttons, inactive elements |
+
+**9.2 Typography**
+
+| Style | Size / Line height | Weight | Usage |
+|---|---|---|---|
+| H1 | 24px / 32px | Bold (700) | Screen titles |
+| H2 | 20px / 28px | Semibold (600) | Section headers |
+| H3 | 16px / 24px | Semibold (600) | Card titles, subsection headers |
+| Body | 14px / 20px | Regular (400) | Body text, descriptions |
+| Caption | 12px / 16px | Regular (400) | Hints, timestamps, secondary info |
+| Button | 14px / 20px | Medium (500) | Button labels |
+| Input | 14px / 20px | Regular (400) | Input field text |
+
+Font family: System default (Roboto on Android, system-ui on web).
+
+**9.3 Spacing**
+
+| Token | Value | Usage |
+|---|---|---|
+| xs | 4px | Tight gaps, icon padding |
+| sm | 8px | Between related elements |
+| md | 16px | Standard padding, card margins |
+| lg | 24px | Section spacing |
+| xl | 32px | Screen-level padding top/bottom |
+| Touch target | 48px minimum | All tappable elements |
+
+**9.4 Iconography**
+
+- Style: Material Design outlined icons (Android standard).
+- Size: 24px default, 20px in compact areas.
+- Color: Text primary (#202124) default, Primary (#1a73e8) for active states.
+
+## 10. Data model
 
 | Entity | Fields | Relations | Notes |
 |---|---|---|---|
@@ -216,7 +343,7 @@ flowchart TD
 | JobListing | id, title, company, wage_zar, location, description, source_url, created_at | — | Seeded in v1 |
 | FuelPriceSnapshot | id, date, petrol_price_zar, source | — | For alerts |
 
-## 10. APIs / integrations
+## 11. APIs / integrations
 
 | Integration | Purpose | Method | Auth | Required |
 |---|---|---|---|---|
@@ -224,21 +351,21 @@ flowchart TD
 | AA Fuel Price | Fuel alerts | Manual snapshot in v1 | None | Recommended |
 | Job source | Job listings | Manual/CSV in v1 | None | Yes |
 
-## 11. Permissions, privacy and security
+## 12. Permissions, privacy and security
 
 | Item | Answer |
 |---|---|
 | Data collected | Email, nearest rank, budget, fare reports |
-| Permissions | None required in v1 |
+| Permissions | None required in v1 (Android) |
 | Security | RLS, password hashing, data minimisation |
 | Privacy | Age gate 18+, delete account supported |
 
-## 12. Build plan, milestones and MVP cut
+## 13. Build plan, milestones and MVP cut
 
 **Milestones:** M1 Setup, M2 Fares MVP, M3 Jobs + Affordability, M4 Polish & Test  
 **MVP cut:** Must have F1,F2,F3.
 
-## 13. Testing, acceptance and open questions
+## 14. Testing, acceptance and open questions
 
 **Acceptance:** Set rank, view/report fares with limits, feed sorted by Net Gain, affordability filter works, offline cached fares shown.
 
@@ -247,7 +374,7 @@ flowchart TD
 - Auth/DB provider confirmation?
 - AA fuel data source (manual snapshot acceptable)?
 
-## 14. Glossary
+## 15. Glossary
 
 | Term | Definition |
 |---|---|
@@ -258,6 +385,8 @@ flowchart TD
 | Rank | Minibus taxi rank |
 | Staleness | Fare > 14 days old marked stale |
 
-## 15. Appendix
+## 16. Appendix
 
 Original app idea: [docs/IDEA.md](https://github.com/ThamiRoneo/indlela-mvp/blob/main/docs/IDEA.md) (Indlela App Concept Document)
+EOF
+echo "done"
