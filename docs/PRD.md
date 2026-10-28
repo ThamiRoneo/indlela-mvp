@@ -12,7 +12,7 @@
 | Link to your original app idea | docs/IDEA.md in the repository |
 | GitHub repository | https://github.com/ThamiRoneo/indlela-mvp |
 | Version | v0.1 |
-| Status | Draft |
+| Status | Approved |
 
 ### Change log
 
