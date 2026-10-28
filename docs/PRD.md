@@ -12,13 +12,14 @@ Oct 27, 2026 · @Melsoft
 | Facilitator / reviewer | Mnelisi Maswanganyi |
 | Link to your original app idea | docs/IDEA.md in the repository |
 | GitHub repository | https://github.com/ThamiRoneo/indlela-mvp |
-| Version | v0.2 |
+| Version | v0.3 |
 | Status | Approved |
 
 ### Change log
 
 | Version | Date | Section(s) changed | What changed | Regenerated? (screens / MASTER.md / none) |
 |---|---|---|---|---|
+| v0.3 | 28 Oct 2026 | 8.1, 8.2, 9, 10, 11, 12, 13, 14 | Added S12/S13/S14; updated offline states; wage format daily; added UserActivity entity; bottom nav note | None |
 | v0.2 | 28 Oct 2026 | 8.1, 8.2, 8.3, 9, 10, 11, 12, 13, 14 | Split S2 into S2/S3; added S9, S10, S11; added M1, M2; added 8.2, 8.3, 9 (design values); renumbered screens; added sample content | None |
 | v0.1 | 28 Oct 2026 | All | First draft | None |
 
@@ -234,6 +235,9 @@ flowchart TD
 | S9 | Fare Alerts | Fuel-aware alerts | View alerts | F4 | Shows fare increase warnings |
 | S10 | Activity | User activity log | View activity | — | Fare reports submitted, alerts received |
 | S11 | Profile/Settings | User settings | Budget/rank/logout | F1,F4 | Budget input (ZAR), change rank, delete account |
+| S12 | Privacy Policy | View privacy policy | Read | F1 | Linked from S2 sign-up checkbox |
+| S13 | Password Reset | Reset forgotten password | Submit new password | F1 | Linked from S3 forgot password link |
+| S14 | Application Flow | Apply for a job | Submit application | F3 | Linked from S8 "Apply" button; opens external browser or in-app form |
 
 **Modals**
 
@@ -247,9 +251,9 @@ flowchart TD
 | Screen | Normal | Empty | Loading | Error | Offline | Success |
 |---|---|---|---|---|---|---|
 | S1 Welcome | Logo, pitch, Sign up + Log in buttons | N/A | N/A | N/A | N/A | N/A |
-| S2 Sign Up | Form with all fields, Sign up button (enabled when valid) | N/A | Spinner on button | "This email already has an account. Log in instead?" with link; red border + "At least 8 characters, including a number" on password | Not specified | Account created → S3 with banner |
-| S3 Log In | Email + password form, Log in button | N/A | Spinner on button | "Please verify your email first." + "Resend email" link; "Too many attempts. Try again in 15 minutes." | Not specified | Verified → S4 or S7 |
-| S4 Set Nearest Rank | List of ranks, selection highlighted, Confirm enabled | "No ranks available. Please try again later." | Spinner while fetching | "Couldn't load ranks. Try again." | Not specified | Rank saved → S7 |
+| S2 Sign Up | Form with all fields, Sign up button (enabled when valid) | N/A | Spinner on button | "This email already has an account. Log in instead?" with link; red border + "At least 8 characters, including a number" on password | "No connection. Please check your internet." | Account created → S3 with banner |
+| S3 Log In | Email + password form, Log in button | N/A | Spinner on button | "Please verify your email first." + "Resend email" link; "Too many attempts. Try again in 15 minutes." | "No connection. Please check your internet." | Verified → S4 or S7 |
+| S4 Set Nearest Rank | List of ranks, selection highlighted, Confirm enabled | "No ranks available. Please try again later." | Spinner while fetching | "Couldn't load ranks. Try again." | "No connection. Please check your internet." | Rank saved → S7 |
 | S5 Fares | Routes with fares, staleness per BR2 | "No fares reported for this rank yet. Be the first to report." + "Report fare" | Spinner while fetching | "Couldn't load fares. Try again." | "Offline - showing cached fares" + cached list; if no cache: "No cached fares available. Connect to internet to load fares." | N/A (view screen) |
 | S6 Report Fare | Form (rank, route, amount), Submit enabled | N/A | Spinner on Submit | "You've reported 5 fares today. Try again tomorrow." (BR3); "Failed to submit. Try again." | "No connection. Connect to internet to report fares." | "Thanks! Fare reported for [Route]." → M2 → S5 |
 | S7 Home Feed | Job cards with net gain, toggle visible | "No jobs available. Check back later." or "No affordable jobs this week. Try increasing budget or reporting fares." | Spinner while fetching | "Couldn't load jobs. Try again." | Cached jobs if available; transport costs flagged unknown | N/A (feed screen) |
@@ -257,6 +261,9 @@ flowchart TD
 | S9 Fare Alerts | List of alerts with fare increase warnings | "No fare alerts. Your routes are stable." | Spinner while fetching | "Couldn't load alerts. Try again." | "Offline - showing cached alerts" | N/A (view screen) |
 | S10 Activity | List of user activity (fare reports, alerts received) | "No activity yet. When you report fares or receive alerts, you'll see them here." | Spinner while fetching | "Couldn't load activity. Try again." | "Offline - showing cached activity" | N/A (view screen) |
 | S11 Profile/Settings | Settings visible, inputs editable | N/A | Spinner during save | "Couldn't save. Try again." | "No connection. Changes will not be saved." | "Saved." confirmation |
+| S12 Privacy Policy | Policy text visible | N/A | Spinner while loading | "Couldn't load policy. Try again." | "No connection. Please check your internet." | N/A |
+| S13 Password Reset | Reset form visible | N/A | Spinner on Submit | "Couldn't reset password. Try again." | "No connection. Please check your internet." | "Password reset. Please log in." → S3 |
+| S14 Application Flow | Application form visible | N/A | Spinner on Submit | "Couldn't submit application. Try again." | "No connection. Please check your internet." | "Application submitted." → S8 |
 | M1 Delete Account | Confirmation dialog: "Are you sure? This will permanently delete your account and all data." with "Cancel" and "Delete" buttons | N/A | Spinner on Delete | "Couldn't delete account. Try again." | "No connection. Try again when online." | "Account deleted." → S1 |
 | M2 Report Success | Modal: "Thanks! Fare reported for [Route]." with "OK" button | N/A | N/A | N/A | N/A | Dismiss → S5 |
 
@@ -341,7 +348,7 @@ Font family: System default (Roboto on Android, system-ui on web).
 | Route | id, rank_id, destination | belongs to Rank, has many FareReport | |
 | FareReport | id, user_id, rank_id, route_id, amount_zar, created_at | belongs to User,Rank,Route | Max 5/day |
 | JobListing | id, title, company, wage_zar, location, description, source_url, created_at | — | Seeded in v1 |
-| FuelPriceSnapshot | id, date, petrol_price_zar, source | — | For alerts |
+| UserActivity | id, user_id, type (fare_report | alert_received), description, created_at | belongs to User | Tracks user activity for S10 |
 
 ## 11. APIs / integrations
 
