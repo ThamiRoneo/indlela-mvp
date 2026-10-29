@@ -427,9 +427,7 @@ Design screen "S11" for my Android app at 360 × 800 px.
 
 ---
 
-## Questions / Missing or Unclear Items
-
-Design screen "M1" for my Android app at 360 × 800 px.
+## 12. M1 — Delete Account Modal
 - Reuse the style guide and shared components exactly. Keep the header and tab bar identical to my other screens.
 - Include every element in the order listed in the spec. Use the exact labels, placeholder text and messages in quotation marks.
 - Fill the screen with the sample content given. Use South African names, places, rand and dates. Never use lorem ipsum.
@@ -579,18 +577,3 @@ Design screen "S14" for my Android app at 360 × 800 px.
 
 **Sample content:** Name: "Lerato Mokoena", phone: "071 234 5678", email: "lerato.mokoena@gmail.com".
 
-
----
-
-## Questions / Missing or Unclear Items
-
-1. **Privacy policy screen** — RESOLVED: Added as S12 in PRD v0.3.
-2. **"Apply" button flow** — RESOLVED: Added as S14 in PRD v0.3.
-3. **Forgot password flow** — RESOLVED: Added as S13 in PRD v0.3.
-4. **Offline state for S2, S3, S4** — RESOLVED: Generic "No connection. Please check your internet." message.
-5. **Job card wage format** — RESOLVED: Daily format (e.g. R150/day).
-6. **Activity screen data model** — RESOLVED: Added UserActivity entity in PRD v0.3.
-7. **Fare Alerts trigger** — RESOLVED: Keep S9 dedicated screen.
-8. **Bottom nav on auth screens** — RESOLVED: No bottom nav on auth/onboarding screens (S1-S4).
-EOF
-echo "done"
