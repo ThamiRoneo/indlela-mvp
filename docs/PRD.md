@@ -396,5 +396,3 @@ Font family: System default (Roboto on Android, system-ui on web).
 ## 16. Appendix
 
 Original app idea: [docs/IDEA.md](https://github.com/ThamiRoneo/indlela-mvp/blob/main/docs/IDEA.md) (Indlela App Concept Document)
-EOF
-echo "done"
