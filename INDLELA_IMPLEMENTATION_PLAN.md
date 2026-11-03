@@ -792,7 +792,8 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-INT-2 | Integration | `auth.int.test.ts` | Delete account removes all user data |
 | T-BR1-1 | Unit | `tests/unit/rank.test.ts` | User must set nearest rank on first use; cannot skip (BR1) |
 | T-US2-4 | Component + Integration | `PasswordReset.test.tsx`, `auth.int.test.ts` | Set new password from reset link: password rules enforced, logged in after |
-| T-INT-5 | Integration | `privacy.int.test.ts` | View privacy policy: returns static content || T-SEC-15a / 15b | Integration | `auth.int.test.ts` | Edge Function `delete-account`: allow (self), deny (other user) |
+| T-INT-5 | Integration | `privacy.int.test.ts` | View privacy policy: returns static content |
+| T-SEC-15a / 15b | Integration | `auth.int.test.ts` | Edge Function `delete-account`: allow (self), deny (other user) |
 | T-NAV-1 | Component | `navigation.test.tsx` | Logged out → can only open S1, S2, S3, S12, S13; any other route → S1 |
 | T-NAV-2 | Component | `navigation.test.tsx` | Logged in without rank → always S4 until rank set |
 | T-NAV-3 | Component | `navigation.test.tsx` | Logged in with rank, no username → S4 until username set |
