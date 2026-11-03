@@ -385,7 +385,7 @@ Rules:
 | --- | --- | --- | --- | --- | --- |
 | id | uuid | No | gen_random_uuid() | primary key | |
 | user_id | uuid | No | — | foreign key → users on delete cascade | |
-| type | text | No | — | check in ('fare_report', 'alert_received') | |
+| type | text | No | — | check in ('fare_report', 'alert_received', 'comment_received', 'follow', 'unlike') | |
 | description | text | No | — | length ≤ 200 | |
 | created_at | timestamptz | No | now() | | |
 
@@ -410,12 +410,42 @@ Rules:
 | petrol_price_zar | numeric(10,2) | No | — | ≥ 0 | |
 | source | text | No | 'AA' | | |
 
+**Table: `comments`**: a comment on a fare report.
+
+| Column | Type | Null? | Default | Constraints | Notes |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid | No | gen_random_uuid() | primary key | |
+| fare_report_id | uuid | No | — | foreign key → `fare_reports` on delete cascade | |
+| user_id | uuid | No | auth.uid() | foreign key → `users` on delete cascade | |
+| body | text | No | — | length 1–300 | |
+| created_at | timestamptz | No | now() | | |
+
+**Table: `follows`**: one user follows another.
+
+| Column | Type | Null? | Default | Constraints | Notes |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid | No | gen_random_uuid() | primary key | |
+| follower_id | uuid | No | — | foreign key → `users` on delete cascade | |
+| following_id | uuid | No | — | foreign key → `users` on delete cascade | |
+| created_at | timestamptz | No | now() | | |
+
+**Table: `likes`**: a like on a fare report.
+
+| Column | Type | Null? | Default | Constraints | Notes |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid | No | gen_random_uuid() | primary key | |
+| fare_report_id | uuid | No | — | foreign key → `fare_reports` on delete cascade | |
+| user_id | uuid | No | auth.uid() | foreign key → `users` on delete cascade | |
+| created_at | timestamptz | No | now() | | |
+
 ### 8.2 Relationships and delete behaviour
 
 - One user has many fare_reports. Deleting a user deletes their fare_reports (cascade).
 - One rank has many routes and fare_reports. Deleting a rank deletes its routes and fare_reports (cascade).
 - One route has many fare_reports. Deleting a route deletes its fare_reports (cascade).
 - One user has many user_activity. Deleting a user deletes their activity (cascade).
+- One fare report has many comments and likes. Deleting a fare report deletes its comments and likes (cascade).
+- One user has many comments, follows and likes. Deleting a user deletes them (cascade).
 - Job listings are independent (no foreign keys to users).
 - Fuel price snapshots are independent.
 
@@ -438,8 +468,11 @@ No status columns in v1. Fare staleness is computed from `created_at` (BR2: vali
 | --- | --- | --- | --- | --- |
 | `limit_fare_reports` | Before insert on `fare_reports` | Raises `rate_limit_fare_reports` if user already has 5 reports today | BR3 | T-BR3-1 |
 | `fuel_price_check` | Manual / scheduled | Compares latest fuel price to 30-day average; if up ≥ 5%, sets `fuel_alert_active = true` on affected ranks | BR7 | T-BR7-1 |
-| `activity_on_like` | After insert on `fare_reports` (if report triggers activity) | Creates an activity row for the recipient | — | T-INT-3 |
-| `activity_on_alert` | After fuel alert triggered | Creates an activity row for affected users | BR7 | T-INT-3 |
+| `activity_on_fare_report` | After insert on `fare_reports` | Creates a `user_activity` row (type `fare_report`) for the reporting user | — | T-INT-3 |
+| `activity_on_alert` | After `fuel_price_check` sets `fuel_alert_active = true` | Creates a `user_activity` row (type `alert_received`) for affected users | BR7 | T-INT-3 |
+| `activity_on_comment` | After insert on `comments` | Creates a `user_activity` row (type `comment_received`) for the comment's owner | — | T-INT-3 |
+| `activity_on_follow` | After insert on `follows` | Creates a `user_activity` row (type `follow`) for the followed user | — | T-INT-3 |
+| `activity_on_unlike` | After delete on `likes` | Creates a `user_activity` row (type `unlike`) for the liked item's owner | — | T-INT-3 |
 
 ### 8.6 Migrations (in order)
 
@@ -481,7 +514,7 @@ No status columns in v1. Fare staleness is computed from `created_at` (BR2: vali
 
 **Always-on security checks** (tested in the hardening phase):
 
-- [ ] T-DB-1: a database test lists every table in `public` and fails if any has RLS switched off.
+- [ ] T-DB-6: a database test lists every table in `public` and fails if any has RLS switched off.
 - [ ] Input is checked in the app **and** in the database (constraints in 8.1).
 - [ ] Rate limit BR3 is enforced by a database trigger, not only in the app.
 - [ ] No passwords, tokens or emails are written to logs.
@@ -626,7 +659,7 @@ The same ID may be used at two levels when both prove the same criterion.
 | 5 | Affordability-First Job Feed | F3 | S7, S8, S14 | T-US6, T-US7, T-BR4, T-BR5, T-BR6 |
 | 6 | Fare Alerts & Budgeting | F4 | S9, S10, S11 | T-US7, T-US8, T-BR6, T-BR7 |
 | 7 | Data-light & Offline Support | F5 | S5, S6 | T-US9, T-BR8 |
-| 8 | Hardening | — | All | T-EDGE-1–5, T-NFR-1–7, T-DB-1, T-E2E-1–4 |
+| 8 | Hardening | — | All | T-EDGE-1–5, T-NFR-1–7, T-DB-6, T-E2E-1–4 |
 | 9 | Release | — | All | Full suite on clean install |
 
 ---
@@ -715,12 +748,13 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | --- | --- | --- |
 | T-DB-1 | `010_tables.test.sql` | Every table and column in 8.1 exists with the right type, null rule and default |
 | T-DB-2 | `020_triggers.test.sql` | `limit_fare_reports` raises `rate_limit_fare_reports` if user already has 5 reports today (BR3) |
+| T-DB-3 | `020_triggers.test.sql` | Triggers in 8.5 behave correctly (`limit_fare_reports`, `fuel_price_check`, activity triggers) |
 | T-BR2-1 | `030_rules.test.sql` | Fare older than 14 days is flagged as stale (BR2) |
 | T-BR3-1 | same | 6th fare report in one day is rejected (BR3) |
 | T-BR7-1 | same | Fuel price up ≥ 5% in 30 days flags affected ranks (BR7) |
 | T-BR8-1 | same | Cache top ranks/routes for 7 days offline (BR8) |
 | T-SEC-1a / 1b | `040_rls.test.sql` | One allow and one deny test per row in Section 9 (SEC1–SEC15). SEC8, SEC10, SEC12, SEC14: deny only. |
-| T-DB-3 | `040_rls.test.sql` | A database test lists every table in `public` and fails if any has RLS switched off |
+| T-DB-6 | `040_rls.test.sql` | A database test lists every table in `public` and fails if any has RLS switched off |
 
 - [ ] All tests above are written, run, and fail for the expected reason.
 
@@ -1014,7 +1048,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-S11-5 | Component | `ProfileSettings.test.tsx` | Weekly transport budget input (ZAR) with "Save" button; success: "Saved." |
 | T-BR6-1 | Unit + Component | `budget.test.ts`, `ProfileSettings.test.tsx` | Weekly transport budget defaults to unset; can be set in S11 |
 | T-BR7-2 | Unit | `tests/unit/fuel.test.ts` | Fuel price check: compare latest to 30-day average; flag if up ≥ 5% |
-| T-INT-3 | Integration | `activity.int.test.ts` | View activity: returns list from user_activity table |
+| T-INT-3 | Integration | `activity.int.test.ts` | View activity: trigger-created rows (fare report, alert, comment, follow, unlike) appear in the user_activity list |
 
 - [ ] All tests above are written, run, and fail for the expected reason.
 
@@ -1138,7 +1172,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-NFR-5 | Component | `a11y.test.tsx` | Tappable targets minimum 48x48px |
 | T-NFR-6 | Component | `a11y.test.tsx` | Labels on all inputs; readable text sizes (minimum 14px body) |
 | T-NFR-7 | Integration | `nfr.int.test.ts` | Rate limits enforced by database triggers, not only app |
-| T-DB-1 | Database | `supabase/tests/090_rls_check.test.sql` | Every table in `public` has RLS enabled |
+| T-DB-6 | Database | `supabase/tests/090_rls_check.test.sql` | Every table in `public` has RLS enabled |
 | T-E2E-1 | E2E | `.maestro/01_onboarding.yaml` | Sign up → verify → log in → set rank → home feed |
 | T-E2E-2 | E2E | `.maestro/02_fare_report.yaml` | Fares → Report fare → success modal |
 | T-E2E-3 | E2E | `.maestro/03_job_feed.yaml` | Feed → filter affordable jobs → job details |
@@ -1243,7 +1277,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | --- | --- | --- | --- | --- | --- | --- |
 | F1 | US1, US2, US3 | T-US1-1, T-US2-1, T-US2-2, T-US2-3, T-US3-1, T-US3-2, T-US3-3 | T-BR1-1 | S2, S3, S4, S11, S12, S13, M1 | OP1, OP2, OP3, OP4, OP5, OP6, OP7, OP16 | 3 |
 | F2 | US4, US5 | T-US4-1, T-US5-1 | T-BR2-1, T-BR2-2, T-BR3-1, T-BR7-1, T-BR8-1 | S5, S6, M2 | OP8, OP9, OP13 | 4 |
-| F3 | US6, US7 | T-US6-1, T-US6-2, T-US6-3, T-US7-1 | T-BR4-1, T-BR4-2, T-BR5-1, T-BR6-1 | S7, S8, S14 | OP10, OP11, OP12, OP15 | 5 |
+| F3 | US6, US7 | T-US6-1, T-US6-2, T-US6-3 | T-BR4-1, T-BR4-2, T-BR5-1 | S7, S8, S14 | OP10, OP11, OP15 | 5 |
 | F4 | US7, US8 | T-US7-1, T-US8-1 | T-BR6-1, T-BR7-2 | S9, S10, S11 | OP12, OP13, OP14 | 6 |
 | F5 | US9 | T-US9-1 | T-BR8-1 | S5, S6 | OP8, OP9 | 7 |
 
@@ -1293,9 +1327,9 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 - [ ] T-SEC-13a / 13b: fuel_price_snapshots read: allow/deny. (automated)
 - [ ] T-SEC-14b: fuel_price_snapshots write: deny. (automated)
 - [ ] T-SEC-15a / 15b: delete-account Edge Function: allow/deny. (automated)
-- [ ] T-DB-1: Every table has RLS enabled. (automated)
+- [ ] T-DB-6: Every table has RLS enabled. (automated)
 - [ ] T-DB-2: limit_fare_reports trigger works. (automated)
-- [ ] T-DB-3: Offline cache works. (automated)
+- [ ] T-DB-3: Triggers behave correctly (`limit_fare_reports`, `fuel_price_check`, activity triggers). (automated)
 - [ ] T-EDGE-1: No fare data → "Transport cost unknown". (automated)
 - [ ] T-EDGE-2: Stale fares → "Last reported X days ago (stale)". (automated)
 - [ ] T-EDGE-3: Offline, no cache → "No cached fares available." (automated)
@@ -1343,7 +1377,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 - [ ] T-C-1 to T-C-12: Shared components. (automated)
 - [ ] T-INT-1: Log out ends session. (automated)
 - [ ] T-INT-2: Delete account removes all data. (automated)
-- [ ] T-INT-3: View activity. (automated)
+- [ ] T-INT-3: View activity — trigger-created rows appear. (automated)
 - [ ] T-INT-4: Submit application. (automated)
 - [ ] T-INT-5: View privacy policy. (automated)
 - [ ] T-NFR-1 to T-NFR-7: Quality requirements. (automated)
@@ -1370,7 +1404,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 | Phase | Date | Status | Automated tests (passed / total) | Commit | Notes |
 | --- | --- | --- | --- | --- | --- |
-| 1 | [DD MMM YYYY] | [Done / Blocked] | [e.g. 24 / 24] | [short hash] | [notes] |
+| 1 | 3 Nov 2026 | Pending | 0 / 0 | - | Not started |
 
 ---
 
@@ -1387,7 +1421,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | 7 | Application submission: in-app form or external link? | S14, OP15 | Both: in-app form (name, phone, email) with option to open employer's external URL | Answered |
 | 8 | Storage bucket for avatars/photos? | 6, 8.1, OP6 | Add storage bucket `avatars` (max 200KB, JPEG) and `posts` (max 1MB, JPEG) | Answered |
 | 9 | handle_new_user writes is_18_or_older but users has no such column. | 8.1, 8.5 | Remove is_18_or_older from trigger. Age gate enforced at sign-up, not stored in DB. | Answered |
-| 10 | user_activity says "inserts only by database triggers" but no trigger defined. | 8.1, 8.5, SEC12 | Add triggers: activity_on_like, activity_on_comment, activity_on_follow, activity_on_unlike. | Answered |
+| 10 | user_activity says "inserts only by database triggers" but no trigger defined. | 8.1, 8.5, SEC12 | Add triggers: activity_on_fare_report (was activity_on_like), activity_on_alert, activity_on_comment, activity_on_follow, activity_on_unlike. | Answered |
 | 11 | Username "Set on S4" vs "set (via S11)" contradiction. | 8.1, 11 | Username set during onboarding (S4), editable in S11. | Answered |
 | 12 | T-DB-1 means "tables exist" in Phase 2 and "RLS enabled" in Phase 8. | 8, 12.3 | Split: T-DB-1 = tables exist, T-DB-6 = RLS check. | Answered |
 | 13 | T-DB-3 is RLS check in Phase 2 but "Offline cache works" in Section 15. | 8, 12.3, 15 | Split: T-DB-3 = triggers, T-EDGE-3 = offline cache. | Answered |
@@ -1400,3 +1434,4 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | --- | --- | --- | --- |
 | v1.0 | 3 Nov 2026 | First version | Generated from PRD v0.4 and Stitch designs |
 | v1.1 | 3 Nov 2026 | All sections updated per review feedback | Added S10 to Phase 6, fixed data model (applications table, rank_id/route_id, fuel_alert_active), resolved contradictions (username, T-DB IDs), fixed Phase 7 repeat tests, fixed deny tests, resolved undecided items (OP15, OP16, seed data), added storage buckets, filled Section 17 |
+| v1.2 | 3 Nov 2026 | Added user_activity triggers | activity_on_fare_report (renamed from activity_on_like), activity_on_alert, activity_on_comment, activity_on_follow, activity_on_unlike defined in 8.5; comments/follows/likes tables added; user_activity type check extended; T-INT-3 covers trigger-created rows |
