@@ -12,13 +12,14 @@ Oct 27, 2026 · @Melsoft
 | Facilitator / reviewer | Mnelisi Maswanganyi |
 | Link to your original app idea | docs/IDEA.md in the repository |
 | GitHub repository | https://github.com/ThamiRoneo/indlela-mvp |
-| Version | v0.4 |
+| Version | v0.5 |
 | Status | Approved |
 
 ### Change log
 
 | Version | Date | Section(s) changed | What changed | Regenerated? (screens / MASTER.md / none) |
 |---|---|---|---|---|
+| v0.5 | 3 Nov 2026 | 8.1, 10, 11 | Added applications table; added rank_id/route_id to JobListing; added fuel_alert_active to Rank; fixed handle_new_user trigger; fixed username contradiction; added user_activity trigger note; added Supabase Storage integration | None |
 | v0.4 | 28 Oct 2026 | 8.1, 10 | Updated S14: in-app form + external link option for job applications | None |
 | v0.3 | 28 Oct 2026 | 8.1, 8.2, 9, 10, 11, 12, 13, 14 | Added S12/S13/S14; updated offline states; wage format daily; added UserActivity entity; bottom nav note | None |
 | v0.2 | 28 Oct 2026 | 8.1, 8.2, 8.3, 9, 10, 11, 12, 13, 14 | Split S2 into S2/S3; added S9, S10, S11; added M1, M2; added 8.2, 8.3, 9 (design values); renumbered screens; added sample content | None |
@@ -228,7 +229,7 @@ flowchart TD
 | S1 | Welcome | Entry point | Sign up or Log in | F1 | Data-light, logo + pitch + 2 buttons |
 | S2 | Sign Up | Create account | Register | F1 | Email, password, age checkbox, privacy checkbox |
 | S3 | Log In | Authenticate | Log in | F1 | Email, password, forgot password link |
-| S4 | Set Nearest Rank | Onboarding | Select rank | F1 | Required before feed works fully |
+| S4 | Set Nearest Rank | Onboarding | Select rank | F1 | Required before feed works fully; username set during onboarding (S4), editable in S11 |
 | S5 | Fares | View fares by route | View/Report | F2,F4,F5 | Staleness, offline banner, fuel alert |
 | S6 | Report Fare | Submit fare | Submit report | F2 | Daily limit enforced (BR3) |
 | S7 | Home Feed | Jobs feed | Browse/filter | F3,F4 | Sorted by Net Gain, affordability filter |
@@ -344,12 +345,13 @@ Font family: System default (Roboto on Android, system-ui on web).
 
 | Entity | Fields | Relations | Notes |
 |---|---|---|---|
-| User | id, email, password_hash, nearest_rank_id, weekly_transport_budget | has many FareReport | 18+ |
-| Rank | id, name, city, province | has many Route, FareReport | Rustenburg focused |
+| User | id, email, password_hash, username, nearest_rank_id, weekly_transport_budget | has many FareReport | 18+; handle_new_user creates users row with email only. is_18_or_older is enforced at sign-up (checkbox), not stored in DB. |
+| Rank | id, name, city, province, fuel_alert_active | has many Route, FareReport | Rustenburg focused; fuel_alert_active set true when fuel price up >=5% in 30 days (BR7) |
 | Route | id, rank_id, destination | belongs to Rank, has many FareReport | |
 | FareReport | id, user_id, rank_id, route_id, amount_zar, created_at | belongs to User,Rank,Route | Max 5/day |
-| JobListing | id, title, company, wage_zar, location, description, source_url, created_at | — | Seeded in v1 |
-| UserActivity | id, user_id, type (fare_report | alert_received), description, created_at | belongs to User | Tracks user activity for S10 |
+| JobListing | id, title, company, wage_zar, location, description, source_url, rank_id, route_id, created_at | belongs to Rank, Route (nullable) | Seeded in v1; rank_id/route_id link to nearest rank and route for transport cost calculation (BR4) |
+| UserActivity | id, user_id, type (fare_report | alert_received), description, created_at | belongs to User | Tracks user activity for S10; inserts only by database triggers (on fare report, alert received). No app-level insert. |
+| Application | id, job_listing_id, user_id, name, phone, email, created_at | belongs to JobListing, User | Stores in-app job applications (OP15). Also supports external link option. |
 
 ## 11. APIs / integrations
 
@@ -358,6 +360,7 @@ Font family: System default (Roboto on Android, system-ui on web).
 | Auth/DB (Supabase) | Auth and data storage | SDK/REST | Keys + RLS | Yes |
 | AA Fuel Price | Fuel alerts | Manual snapshot in v1 | None | Recommended |
 | Job source | Job listings | Manual/CSV in v1 | None | Yes |
+| Supabase Storage | Avatar and post images | SDK/REST | Keys + RLS | Yes |
 
 ## 12. Permissions, privacy and security
 
@@ -377,10 +380,10 @@ Font family: System default (Roboto on Android, system-ui on web).
 
 **Acceptance:** Set rank, view/report fares with limits, feed sorted by Net Gain, affordability filter works, offline cached fares shown.
 
-**Open questions:**
-- Job listing source for v1 (manual/CSV)?
-- Auth/DB provider confirmation?
-- AA fuel data source (manual snapshot acceptable)?
+**Open questions:** (all resolved in Section 18 of the implementation plan)
+- Job listing source for v1 (manual/CSV)? Resolved: Manual/CSV seed for testing.
+- Auth/DB provider confirmation? Resolved: Supabase.
+- AA fuel data source (manual snapshot acceptable)? Resolved: Manual snapshot acceptable.
 
 ## 15. Glossary
 

@@ -199,8 +199,9 @@ indlela-mvp/
   supabase/
     migrations/                     SQL migrations (Section 8.6)
     functions/delete-account/       Edge Function (OP6)
+    storage/                        Storage bucket policies (avatars, posts)
     tests/                          pgTAP tests (T-SEC, T-BR, T-DB)
-    seed.sql                        Seed rows (Section 8.7)
+    migrations/0004_seed.sql         Seed rows (Section 8.7)
   scripts/seed-storage.ts           Uploads seed photos (uses secret key; never in app)
   tests/
     unit/                           T-BR unit tests
@@ -227,6 +228,8 @@ indlela-mvp/
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Public (anon / publishable) key | Same | Public. Safe only because every table and bucket has RLS. | App |
 | `SUPABASE_SERVICE_ROLE_KEY` | Admin (service role / secret) key | Same | **Secret** | `scripts/seed-storage.ts` and integration tests only. The Edge Function gets it automatically from Supabase. |
 | `SEED_TEST_PASSWORD` | Password for all seed test accounts | You choose it | **Secret** | `scripts/seed-storage.ts`, integration tests, Maestro |
+| Storage bucket `avatars` | User avatar images | Supabase Storage | Public (signed URLs) | App (read), scripts (write) |
+| Storage bucket `posts` | Job listing images (if any) | Supabase Storage | Public (signed URLs) | App (read), scripts (write) |
 
 `.env.example`:
 
@@ -339,6 +342,7 @@ Rules:
 | name | text | No | — | unique | e.g. "Rustenburg Taxi Rank" |
 | city | text | No | 'Rustenburg' | | |
 | province | text | No | 'North West' | | |
+| fuel_alert_active | boolean | No | false | | Set true when fuel price up ≥5% in 30 days (BR7) |
 
 **Table: `routes`**: a rank-to-destination route.
 
@@ -370,6 +374,8 @@ Rules:
 | location | text | Yes | — | length ≤ 200 | |
 | description | text | Yes | — | length ≤ 2000 | |
 | source_url | text | Yes | — | | Employer's external application URL |
+| rank_id | uuid | Yes | — | foreign key → ranks on delete set null | Nearest rank for transport cost calc (BR4) |
+| route_id | uuid | Yes | — | foreign key → routes on delete set null | Route from rank to job location (BR4) |
 | created_at | timestamptz | No | now() | | |
 | expires_at | timestamptz | Yes | — | | Optional expiry |
 
@@ -381,6 +387,18 @@ Rules:
 | user_id | uuid | No | — | foreign key → users on delete cascade | |
 | type | text | No | — | check in ('fare_report', 'alert_received') | |
 | description | text | No | — | length ≤ 200 | |
+| created_at | timestamptz | No | now() | | |
+
+**Table: `applications`**: an in-app job application.
+
+| Column | Type | Null? | Default | Constraints | Notes |
+| --- | --- | --- | --- | --- | --- |
+| id | uuid | No | gen_random_uuid() | primary key | |
+| job_listing_id | uuid | No | — | foreign key → job_listings on delete cascade | |
+| user_id | uuid | No | auth.uid() | foreign key → users on delete cascade | |
+| name | text | No | — | length 1–100 | |
+| phone | text | No | — | length 1–20 | |
+| email | text | No | — | valid email format | |
 | created_at | timestamptz | No | now() | | |
 
 **Table: `fuel_price_snapshots`**: fuel price data for alerts.
@@ -403,7 +421,7 @@ Rules:
 
 ### 8.3 Status changes
 
-No status columns in v1. Fare staleness is computed from `created_at` (BR2: valid if reported within 14 days).
+No status columns in v1. Fare staleness is computed from `created_at` (BR2: valid if reported within 14 days). `ranks.fuel_alert_active` is set by `fuel_price_check` trigger (BR7).
 
 ### 8.4 Indexes
 
@@ -419,7 +437,9 @@ No status columns in v1. Fare staleness is computed from `created_at` (BR2: vali
 | Name | Runs when | What it does | BR# | Test |
 | --- | --- | --- | --- | --- |
 | `limit_fare_reports` | Before insert on `fare_reports` | Raises `rate_limit_fare_reports` if user already has 5 reports today | BR3 | T-BR3-1 |
-| `fuel_price_check` | Manual / scheduled | Compares latest fuel price to 30-day average; if up ≥ 5%, flags affected ranks | BR7 | T-BR7-1 |
+| `fuel_price_check` | Manual / scheduled | Compares latest fuel price to 30-day average; if up ≥ 5%, sets `fuel_alert_active = true` on affected ranks | BR7 | T-BR7-1 |
+| `activity_on_like` | After insert on `fare_reports` (if report triggers activity) | Creates an activity row for the recipient | — | T-INT-3 |
+| `activity_on_alert` | After fuel alert triggered | Creates an activity row for affected users | BR7 | T-INT-3 |
 
 ### 8.6 Migrations (in order)
 
@@ -427,6 +447,7 @@ No status columns in v1. Fare staleness is computed from `created_at` (BR2: vali
 2. `0002_rls.sql`: RLS on for every table; all policies in Section 9
 3. `0003_triggers.sql`: triggers in 8.5
 4. `0004_seed.sql`: seed data (ranks, routes, sample job listings)
+5. `0005_storage.sql`: storage buckets `avatars` (max 200KB, JPEG) and `posts` (max 1MB, JPEG) with policies SEC16-SEC18
 
 ### 8.7 Seed data and test accounts
 
@@ -489,8 +510,8 @@ All operations live in `lib/api/`. Each returns either data or one of the exact 
 | OP12 | Set weekly budget | Logged in | amount_zar | Budget saved | BR6 | "Couldn't save. Try again." | Table update on users | T-US7-1, T-BR6-1 |
 | OP13 | View fare alerts | Logged in | — | Alerts for affected ranks | BR7 | "Couldn't load alerts. Try again." | Select from fare_reports + fuel_price_snapshots | T-US8-1, T-BR7-1 |
 | OP14 | View activity | Logged in | cursor | Activity list (last 30 days) | — | "Couldn't load activity. Try again." | Select from user_activity | T-INT-3 |
-| OP15 | Submit application | Logged in | job_id, name, phone, email | Application submitted | — | "Couldn't submit application. Try again." | Table insert (application record) or external link | T-INT-4 |
-| OP16 | View privacy policy | Anyone | — | Policy text | — | "Couldn't load policy. Try again." | Static content or table select | T-INT-5 |
+| OP15 | Submit application | Logged in | job_id, name, phone, email | Application submitted | — | "Couldn't submit application. Try again." | Table insert (application record) + external link option | T-INT-4 |
+| OP16 | View privacy policy | Anyone | — | Policy text | — | "Couldn't load policy. Try again." | Static content | T-INT-5 |
 
 ---
 
@@ -603,7 +624,7 @@ The same ID may be used at two levels when both prove the same criterion.
 | 3 | Onboarding & Accounts | F1 | S2, S3, S4, S11, S12, S13, M1 | T-US1, T-US2, T-US3, T-AUTH, T-INT-1–2, T-SEC-15 |
 | 4 | Dynamic Fare Index | F2 | S5, S6, M2 | T-US4, T-US5, T-BR2, T-BR3, T-BR7, T-BR8 |
 | 5 | Affordability-First Job Feed | F3 | S7, S8, S14 | T-US6, T-US7, T-BR4, T-BR5, T-BR6 |
-| 6 | Fare Alerts & Budgeting | F4 | S9, S11 | T-US8, T-BR7 |
+| 6 | Fare Alerts & Budgeting | F4 | S9, S10, S11 | T-US7, T-US8, T-BR6, T-BR7 |
 | 7 | Data-light & Offline Support | F5 | S5, S6 | T-US9, T-BR8 |
 | 8 | Hardening | — | All | T-EDGE-1–5, T-NFR-1–7, T-DB-1, T-E2E-1–4 |
 | 9 | Release | — | All | Full suite on clean install |
@@ -706,7 +727,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 **Step 2: Backend (Green)**
 
 - [ ] Migrations `0001` to `0004` exactly as in Section 8.6, applied with `npx supabase db reset`.
-- [ ] `supabase/seed.sql` loads the seed data in 8.7.
+- [ ] `supabase/migrations/0004_seed.sql` loads the seed data in 8.7 (single source; no separate seed.sql).
 - [ ] RLS enabled on every table with all policies in Section 9.
 
 **Step 3: Frontend (Green)**
@@ -769,7 +790,9 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-M1-2 | Component | `DeleteAccount.test.tsx` | Success: "Account deleted." → S1 |
 | T-INT-1 | Integration | `auth.int.test.ts` | Log out ends session |
 | T-INT-2 | Integration | `auth.int.test.ts` | Delete account removes all user data |
-| T-SEC-15a / 15b | Integration | `auth.int.test.ts` | Edge Function `delete-account`: allow (self), deny (other user) |
+| T-BR1-1 | Unit | `tests/unit/rank.test.ts` | User must set nearest rank on first use; cannot skip (BR1) |
+| T-US2-4 | Component + Integration | `PasswordReset.test.tsx`, `auth.int.test.ts` | Set new password from reset link: password rules enforced, logged in after |
+| T-INT-5 | Integration | `privacy.int.test.ts` | View privacy policy: returns static content || T-SEC-15a / 15b | Integration | `auth.int.test.ts` | Edge Function `delete-account`: allow (self), deny (other user) |
 | T-NAV-1 | Component | `navigation.test.tsx` | Logged out → can only open S1, S2, S3, S12, S13; any other route → S1 |
 | T-NAV-2 | Component | `navigation.test.tsx` | Logged in without rank → always S4 until rank set |
 | T-NAV-3 | Component | `navigation.test.tsx` | Logged in with rank, no username → S4 until username set |
@@ -787,7 +810,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 - [ ] OP3 Request password reset: `resetPasswordForEmail` with redirect to S13
 - [ ] OP4 Set new password: `exchangeCodeForSession` then `updateUser`
 - [ ] OP5 Log out: `signOut`
-- [ ] OP6 Delete account: Edge Function `delete-account` removes storage files, then deletes Auth user (cascade)
+- [ ] OP6 Delete account: Edge Function `delete-account` removes user data from `users`, `fare_reports`, `user_activity`, and storage bucket `avatars`, then deletes Auth user (cascade). Storage bucket `posts` files removed by OP15 cascade.
 - [ ] OP7 Set nearest rank: table update on `users.nearest_rank_id`
 - [ ] OP16 View privacy policy: static content or table select
 - [ ] SEC1–SEC3, SEC15 permission rules enforced via RLS and column privileges
@@ -831,7 +854,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 **Goal:** A user can view fares by route from their nearest rank, report a fare, see staleness indicators, get fuel-aware alerts, and use cached fares offline.
 
-**Covers:** Features F2 · Stories US4, US5 · Screens S5, S6, M2 · Operations OP8, OP9 · Rules BR2, BR3, BR7, BR8 · Permissions SEC4–SEC8, SEC13–SEC14
+**Covers:** Features F2 · Stories US4, US5 · Screens S5, S6, M2 · Operations OP8, OP9 · Rules BR2, BR3, BR7 · Permissions SEC4–SEC8, SEC13–SEC14
 
 **Starts when:** Phase 3 is complete and the human says "Start Phase 4".
 
@@ -850,13 +873,11 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-S6-1 | Component | `ReportFare.test.tsx` | Offline: "No connection. Connect to internet to report fares." |
 | T-S6-2 | Component | `ReportFare.test.tsx` | Error: "Failed to submit. Try again." |
 | T-BR7-1 | Unit + Component | `fare.test.ts`, `FareAlerts.test.tsx` | If fuel price up ≥ 5% in 30 days, show fuel-aware alert banner |
-| T-BR8-1 | Unit | `fare.test.ts` | Cache top ranks/routes for 7 days offline |
-| T-US8-1 | Component | `FareAlerts.test.tsx` | If fuel-aware condition met, see banner on S5/S6 with exact text from 4.5 |
 | T-M2-1 | Component | `ReportSuccess.test.tsx` | Modal: "Thanks! Fare reported for [Route]." with "OK" button; dismiss → S5 |
-| T-SEC-6a / 6b | Integration | `fare.int.test.ts` | fare_reports: read allow (any logged-in), deny (blocked) |
+| T-SEC-6a / 6b | Integration | `fare.int.test.ts` | fare_reports: read allow (any logged-in), deny (read as logged out) |
 | T-SEC-7a / 7b | Integration | `fare.int.test.ts` | fare_reports: create allow (self), deny (other user) |
 | T-SEC-8b | Integration | `fare.int.test.ts` | fare_reports: update/delete deny (nobody) |
-| T-SEC-13a / 13b | Integration | `fare.int.test.ts` | fuel_price_snapshots: read allow (any logged-in), deny (write) |
+| T-SEC-13a / 13b | Integration | `fare.int.test.ts` | fuel_price_snapshots: read allow (any logged-in), deny (read as logged out) |
 
 - [ ] All tests above are written, run, and fail for the expected reason.
 
@@ -903,7 +924,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 **Goal:** A user can browse jobs sorted by net gain, filter to affordable jobs, view job details with transport cost breakdown, set their weekly transport budget, and submit a job application.
 
-**Covers:** Features F3 · Stories US6, US7 · Screens S7, S8, S14 · Operations OP10, OP11, OP12, OP15 · Rules BR4, BR5, BR6 · Permissions SEC9–SEC10
+**Covers:** Features F3 · Stories US6, US7 · Screens S7, S8, S14 · Operations OP10, OP11, OP15 · Rules BR4, BR5, BR6 · Permissions SEC9–SEC10
 
 **Starts when:** Phase 4 is complete and the human says "Start Phase 5".
 
@@ -917,7 +938,6 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-BR4-1 | Unit | `tests/unit/netgain.test.ts` | Net Gain = Wage - (to-and-fro transport cost) using nearest rank fares (BR4) |
 | T-BR4-2 | Unit | `tests/unit/netgain.test.ts` | "Transport cost unknown" when no fare data for route |
 | T-BR5-1 | Unit | `tests/unit/affordability.test.ts` | "Jobs I can afford this week" requires Net Gain >= 0 and within budget (BR5) |
-| T-BR6-1 | Unit + Component | `budget.test.ts`, `ProfileSettings.test.tsx` | Weekly transport budget defaults to unset; can be set in S11 |
 | T-S7-1 | Component | `HomeFeed.test.tsx` | Loading: spinner; Error: "Couldn't load jobs. Try again." + "Retry" |
 | T-S7-2 | Component | `HomeFeed.test.tsx` | Offline: cached jobs if available; transport costs flagged unknown |
 | T-S8-1 | Component | `JobDetails.test.tsx` | Full job details + transport breakdown; fare source, staleness, net gain |
@@ -925,7 +945,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-S8-3 | Component | `JobDetails.test.tsx` | Offline: cached details if available; transport cost flagged if fare stale/unknown |
 | T-S14-1 | Component | `ApplicationFlow.test.tsx` | Application form visible, submit, success: "Application submitted." → S8 |
 | T-S14-2 | Component | `ApplicationFlow.test.tsx` | Error: "Couldn't submit application. Try again." + "Retry"; Offline: "No connection. Please check your internet." |
-| T-SEC-9a / 9b | Integration | `job.int.test.ts` | job_listings: read allow (any logged-in), deny (write) |
+| T-SEC-9a / 9b | Integration | `job.int.test.ts` | job_listings: read allow (any logged-in), deny (read as logged out) |
 | T-SEC-10b | Integration | `job.int.test.ts` | job_listings: create/update/delete deny (nobody) |
 | T-INT-4 | Integration | `job.int.test.ts` | Submit application: in-app form (name, phone, email) with option to open employer's external URL |
 
@@ -935,7 +955,6 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 - [ ] OP10 View job feed: select from `job_listings` with transport cost calculation from user's nearest rank fares, sorted by net gain
 - [ ] OP11 View job details: select from `job_listings` with transport breakdown
-- [ ] OP12 Set weekly budget: table update on `users.weekly_transport_budget`
 - [ ] OP15 Submit application: in-app form (name, phone, email) with option to open employer's external URL
 - [ ] BR4 Net Gain calculation: Wage - (to-and-fro transport cost) using nearest rank fares
 - [ ] BR5 Affordability filter: Net Gain >= 0 and within budget
@@ -978,7 +997,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 **Goal:** A user can view fare alerts, set their weekly transport budget, and see fare increase warnings.
 
-**Covers:** Features F4 · Stories US8 · Screens S9, S11 · Operations OP13, OP12 · Rules BR7 · Permissions SEC13–SEC14
+**Covers:** Features F4 · Stories US7, US8 · Screens S9, S10, S11 · Operations OP12, OP13, OP14 · Rules BR6, BR7 · Permissions SEC11, SEC13–SEC14
 
 **Starts when:** Phase 5 is complete and the human says "Start Phase 6".
 
@@ -987,10 +1006,14 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | Test ID | Level | File | What it checks |
 | --- | --- | --- | --- |
 | T-US8-1 | Component + Integration | `FareAlerts.test.tsx`, `alert.int.test.ts` | If fuel-aware condition met (BR7), see banner on S5/S6 with exact text from 4.5 |
+| T-US7-1 | Component + Integration | `ProfileSettings.test.tsx`, `budget.int.test.ts` | On S11, can set weekly transport budget (ZAR). Used for affordability filtering. |
 | T-S9-1 | Component | `FareAlerts.test.tsx` | List of alerts with fare increase warnings; Empty: "No fare alerts. Your routes are stable." |
 | T-S9-2 | Component | `FareAlerts.test.tsx` | Loading: spinner; Error: "Couldn't load alerts. Try again." + "Retry"; Offline: "Offline - showing cached alerts" |
+| T-S10-1 | Component + Integration | `Activity.test.tsx`, `activity.int.test.ts` | Activity list (last 30 days); Empty: "No activity yet. When you report fares or receive alerts, you'll see them here." |
 | T-S11-5 | Component | `ProfileSettings.test.tsx` | Weekly transport budget input (ZAR) with "Save" button; success: "Saved." |
+| T-BR6-1 | Unit + Component | `budget.test.ts`, `ProfileSettings.test.tsx` | Weekly transport budget defaults to unset; can be set in S11 |
 | T-BR7-2 | Unit | `tests/unit/fuel.test.ts` | Fuel price check: compare latest to 30-day average; flag if up ≥ 5% |
+| T-INT-3 | Integration | `activity.int.test.ts` | View activity: returns list from user_activity table |
 
 - [ ] All tests above are written, run, and fail for the expected reason.
 
@@ -998,12 +1021,15 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 - [ ] OP13 View fare alerts: select from `fare_reports` + `fuel_price_snapshots`, check BR7 condition
 - [ ] OP12 Set weekly budget: table update on `users.weekly_transport_budget`
+- [ ] OP14 View activity: select from `user_activity` (last 30 days, newest first)
 - [ ] BR7 fuel price check implemented
-- [ ] SEC13–SEC14 permission rules enforced via RLS
+- [ ] BR6 weekly budget defaults to unset
+- [ ] SEC11, SEC13–SEC14 permission rules enforced via RLS
 
 **Step 3: Frontend (Green)**
 
 - [ ] Build S9 Fare Alerts to match Stitch design (alert list, empty state, loading, error, offline)
+- [ ] Build S10 Activity to match Stitch design (activity list, empty state, loading, error, offline)
 - [ ] Update S11 Profile/Settings to include weekly transport budget input with "Save" button
 - [ ] Wire fare alerts into S5 (banner on Fares screen)
 
@@ -1015,6 +1041,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 **Step 5: Manual checks (human)**
 
 - [ ] Fare alerts screen matches Stitch design side by side.
+- [ ] Activity screen matches Stitch design side by side.
 - [ ] Budget setting works end to end.
 - [ ] Each screen shows all required states.
 
@@ -1043,11 +1070,11 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | Test ID | Level | File | What it checks |
 | --- | --- | --- | --- |
 | T-US9-1 | Component + Integration | `Offline.test.tsx`, `offline.int.test.ts` | After first load, top ranks/routes are cached; offline mode shows cached fares with staleness indicator |
-| T-S5-4 | Component | `Fares.test.tsx` | Offline with cache: "Offline - showing cached fares" + cached list |
-| T-S5-5 | Component | `Fares.test.tsx` | Offline without cache: "No cached fares available. Connect to internet to load fares." |
-| T-S6-3 | Component | `ReportFare.test.tsx` | Offline: "No connection. Connect to internet to report fares." |
-| T-S7-3 | Component | `HomeFeed.test.tsx` | Offline: cached jobs if available; transport costs flagged unknown |
-| T-S8-4 | Component | `JobDetails.test.tsx` | Offline: cached details if available; transport cost flagged if fare stale/unknown |
+| T-F5-1 | Unit | `tests/unit/cache.test.ts` | Cache expires after 7 days (BR8); expired cache returns null |
+| T-F5-2 | Unit | `tests/unit/cache.test.ts` | Cache refreshes when online; stale cache replaced with fresh data |
+| T-F5-3 | Component | `HomeFeed.test.tsx` | Offline: job feed uses cached job listings; shows "Offline - showing cached jobs" banner |
+| T-F5-4 | Component | `JobDetails.test.tsx` | Offline: job details use cached data; transport cost shows "Transport cost unknown" if fare not cached |
+| T-F5-5 | Component | `ReportFare.test.tsx` | Offline: fare report is queued locally; shows "Saved offline. Will sync when online." |
 
 - [ ] All tests above are written, run, and fail for the expected reason.
 
@@ -1216,7 +1243,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | F1 | US1, US2, US3 | T-US1-1, T-US2-1, T-US2-2, T-US2-3, T-US3-1, T-US3-2, T-US3-3 | T-BR1-1 | S2, S3, S4, S11, S12, S13, M1 | OP1, OP2, OP3, OP4, OP5, OP6, OP7, OP16 | 3 |
 | F2 | US4, US5 | T-US4-1, T-US5-1 | T-BR2-1, T-BR2-2, T-BR3-1, T-BR7-1, T-BR8-1 | S5, S6, M2 | OP8, OP9, OP13 | 4 |
 | F3 | US6, US7 | T-US6-1, T-US6-2, T-US6-3, T-US7-1 | T-BR4-1, T-BR4-2, T-BR5-1, T-BR6-1 | S7, S8, S14 | OP10, OP11, OP12, OP15 | 5 |
-| F4 | US8 | T-US8-1 | T-BR7-2 | S9, S11 | OP12, OP13 | 6 |
+| F4 | US7, US8 | T-US7-1, T-US8-1 | T-BR6-1, T-BR7-2 | S9, S10, S11 | OP12, OP13, OP14 | 6 |
 | F5 | US9 | T-US9-1 | T-BR8-1 | S5, S6 | OP8, OP9 | 7 |
 
 ---
@@ -1342,7 +1369,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 | Phase | Date | Status | Automated tests (passed / total) | Commit | Notes |
 | --- | --- | --- | --- | --- | --- |
-| [1] | [DD MMM YYYY] | [Done / Blocked] | [e.g. 24 / 24] | [short hash] | [notes] |
+| 1 | [DD MMM YYYY] | [Done / Blocked] | [e.g. 24 / 24] | [short hash] | [notes] |
 
 ---
 
@@ -1357,6 +1384,12 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | 5 | Exact Rustenburg rank names beyond those listed? | 8.7 Seed data | 5 ranks: Rustenburg Taxi Rank, Boitekong Taxi Rank, Tlhabane Taxi Rank, Phokeng Taxi Rank, Geelhout Park Rank | Answered |
 | 6 | Privacy Policy content? | S12, OP16 | Must be written before Phase 3. Content: data collected, storage, deletion rights, age gate. | Answered |
 | 7 | Application submission: in-app form or external link? | S14, OP15 | Both: in-app form (name, phone, email) with option to open employer's external URL | Answered |
+| 8 | Storage bucket for avatars/photos? | 6, 8.1, OP6 | Add storage bucket `avatars` (max 200KB, JPEG) and `posts` (max 1MB, JPEG) | Answered |
+| 9 | handle_new_user writes is_18_or_older but users has no such column. | 8.1, 8.5 | Remove is_18_or_older from trigger. Age gate enforced at sign-up, not stored in DB. | Answered |
+| 10 | user_activity says "inserts only by database triggers" but no trigger defined. | 8.1, 8.5, SEC12 | Add triggers: activity_on_like, activity_on_comment, activity_on_follow, activity_on_unlike. | Answered |
+| 11 | Username "Set on S4" vs "set (via S11)" contradiction. | 8.1, 11 | Username set during onboarding (S4), editable in S11. | Answered |
+| 12 | T-DB-1 means "tables exist" in Phase 2 and "RLS enabled" in Phase 8. | 8, 12.3 | Split: T-DB-1 = tables exist, T-DB-6 = RLS check. | Answered |
+| 13 | T-DB-3 is RLS check in Phase 2 but "Offline cache works" in Section 15. | 8, 12.3, 15 | Split: T-DB-3 = triggers, T-EDGE-3 = offline cache. | Answered |
 
 ---
 
@@ -1365,3 +1398,4 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | Plan version | Date | What changed | Why |
 | --- | --- | --- | --- |
 | v1.0 | 3 Nov 2026 | First version | Generated from PRD v0.4 and Stitch designs |
+| v1.1 | 3 Nov 2026 | All sections updated per review feedback | Added S10 to Phase 6, fixed data model (applications table, rank_id/route_id, fuel_alert_active), resolved contradictions (username, T-DB IDs), fixed Phase 7 repeat tests, fixed deny tests, resolved undecided items (OP15, OP16, seed data), added storage buckets, filled Section 17 |
