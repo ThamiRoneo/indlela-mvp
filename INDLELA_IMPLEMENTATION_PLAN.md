@@ -7,12 +7,12 @@
 | Field | Value |
 | --- | --- |
 | App name | Indlela |
-| Built from PRD version | v0.4 |
+| Built from PRD version | v0.5 |
 | Screen designs | https://stitch.withgoogle.com/projects/3597720798231985125 (S1–S14, M1–M2) |
 | Plan version | v1.0 |
 | Repository | https://github.com/ThamiRoneo/indlela-mvp |
 | Status | Ready to build |
-| Last updated | 3 Nov 2026 |
+| Last updated | 4 Nov 2026 |
 
 ---
 
