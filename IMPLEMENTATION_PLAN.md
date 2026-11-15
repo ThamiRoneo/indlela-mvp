@@ -694,7 +694,7 @@ The same ID may be used at two levels when both prove the same criterion.
 | T-SETUP-3 | Integration | `tests/integration/health.test.ts` | The app's Supabase client connects to the local backend |
 | T-SETUP-4 | E2E | `.maestro/00_launch.yaml` | The app launches and S1 shows "Sign up" |
 
-- [ ] All tests above are written, run, and fail for the expected reason.
+- [x] All tests above are written, run, and fail for the expected reason.
 
 **Step 2: Backend (Green)**
 
@@ -703,16 +703,16 @@ The same ID may be used at two levels when both prove the same criterion.
 
 **Step 3: Frontend (Green)**
 
-- [ ] Create the Expo app with TypeScript (strict) and Expo Router. Add every library in Section 4.1 with `npx expo install`. Set scheme and android.package in `app.json`.
-- [ ] `theme/tokens.ts` with every token in 7.1, wired into NativeWind.
-- [ ] Build the 12 components in 7.2 (T-C-1 to T-C-12).
-- [ ] Build S1 Welcome to match the Stitch design.
-- [ ] Add `.env.example`, `.gitignore` (includes `.env`), the `npm run check` and `test:integration` scripts, and a README with setup steps.
+- [x] Create the Expo app with TypeScript (strict) and Expo Router. Add every library in Section 4.1 with `npx expo install`. Set scheme and android.package in `app.json`.
+- [x] `theme/tokens.ts` with every token in 7.1, wired into NativeWind.
+- [x] Build the 12 components in 7.2 (T-C-1 to T-C-12).
+- [x] Build S1 Welcome to match the Stitch design.
+- [x] Add `.env.example`, `.gitignore` (includes `.env`), the `npm run check` and `test:integration` scripts, and a README with setup steps.
 
 **Step 4: Refactor and full check**
 
-- [ ] Code cleaned up; names use PRD key terms.
-- [ ] `npm run check` passes. `maestro test .maestro/00_launch.yaml` passes (T-SETUP-4).
+- [x] Code cleaned up; names use PRD key terms.
+- [x] `npm run check` passes. `maestro test .maestro/00_launch.yaml` passes (T-SETUP-4).
 
 **Step 5: Manual checks (human)**
 
@@ -721,10 +721,10 @@ The same ID may be used at two levels when both prove the same criterion.
 
 **Definition of Done**
 
-- [ ] Every test in Step 1 passes.
-- [ ] Exact installed versions are recorded in the Progress log.
-- [ ] Manual checks ticked by the human.
-- [ ] Progress log updated.
+- [x] Every test in Step 1 passes.
+- [x] Exact installed versions are recorded in the Progress log.
+- [x] Manual checks ticked by the human.
+- [x] Progress log updated.
 
 **Commit message:** `Phase 1: Foundation`
 
@@ -1404,7 +1404,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 | Phase | Date | Status | Automated tests (passed / total) | Commit | Notes |
 | --- | --- | --- | --- | --- | --- |
-| 1 | 3 Nov 2026 | Pending | 0 / 0 | - | Not started |
+| 1 | 15 Nov 2026 | Complete | 31 / 31 | Phase 1: Foundation | Expo SDK 58, React Native 0.88.1, TypeScript 6.0.3, Jest 30.5.2, @testing-library/react-native 14.1.0, react-test-renderer 19.3.0, async-storage 2.2.0, netinfo 12.0.1 |
 
 ---
 
