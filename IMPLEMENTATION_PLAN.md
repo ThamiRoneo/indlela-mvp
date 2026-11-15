@@ -756,13 +756,13 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-SEC-1a / 1b | `040_rls.test.sql` | One allow and one deny test per row in Section 9 (SEC1–SEC15). SEC8, SEC10, SEC12, SEC14: deny only. |
 | T-DB-6 | `040_rls.test.sql` | A database test lists every table in `public` and fails if any has RLS switched off |
 
-- [ ] All tests above are written, run, and fail for the expected reason.
+- [x] All tests above are written (run blocked: no Docker access for local Supabase).
 
 **Step 2: Backend (Green)**
 
-- [ ] Migrations `0001` to `0004` exactly as in Section 8.6, applied with `npx supabase db reset`.
-- [ ] `supabase/migrations/0004_seed.sql` loads the seed data in 8.7 (single source; no separate seed.sql).
-- [ ] RLS enabled on every table with all policies in Section 9.
+- [x] Migrations `0001` to `0004` exactly as in Section 8.6 written (applied with `npx supabase db reset` blocked by Docker).
+- [x] `supabase/migrations/0004_seed.sql` loads the seed data in 8.7 (single source; no separate seed.sql).
+- [x] RLS enabled on every table with all policies in Section 9.
 
 **Step 3: Frontend (Green)**
 
@@ -1405,6 +1405,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | Phase | Date | Status | Automated tests (passed / total) | Commit | Notes |
 | --- | --- | --- | --- | --- | --- |
 | 1 | 15 Nov 2026 | Complete | 31 / 31 | Phase 1: Foundation | Expo SDK 58, React Native 0.88.1, TypeScript 6.0.3, Jest 30.5.2, @testing-library/react-native 14.1.0, react-test-renderer 19.3.0, async-storage 2.2.0, netinfo 12.0.1 |
+| 2 | 15 Nov 2026 | In progress (blocked) | 0 / 23 | Phase 2: Data and security | Migrations 0001–0004 + pgTAP tests written. Cannot run `npx supabase start` / `supabase test db`: Docker socket inaccessible (user not in docker group, no sudo). Full check cannot complete until Docker access is available. |
 
 ---
 
