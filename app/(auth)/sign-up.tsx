@@ -19,11 +19,16 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
   const [agreedPrivacy, setAgreedPrivacy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   const isValidEmail = useCallback((e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e), []);
   const isFormValid = useCallback(() => isValidEmail(email) && isValidPassword(password) && is18 && agreedPrivacy, [email, password, is18, agreedPrivacy]);
 
+  const emailInvalid = email && !isValidEmail(email);
+  const passwordInvalid = password && !isValidPassword(password);
+
   const handleSignUp = useCallback(async () => {
+    setSubmitted(true);
     setError(null);
     if (!isFormValid()) return;
     setLoading(true);
@@ -57,15 +62,17 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
-            error={showError && error === messages.auth.duplicateEmail ? messages.auth.duplicateEmail : undefined}
+            error={(submitted || emailInvalid) && emailInvalid ? true : undefined}
           />
+          {emailInvalid && <Text style={styles.fieldError}>{messages.auth.passwordTooShort}</Text>}
           <TextInput
             placeholder="Password"
             secureTextEntry
             value={password}
             onChangeText={setPassword}
-            error={showError && error === messages.auth.passwordTooShort ? messages.auth.passwordTooShort : undefined}
+            error={passwordInvalid || (submitted && !!error && error === messages.auth.passwordTooShort)}
           />
+          {passwordInvalid && <Text style={styles.fieldError}>{messages.auth.passwordTooShort}</Text>}
           <View style={styles.checkboxRow}>
             <TouchableOpacity onPress={() => setIs18(!is18)} style={[styles.checkbox, is18 && styles.checkboxChecked]}>
               {is18 && <Text style={styles.checkboxCheck}>✓</Text>}
@@ -104,6 +111,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: tokens.color.background },
   scrollContent: { padding: tokens.space.xl },
   form: { gap: tokens.space.md },
+  fieldError: { fontSize: tokens.font.caption.size, color: tokens.color.error, marginBottom: tokens.space.sm },
   checkboxRow: { flexDirection: 'row', alignItems: 'center', gap: tokens.space.sm },
   checkbox: { width: tokens.size.touchMin, height: tokens.size.touchMin, borderWidth: 1, borderColor: tokens.color.border, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
   checkboxChecked: { backgroundColor: tokens.color.primary, borderColor: tokens.color.primary },
