@@ -177,3 +177,22 @@ create trigger trg_activity_on_unlike
   after delete on public.likes
   for each row
   execute function public.activity_on_unlike();
+
+-- OP1/handle_new_user: create public.users row when a new auth user signs up
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.users (id, email, username, nearest_rank_id, weekly_transport_budget, created_at)
+  values (new.id, new.email, null, null, null, now());
+  return new;
+end;
+$$;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row
+  execute function public.handle_new_user();
