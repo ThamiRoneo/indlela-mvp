@@ -1,5 +1,16 @@
 -- 0001_tables.sql: all tables, constraints and indexes (Section 8.1-8.4)
 
+-- Table: ranks
+create table public.ranks (
+  id uuid not null default gen_random_uuid(),
+  name text not null,
+  city text not null default 'Rustenburg',
+  province text not null default 'North West',
+  fuel_alert_active boolean not null default false,
+  constraint ranks_pkey primary key (id),
+  constraint ranks_name_unique unique (name)
+);
+
 -- Table: users
 create table public.users (
   id uuid not null default gen_random_uuid(),
@@ -21,17 +32,6 @@ create table public.users (
     )
   ),
   constraint users_weekly_transport_budget_check check (weekly_transport_budget is null or weekly_transport_budget >= 0)
-);
-
--- Table: ranks
-create table public.ranks (
-  id uuid not null default gen_random_uuid(),
-  name text not null,
-  city text not null default 'Rustenburg',
-  province text not null default 'North West',
-  fuel_alert_active boolean not null default false,
-  constraint ranks_pkey primary key (id),
-  constraint ranks_name_unique unique (name)
 );
 
 -- Table: routes
