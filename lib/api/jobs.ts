@@ -1,0 +1,143 @@
+import { supabase } from '../supabase';
+import { messages } from '../messages';
+
+export interface JobFeedItem {
+  id: string;
+  title: string;
+  company: string | null;
+  wage_zar: number | null;
+  location: string | null;
+  description: string | null;
+  source_url: string | null;
+  rank_id: string | null;
+  route_id: string | null;
+  transportCost: number | null;
+  netGain: number | null;
+  fareSource?: string;
+  stale?: boolean;
+  daysAgo?: number;
+}
+
+async function jobToFeedItem(j: any, fareMap: Record<string, number>): Promise<JobFeedItem> {
+  const fareAmount = j.route_id ? fareMap[j.route_id] : undefined;
+  const transportCost = fareAmount != null ? fareAmount * 2 : null;
+  const wage = j.wage_zar ?? null;
+  const netGain = wage != null && transportCost != null ? wage - transportCost : null;
+  return {
+    id: j.id,
+    title: j.title,
+    company: j.company,
+    wage_zar: j.wage_zar,
+    location: j.location,
+    description: j.description,
+    source_url: j.source_url,
+    rank_id: j.rank_id,
+    route_id: j.route_id,
+    transportCost,
+    netGain,
+  };
+}
+
+function sortByNetGain(jobs: JobFeedItem[]): JobFeedItem[] {
+  return jobs.sort((a, b) => {
+    if (a.netGain == null && b.netGain == null) return 0;
+    if (a.netGain == null) return 1;
+    if (b.netGain == null) return 1;
+    return b.netGain - a.netGain;
+  });
+}
+
+export async function viewJobFeed(): Promise<{ data: JobFeedItem[] | null; error: string | null }> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { data: null, error: messages.jobs.loadError };
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('nearest_rank_id')
+    .eq('id', user.id)
+    .single();
+  const rankId = profile?.nearest_rank_id;
+
+  const { data: jobsData, error } = await supabase
+    .from('job_listings')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) return { data: null, error: messages.jobs.loadError };
+
+  let fareMap: Record<string, number> = {};
+  if (rankId) {
+    const { data: fares } = await supabase
+      .from('fare_reports')
+      .select('route_id, amount_zar, created_at')
+      .eq('rank_id', rankId)
+      .order('created_at', { ascending: false });
+    if (fares) {
+      for (const f of fares) {
+        if (!(f.route_id in fareMap)) {
+          fareMap[f.route_id] = f.amount_zar;
+        }
+      }
+    }
+  }
+
+  const jobs: JobFeedItem[] = [];
+  for (const j of (jobsData || [])) {
+    jobs.push(await jobToFeedItem(j, fareMap));
+  }
+
+  return { data: sortByNetGain(jobs), error: null };
+}
+
+export async function viewJobDetails(jobId: string): Promise<{ data: JobFeedItem | null; error: string | null }> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { data: null, error: messages.jobs.detailsError };
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('nearest_rank_id')
+    .eq('id', user.id)
+    .single();
+  const rankId = profile?.nearest_rank_id;
+
+  const { data, error } = await supabase
+    .from('job_listings')
+    .select('*')
+    .eq('id', jobId)
+    .single();
+
+  if (error) return { data: null, error: messages.jobs.detailsError };
+
+  let fareMap: Record<string, number> = {};
+  if (rankId && data?.route_id) {
+    const { data: fares } = await supabase
+      .from('fare_reports')
+      .select('amount_zar')
+      .eq('rank_id', rankId)
+      .eq('route_id', data.route_id)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (fares && fares.length > 0) {
+      fareMap[data.route_id] = fares[0].amount_zar;
+    }
+  }
+
+  const item = await jobToFeedItem(data, fareMap);
+  return { data: item, error: null };
+}
+
+export async function submitApplication(
+  jobId: string,
+  name: string,
+  phone: string,
+  email: string,
+): Promise<{ error: string | null }> {
+  const { error } = await supabase.from('applications').insert({
+    job_listing_id: jobId,
+    name,
+    phone,
+    email,
+  });
+  if (error) return { error: messages.jobs.submitError };
+  return { error: null };
+}

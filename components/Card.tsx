@@ -1,13 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { messages } from '../lib/messages';
+import { tokens } from '../theme/tokens';
 
 type CardProps = {
   type?: 'job' | 'fare';
   title?: string;
   company?: string;
-  wage?: number;
-  transportCost?: number;
-  netGain?: number;
+  wage?: number | null;
+  transportCost?: number | null;
+  netGain?: number | null;
   route?: string;
   amount?: number;
   staleness?: string;
@@ -18,10 +20,14 @@ export const Card = ({ type = 'job', title, company, wage, transportCost, netGai
     return (
       <View style={styles.card}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.company}>{company}</Text>
-        <Text style={styles.wage}>R{wage}</Text>
-        <Text style={styles.transport}>Transport: R{transportCost}</Text>
-        <Text style={styles.netGain}>Net Gain: R{netGain}</Text>
+        {company && <Text style={styles.company}>{company}</Text>}
+        {wage != null && <Text style={styles.wage}>R{wage}</Text>}
+        {transportCost != null ? (
+          <Text style={styles.transport}>Transport: R{transportCost}</Text>
+        ) : (
+          <Text style={styles.transport}>{messages.jobs.transportUnknown}</Text>
+        )}
+        {netGain != null && <Text style={styles.netGain}>Net Gain: R{netGain}</Text>}
       </View>
     );
   }
@@ -35,11 +41,11 @@ export const Card = ({ type = 'job', title, company, wage, transportCost, netGai
 };
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: '#f8f9fa', padding: 16, borderRadius: 8 },
-  title: { fontSize: 16, fontWeight: '600' },
-  company: { fontSize: 14, color: '#5f6368' },
-  wage: { fontSize: 14, fontWeight: '600' },
-  transport: { fontSize: 12, color: '#5f6368' },
-  netGain: { fontSize: 14, fontWeight: '600' },
-  staleness: { fontSize: 12, color: '#fbbc04' },
+  card: { backgroundColor: tokens.color.surface, padding: tokens.space.md, borderRadius: 8 },
+  title: { fontSize: tokens.font.h3.size, fontWeight: '600' },
+  company: { fontSize: tokens.font.body.size, color: tokens.color.textSecondary },
+  wage: { fontSize: tokens.font.body.size, fontWeight: '600' },
+  transport: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary },
+  netGain: { fontSize: tokens.font.body.size, fontWeight: '600' },
+  staleness: { fontSize: tokens.font.caption.size, color: tokens.color.warning },
 });
