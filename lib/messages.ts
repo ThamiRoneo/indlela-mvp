@@ -35,6 +35,7 @@ export const messages = {
     submitError: "Couldn't submit application. Try again.",
     offlineSubmit: 'No connection. Please check your internet.',
     submitSuccess: 'Application submitted.',
+    offlineCached: 'Offline - showing cached jobs',
   },
   profile: {
     saveError: "Couldn't save. Try again.",

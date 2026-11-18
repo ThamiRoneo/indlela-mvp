@@ -10,6 +10,7 @@ import { ListItem } from '../../components/ListItem';
 import { EmptyState } from '../../components/EmptyState';
 import { TopAppBar } from '../../components/TopAppBar';
 import { Spinner } from '../../components/Spinner';
+import { Banner } from '../../components/Banner';
 import ReportSuccess from '../modals/report-success';
 
 type Rank = { id: string; name: string };
@@ -27,6 +28,8 @@ export default function ReportFare() {
   const [success, setSuccess] = useState<{ route: string } | null>(null);
 
   const loadRanks = useCallback(async () => {
+    const connected = await NetInfo.fetch();
+    setOffline(!connected.isConnected);
     const { data } = await supabase.from('ranks').select('id, name').order('name');
     setRanks(data || []);
     setLoading(false);
@@ -69,15 +72,6 @@ export default function ReportFare() {
     );
   }
 
-  if (offline) {
-    return (
-      <View style={styles.container}>
-        <TopAppBar title="Report Fare" />
-        <EmptyState text={messages.fares.offlineSubmit} />
-      </View>
-    );
-  }
-
   if (error) {
     return (
       <View style={styles.container}>
@@ -99,6 +93,9 @@ export default function ReportFare() {
   return (
     <View style={styles.container}>
       <TopAppBar title="Report Fare" />
+      {offline && (
+        <Banner variant="error">{messages.fares.offlineSubmit}</Banner>
+      )}
 
       {!selectedRank && (
         <>
@@ -143,7 +140,7 @@ export default function ReportFare() {
           />
           <Button
             variant="primary"
-            disabled={!amount || loading}
+            disabled={!amount || loading || offline}
             loading={loading}
             onPress={handleSubmit}
           >

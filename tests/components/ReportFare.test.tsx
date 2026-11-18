@@ -154,4 +154,32 @@ describe('T-US5 / T-S6 Report Fare', () => {
 
     expect(toJson(tree)).toContain(messages.fares.submitError);
   });
+
+  it('T-F5-5: offline → submit disabled, "No connection. Connect to internet to report fares."', async () => {
+    currentRanks = [{ id: 'r1', name: 'Rustenburg Taxi Rank' }];
+    currentRoutes = [{ id: 'rt1', destination: 'Johannesburg Park Station' }];
+    (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: false });
+
+    const tree = mount(<ReportFare />);
+    await flush();
+
+    act(() => {
+      tree.root.findAllByType(TouchableOpacity)[0].props.onPress();
+    });
+    await flush();
+
+    act(() => {
+      tree.root.findAllByType(TouchableOpacity)[0].props.onPress();
+    });
+    await flush();
+
+    const input = tree.root.findAllByType(TextInput)[0];
+    act(() => { input.props.onChangeText('180'); });
+    await flush();
+
+    const touchables = tree.root.findAllByType(TouchableOpacity);
+    const submit = touchables[touchables.length - 1];
+    expect(submit.props.disabled).toBe(true);
+    expect(toJson(tree)).toContain(messages.fares.offlineSubmit);
+  });
 });

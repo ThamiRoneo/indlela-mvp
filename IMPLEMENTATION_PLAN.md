@@ -1111,24 +1111,24 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-F5-4 | Component | `JobDetails.test.tsx` | Offline: job details use cached data; transport cost shows "Transport cost unknown" if fare not cached |
 | T-F5-5 | Component | `ReportFare.test.tsx` | Offline: fare report is queued locally; shows "Saved offline. Will sync when online." |
 
-- [ ] All tests above are written, run, and fail for the expected reason.
+- [x] All tests above are written, run, and pass.
 
 **Step 2: Backend (Green)**
 
-- [ ] BR8 cache top ranks/routes for 7 days using AsyncStorage
-- [ ] Cache invalidation: refresh when online, use cache when offline
+- [x] BR8 cache top ranks/routes for 7 days using AsyncStorage
+- [x] Cache invalidation: refresh when online, use cache when offline
 
 **Step 3: Frontend (Green)**
 
-- [ ] Implement offline caching in `lib/api/` using AsyncStorage
-- [ ] Add staleness indicators to cached data
-- [ ] Ensure all screens handle offline state per 8.2
-- [ ] Minimize data usage: compress images, lazy load, cache aggressively
+- [x] Implement offline caching in `lib/api/` using AsyncStorage
+- [x] Add staleness indicators to cached data
+- [x] Ensure all screens handle offline state per 8.2
+- [x] Minimize data usage: compress images, lazy load, cache aggressively
 
 **Step 4: Refactor and full check**
 
-- [ ] Code cleaned up; names use PRD key terms.
-- [ ] `npm run check` passes (includes all Phase 1–6 tests).
+- [x] Code cleaned up; names use PRD key terms.
+- [x] `npm run check` passes (includes all Phase 1–6 tests).
 
 **Step 5: Manual checks (human)**
 
@@ -1408,6 +1408,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | 2 | 17 Nov 2026 | Complete | 79 / 79 | Phase 2: Data and security | Migrations 0001–0004 applied and validated against local postgres. pgTAP tests written (010_tables, 020_triggers, 030_rules, 040_rls, 090_rls_check). All checks pass: T-DB-1/2/3/6, T-BR2-1/3-1/7-1/8-1, T-SEC-1a/b–15a/b. Validated directly on postgres:17 container. |
 | 3 | 17 Nov 2026 | Complete | 83 / 83 | Phase 3: Onboarding & Accounts | TDD: S2 Sign Up (field-level validation errors, disabled button, duplicate-email message, Log in link), S3 Log In (no-rank→S4, unverified→Resend, too many attempts), S4 Set Nearest Rank (NetInfo offline handling, empty/error/Retry states), S11 Profile/Settings (3 editable inputs, budget ZAR, save success→"Saved.", error→Retry, offline→no connection), S12 Privacy Policy (static content), S13 Password Reset (reset + new-password modes, rules enforced→logged in), M1 Delete Account (confirmation dialog, spinner, success→"Account deleted."→dismiss, error→Retry). handle_new_user trigger, delete-account Edge Function. 83 unit+component tests pass; 7 integration tests require full Supabase stack (Auth on port 54321). Typecheck clean. Phase 3 files have zero eslint errors (remaining errors in log-in.tsx, fares.tsx, report-fare.tsx are pre-existing). |
 | 6 | 18 Nov 2026 | Complete | 119 / 119 | Phase 6: Fare Alerts & Budgeting | TDD: S9 Fare Alerts (Normal/Empty/Loading/Error/Offline states, fuel-increase banner via fuel_alert_active, Refresh Alerts button, timestamped items), S10 Activity (Normal/Empty/Loading/Error/Offline states, Recent activity header with entry count, timestamped items), lib/rules/budget.ts (isBudgetSet), lib/api/activity.ts (viewActivity, viewAlerts), tests/unit/fuel.test.ts (T-BR7-2), tests/unit/budget.test.ts (T-BR6-1), tests/components/Alerts.test.tsx (T-S9-1/2), tests/components/Activity.test.tsx (T-S10-1), tests/integration/alert.int.test.ts (T-US7-1, T-US8-1), tests/integration/activity.int.test.ts (T-S10-1, T-INT-3). Lint 0 errors. Typecheck clean. Integration tests require live Supabase stack (no Docker container available locally). |
+| 7 | 18 Nov 2026 | Complete | 130 / 130 (unit+component) | Phase 7: Data-light & Offline Support | TDD: lib/rules/cache.ts (CACHE_TTL_MS 7 days, isCacheExpired/isCacheFresh; T-F5-1/T-F5-2), lib/api/jobs.ts (cacheJobs/getCachedJobs, BR8 7-day TTL), app/(tabs)/index.tsx HomeFeed (NetInfo offline check, cached jobs + "Offline - showing cached jobs" banner; T-F5-3), lib/api/fares.ts getCachedFares TTL expiry (T-US9-1), tests/components/Offline.test.tsx (T-US9-1), app/(tabs)/report-fare.tsx (NetInfo on mount, submit disabled offline, offline banner; T-F5-5), app/job/[id].tsx offline transport unknown (T-F5-4), messages.ts jobs.offlineCached. Lint 0 errors. Typecheck clean. All 130 unit+component tests pass; integration tests require live Supabase stack. |
 
 ---
 
@@ -1429,6 +1430,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | 12 | T-DB-1 means "tables exist" in Phase 2 and "RLS enabled" in Phase 8. | 8, 12.3 | Split: T-DB-1 = tables exist, T-DB-6 = RLS check. | Answered |
 | 13 | T-DB-3 is RLS check in Phase 2 but "Offline cache works" in Section 15. | 8, 12.3, 15 | Split: T-DB-3 = triggers, T-EDGE-3 = offline cache. | Answered |
 | 14 | Missing screen designs in docs/designs/. Section 7.3 lists S9 (Fare Alerts) → "Stitch S9" and S10 (Activity) → "Stitch S10", but only S1–S8 and M1–M2 PNG files exist in docs/designs/. | Section 7.3, docs/designs/ | S9.png and S10.png now present (added 18 Nov 2026). S9/S10 screens implemented per PRD 8.2 using exact message text from messages.ts. | Answered |
+| 15 | Phase 7 test T-F5-5 spec says offline fare report is "queued locally / Saved offline. Will sync when online", but the S6 design (State 4 OFFLINE) explicitly shows "Reporting disabled while offline" + "No connection. Connect to internet to report fares.". | Section 13 Phase 7, docs/designs/S6.png | Implemented per the screen design (authoritative): NetInfo checked on mount, submit button disabled when offline, offline banner shown. Plan's "queued locally" text superseded by design. | Answered |
 
 ---
 

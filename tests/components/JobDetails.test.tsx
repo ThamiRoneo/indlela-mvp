@@ -103,4 +103,17 @@ describe('T-S8 Job Details', () => {
 
     expect(toJson(tree)).toContain(messages.jobs.transportUnknown);
   });
+
+  it('T-F5-4: offline → job details use cached data; transport cost shows "Transport cost unknown" if fare not cached', async () => {
+    (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: false });
+    (viewJobDetails as jest.Mock).mockResolvedValue({
+      data: { ...job, transportCost: null, netGain: null },
+      error: null,
+    });
+
+    const tree = mount(<JobDetails jobId="j1" />);
+    await flush();
+
+    expect(toJson(tree)).toContain(messages.jobs.transportUnknown);
+  });
 });

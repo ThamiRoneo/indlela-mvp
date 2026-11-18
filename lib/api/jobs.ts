@@ -1,4 +1,5 @@
 import { supabase } from '../supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { messages } from '../messages';
 
 export interface JobFeedItem {
@@ -140,4 +141,27 @@ export async function submitApplication(
   });
   if (error) return { error: messages.jobs.submitError };
   return { error: null };
+}
+
+const JOBS_CACHE_KEY = 'indlela:jobs';
+const JOBS_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // BR8
+
+export async function cacheJobs(jobs: JobFeedItem[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(JOBS_CACHE_KEY, JSON.stringify({ jobs, cachedAt: Date.now() }));
+  } catch {
+    // cache write failure is non-fatal
+  }
+}
+
+export async function getCachedJobs(): Promise<JobFeedItem[] | null> {
+  try {
+    const raw = await AsyncStorage.getItem(JOBS_CACHE_KEY);
+    if (!raw) return null;
+    const { jobs, cachedAt } = JSON.parse(raw);
+    if (Date.now() - (cachedAt || 0) > JOBS_CACHE_TTL_MS) return null;
+    return jobs;
+  } catch {
+    return null;
+  }
 }

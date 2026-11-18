@@ -9,12 +9,18 @@ jest.mock('../../lib/supabase', () => {
 });
 jest.mock('../../lib/api/jobs', () => {
   const m = jest.requireMock('../../tests/mocks/jobs-api');
-  return { viewJobFeed: m.viewJobFeed, viewJobDetails: m.viewJobDetails, submitApplication: m.submitApplication };
+  return {
+    viewJobFeed: m.viewJobFeed,
+    viewJobDetails: m.viewJobDetails,
+    submitApplication: m.submitApplication,
+    cacheJobs: m.cacheJobs,
+    getCachedJobs: m.getCachedJobs,
+  };
 });
 
 import HomeFeed from '../../app/(tabs)/index';
 import { supabase } from '../../lib/supabase';
-import { viewJobFeed } from '../../lib/api/jobs';
+import { viewJobFeed, getCachedJobs } from '../../lib/api/jobs';
 import { messages } from '../../lib/messages';
 
 const mount = (element: React.ReactElement) => {
@@ -121,5 +127,19 @@ describe('T-US6 / T-S7 Home Feed', () => {
     await flush();
 
     expect(toJson(tree)).toContain(messages.jobs.transportUnknown);
+  });
+
+  it('T-F5-3: offline → cached jobs + "Offline - showing cached jobs" banner', async () => {
+    (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: false });
+    (getCachedJobs as jest.Mock).mockResolvedValue([
+      { id: 'j1', title: 'Cached Job', company: 'Co', wage_zar: 150, transportCost: 90, netGain: 60 },
+    ]);
+
+    const tree = mount(<HomeFeed />);
+    await flush();
+
+    const json = toJson(tree);
+    expect(json).toContain(messages.jobs.offlineCached);
+    expect(json).toContain('Cached Job');
   });
 });
