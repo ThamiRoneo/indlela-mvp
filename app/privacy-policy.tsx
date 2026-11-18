@@ -1,30 +1,38 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
-import { supabase } from '../lib/supabase';
-import { messages } from '../lib/messages';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { tokens } from '../theme/tokens';
 import { TopAppBar } from '../components/TopAppBar';
 import { Spinner } from '../components/Spinner';
 
+const POLICY_CONTENT = `# Privacy Policy
+
+Indlela helps unemployed youth in Rustenburg, North West find affordable job opportunities.
+
+Data we collect: your email address, nearest taxi rank, and weekly transport budget. This is stored to show you jobs you can afford to reach and to let you report taxi fares.
+
+Your email is never shared with other users. You can delete your account and all your data at any time from Profile & Settings.
+
+You must be 18 or older to create an account.`;
+
 export default function PrivacyPolicy() {
-  const [content, setContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadPolicy();
-  }, []);
-
   const loadPolicy = useCallback(async () => {
     try {
-      const { data, error: policyError } = await supabase.from('privacy_policy').select('content').single();
-      if (policyError) throw policyError;
-      setContent(data?.content || '# Privacy Policy\n\nIndlela is a job-seeking app for youth in Rustenburg, North West.\n\nWe collect your email, nearest rank, and transport budget to help you find affordable job opportunities.\n\nYou can delete your account and all data at any time from Profile & Settings.');
+      setLoading(true);
+      setError(null);
+      // Static content: no network call required.
+      await Promise.resolve();
+      setLoading(false);
     } catch {
-      setError(messages.privacy.loadError);
-    } finally {
+      setError('Could not load policy. Try again.');
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    loadPolicy();
   }, []);
 
   if (loading) return (
@@ -42,7 +50,7 @@ export default function PrivacyPolicy() {
     <View style={styles.container}>
       <TopAppBar title="Privacy Policy" />
       <View style={styles.scrollContent}>
-        <Text style={styles.policyText}>{content}</Text>
+        <Text style={styles.policyText}>{POLICY_CONTENT}</Text>
       </View>
     </View>
   );

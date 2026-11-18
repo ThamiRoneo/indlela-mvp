@@ -44,7 +44,11 @@ const Pressable = React.forwardRef((props, ref) => {
 });
 
 const FlatList = React.forwardRef((props, ref) => {
-  return React.createElement('div', { ...props, ref }, wrapChildren(props.children));
+  const items = props.data || [];
+  const rendered = items.map((item, index) =>
+    props.renderItem ? props.renderItem({ item, index }) : null
+  );
+  return React.createElement('div', { ...props, ref }, wrapChildren(rendered));
 });
 
 const ScrollView = React.forwardRef((props, ref) => {

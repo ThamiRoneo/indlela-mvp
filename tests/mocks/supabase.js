@@ -20,6 +20,9 @@ const SupabaseClient = {
     onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
   },
   rpc: jest.fn(() => Promise.resolve({ data: null, error: null })),
+  functions: {
+    invoke: jest.fn(() => Promise.resolve({ data: null, error: null })),
+  },
 };
 
 const createClient = jest.fn(() => SupabaseClient);

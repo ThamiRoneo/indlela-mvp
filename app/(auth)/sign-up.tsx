@@ -62,7 +62,6 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
-            error={(submitted || emailInvalid) && emailInvalid ? true : undefined}
           />
           {emailInvalid && <Text style={styles.fieldError}>{messages.auth.passwordTooShort}</Text>}
           <TextInput
@@ -70,7 +69,7 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
             secureTextEntry
             value={password}
             onChangeText={setPassword}
-            error={passwordInvalid || (submitted && !!error && error === messages.auth.passwordTooShort)}
+            error={passwordInvalid ? messages.auth.passwordTooShort : undefined}
           />
           {passwordInvalid && <Text style={styles.fieldError}>{messages.auth.passwordTooShort}</Text>}
           <View style={styles.checkboxRow}>

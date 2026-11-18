@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { messages } from '../../lib/messages';
+import { isValidPassword } from '../../lib/rules/password';
 import { tokens } from '../../theme/tokens';
 import { Button } from '../../components/Button';
 import { TextInput } from '../../components/TextInput';
@@ -9,10 +10,13 @@ import { TopAppBar } from '../../components/TopAppBar';
 
 type PasswordResetProps = {
   navigation?: { navigate: (screen: string) => void };
+  mode?: 'request' | 'reset';
 };
 
-export default function PasswordReset({ navigation }: PasswordResetProps = {}) {
+export default function PasswordReset({ navigation, mode = 'request' }: PasswordResetProps) {
   const [email, setEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -37,14 +41,46 @@ export default function PasswordReset({ navigation }: PasswordResetProps = {}) {
     }
   }, [email]);
 
-  const handleNewPassword = useCallback(async (newPassword: string) => {
-    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-    if (updateError) {
+  const handleNewPassword = useCallback(async () => {
+    setError(null);
+    if (!isValidPassword(newPassword)) { setError(messages.auth.passwordTooShort); return; }
+    if (newPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
+    setLoading(true);
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      setLoading(false);
+      if (updateError) {
+        setError(messages.passwordReset.submitError);
+        return;
+      }
+      navigation?.navigate('(auth)/log-in');
+    } catch {
+      setLoading(false);
       setError(messages.passwordReset.submitError);
-      return;
     }
-    navigation?.navigate('(auth)/log-in');
-  }, [navigation]);
+  }, [newPassword, confirmPassword, navigation]);
+
+  if (mode === 'reset') {
+    return (
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <TopAppBar title="Set new password" />
+          <View style={styles.form}>
+            <TextInput placeholder="New password" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
+            <TextInput placeholder="Confirm password" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
+            {error && (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            )}
+            <Button variant="primary" disabled={loading} loading={loading} onPress={handleNewPassword}>
+              Set password
+            </Button>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, StyleSheet, Platform } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../lib/supabase';
 import { messages } from '../lib/messages';
 import { tokens } from '../theme/tokens';
@@ -28,13 +29,19 @@ export default function SetNearestRank({ navigation }: SetNearestRankProps = {})
     setLoading(true);
     setError(null);
     try {
+      const state = await NetInfo.fetch();
+      if (!state.isConnected) {
+        setOffline(true);
+        setLoading(false);
+        return;
+      }
       const { data, error: ranksError } = await supabase.from('ranks').select('id, name').order('name');
       if (ranksError) throw ranksError;
       setRanks(data || []);
     } catch {
       setError(messages.rank.loadError);
     } finally {
-      setLoading(false);
+      if (!offline) setLoading(false);
     }
   }, []);
 
@@ -55,6 +62,13 @@ export default function SetNearestRank({ navigation }: SetNearestRankProps = {})
 
   if (loading) return (
     <View style={styles.loadingContainer}><Spinner size="large" /></View>
+  );
+
+  if (offline) return (
+    <View style={styles.container}>
+      <TopAppBar title="Set nearest rank" />
+      <EmptyState text={messages.rank.offline} actionLabel="Retry" onAction={loadRanks} />
+    </View>
   );
 
   if (error) return (

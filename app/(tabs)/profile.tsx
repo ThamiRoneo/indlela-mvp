@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, ScrollView, Platform, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../../lib/supabase';
 import { messages } from '../../lib/messages';
 import { tokens } from '../../theme/tokens';
@@ -12,8 +13,10 @@ export default function ProfileSettings() {
   const [email, setEmailState] = useState<string>('');
   const [username, setUsername] = useState<string>('');
   const [budget, setBudget] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [offline, setOffline] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
@@ -21,32 +24,58 @@ export default function ProfileSettings() {
   }, []);
 
   const loadProfile = useCallback(async () => {
+    const connected = await NetInfo.fetch();
+    if (!connected.isConnected) {
+      setOffline(true);
+      setLoading(false);
+      return;
+    }
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data } = await supabase.from('users').select('*').eq('id', user.id).single();
+    if (!user) { setLoading(false); return; }
+    const { data, error: profileError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    if (profileError) {
+      setError(messages.profile.saveError);
+      setLoading(false);
+      return;
+    }
     if (data) {
       setEmailState(data.email || '');
       setUsername(data.username || '');
       setProfile(data);
       if (data.weekly_transport_budget != null) setBudget(String(data.weekly_transport_budget));
     }
+    setLoading(false);
   }, []);
 
   const handleSave = useCallback(async () => {
     setError(null);
+    setSuccess(false);
     setLoading(true);
+    const connected = await NetInfo.fetch();
+    if (!connected.isConnected) {
+      setOffline(true);
+      setLoading(false);
+      return;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
     const updates: Record<string, unknown> = {};
     if (username.trim()) updates.username = username.trim();
     if (budget.trim()) updates.weekly_transport_budget = parseInt(budget, 10);
-    const { error: updateError } = await supabase.from('users').update(updates).eq('id', user.id);
+    const { error: updateError } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', user.id);
     setLoading(false);
     if (updateError) {
       setError(messages.profile.saveError);
       return;
     }
-    Alert.alert('Saved.', messages.profile.saveSuccess);
+    setSuccess(true);
   }, [username, budget]);
 
   const handleLogout = useCallback(async () => {
@@ -54,7 +83,14 @@ export default function ProfileSettings() {
   }, []);
 
   if (loading) return (
-    <View style={styles.card}><Spinner size="large" /></View>
+    <View style={styles.loadingContainer}><Spinner size="large" /></View>
+  );
+
+  if (offline) return (
+    <View style={styles.container}>
+      <TopAppBar title="Profile & Settings" />
+      <View style={styles.card}>{messages.profile.offline}</View>
+    </View>
   );
 
   return (
@@ -69,6 +105,11 @@ export default function ProfileSettings() {
           <Text style={styles.label}>{messages.profile.budgetLabel}</Text>
           <TextInput value={budget} onChangeText={setBudget} />
         </View>
+        {success && (
+          <View style={styles.successBanner}>
+            <Text style={styles.successText}>{messages.profile.saveSuccess}</Text>
+          </View>
+        )}
         {error && (
           <View style={styles.errorBanner}>
             <Text style={styles.errorText}>{error}</Text>
@@ -102,5 +143,8 @@ const styles = StyleSheet.create({
   errorText: { fontSize: tokens.font.body.size, color: tokens.color.error, marginBottom: tokens.space.sm },
   retryButton: { padding: 8, borderRadius: 4, backgroundColor: tokens.color.primary },
   retryText: { color: '#ffffff', fontSize: tokens.font.body.size },
+  successBanner: { marginTop: tokens.space.sm, padding: tokens.space.md, backgroundColor: '#e8f5e9', borderRadius: 8 },
+  successText: { fontSize: tokens.font.body.size, color: tokens.color.success, textAlign: 'center' },
   deleteButton: { marginTop: tokens.space.sm },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });

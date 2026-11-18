@@ -13,7 +13,6 @@ type DeleteAccountProps = {
 export default function DeleteAccount({ onDismiss }: DeleteAccountProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [confirmed, setConfirmed] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const handleDelete = useCallback(async () => {
@@ -33,8 +32,6 @@ export default function DeleteAccount({ onDismiss }: DeleteAccountProps) {
     }
   }, []);
 
-  const handleConfirmDelete = () => setConfirmed(true);
-
   if (success) return (
     <Modal
       title="Account deleted"
@@ -43,24 +40,20 @@ export default function DeleteAccount({ onDismiss }: DeleteAccountProps) {
     />
   );
 
-  if (!confirmed) return (
-    <Modal
-      title="Delete account"
-      text={messages.deleteAccount.confirm}
-      buttons={[
-        { label: 'Cancel', onPress: onDismiss },
-        { label: 'Delete', onPress: handleConfirmDelete, style: { backgroundColor: tokens.color.error } },
-      ]}
-    />
+  if (loading) return (
+    <Modal title="Deleting..." text="Please wait..." buttons={[]}>
+      <Spinner size="small" />
+    </Modal>
   );
 
   return (
     <Modal
-      title="Deleting..."
-      text={loading ? 'Please wait...' : error || messages.deleteAccount.deleteError}
-      buttons={loading ? [] : [{ label: 'Retry', onPress: handleDelete }]}
-    >
-      {loading && <Spinner size="small" />}
-    </Modal>
+      title="Delete account"
+      text={error ? `${messages.deleteAccount.confirm}\n${error}` : messages.deleteAccount.confirm}
+      buttons={[
+        { label: 'Cancel', onPress: onDismiss },
+        { label: error ? 'Retry' : 'Delete', onPress: handleDelete, style: error ? undefined : { backgroundColor: tokens.color.error } },
+      ]}
+    />
   );
 }
