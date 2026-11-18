@@ -20,35 +20,34 @@ export default function ProfileSettings() {
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
+    const loadProfile = async () => {
+      const connected = await NetInfo.fetch();
+      if (!connected.isConnected) {
+        setOffline(true);
+        setLoading(false);
+        return;
+      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
+      const { data, error: profileError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      if (profileError) {
+        setError(messages.profile.saveError);
+        setLoading(false);
+        return;
+      }
+      if (data) {
+        setEmailState(data.email || '');
+        setUsername(data.username || '');
+        setProfile(data);
+        if (data.weekly_transport_budget != null) setBudget(String(data.weekly_transport_budget));
+      }
+      setLoading(false);
+    };
     loadProfile();
-  }, []);
-
-  const loadProfile = useCallback(async () => {
-    const connected = await NetInfo.fetch();
-    if (!connected.isConnected) {
-      setOffline(true);
-      setLoading(false);
-      return;
-    }
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
-    const { data, error: profileError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-    if (profileError) {
-      setError(messages.profile.saveError);
-      setLoading(false);
-      return;
-    }
-    if (data) {
-      setEmailState(data.email || '');
-      setUsername(data.username || '');
-      setProfile(data);
-      if (data.weekly_transport_budget != null) setBudget(String(data.weekly_transport_budget));
-    }
-    setLoading(false);
   }, []);
 
   const handleSave = useCallback(async () => {

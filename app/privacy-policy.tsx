@@ -1,8 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { tokens } from '../theme/tokens';
 import { TopAppBar } from '../components/TopAppBar';
-import { Spinner } from '../components/Spinner';
 
 const POLICY_CONTENT = `# Privacy Policy
 
@@ -15,37 +14,6 @@ Your email is never shared with other users. You can delete your account and all
 You must be 18 or older to create an account.`;
 
 export default function PrivacyPolicy() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadPolicy = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      // Static content: no network call required.
-      await Promise.resolve();
-      setLoading(false);
-    } catch {
-      setError('Could not load policy. Try again.');
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadPolicy();
-  }, []);
-
-  if (loading) return (
-    <View style={styles.loadingContainer}><Spinner size="large" /></View>
-  );
-
-  if (error) return (
-    <View style={styles.container}>
-      <TopAppBar title="Privacy Policy" />
-      <Text style={styles.errorText}>{error}</Text>
-    </View>
-  );
-
   return (
     <View style={styles.container}>
       <TopAppBar title="Privacy Policy" />
@@ -58,8 +26,6 @@ export default function PrivacyPolicy() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: tokens.color.background },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   scrollContent: { padding: tokens.space.xl },
   policyText: { fontSize: tokens.font.body.size, lineHeight: tokens.font.body.lineHeight, color: tokens.color.text },
-  errorText: { fontSize: tokens.font.body.size, color: tokens.color.error, textAlign: 'center', marginTop: tokens.space.lg },
 });

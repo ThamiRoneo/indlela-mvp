@@ -22,10 +22,30 @@ export default function SetNearestRank({ navigation }: SetNearestRankProps = {})
   const [offline, setOffline] = useState(false);
 
   useEffect(() => {
-    loadRanks();
+    const loadInitial = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const state = await NetInfo.fetch();
+        if (!state.isConnected) {
+          setOffline(true);
+          setLoading(false);
+          return;
+        }
+        const { data, error: ranksError } = await supabase.from('ranks').select('id, name').order('name');
+        if (ranksError) throw ranksError;
+        setRanks(data || []);
+      } catch {
+        setError(messages.rank.loadError);
+      } finally {
+        if (!offline) setLoading(false);
+      }
+    };
+    loadInitial();
   }, []);
 
   const loadRanks = useCallback(async () => {
+    await Promise.resolve();
     setLoading(true);
     setError(null);
     try {
