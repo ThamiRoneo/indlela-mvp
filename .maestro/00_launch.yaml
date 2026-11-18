@@ -1,0 +1,10 @@
+appId: "indlela-mvp"
+
+- launchApp:
+    clearState: true
+
+- assertVisible: '"Sign up"'
+
+- assertVisible: '"Log in"'
+
+- assertVisible: '"Indlela"'
