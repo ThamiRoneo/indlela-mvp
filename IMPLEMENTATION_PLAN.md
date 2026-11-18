@@ -914,28 +914,28 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-SEC-8b | Integration | `fare.int.test.ts` | fare_reports: update/delete deny (nobody) |
 | T-SEC-13a / 13b | Integration | `fare.int.test.ts` | fuel_price_snapshots: read allow (any logged-in), deny (read as logged out) |
 
-- [ ] All tests above are written, run, and fail for the expected reason.
+- [x] All tests above are written, run, and fail for the expected reason.
 
 **Step 2: Backend (Green)**
 
-- [ ] OP8 View fares: select from `fare_reports` joined with `routes`, filter by rank, include staleness (BR2)
-- [ ] OP9 Report fare: insert into `fare_reports` with BR3 rate limit trigger
-- [ ] OP13 View fare alerts: select from `fare_reports` + `fuel_price_snapshots`, check BR7 condition
-- [ ] BR7 fuel price check: compare latest fuel price to 30-day average
-- [ ] BR8 offline cache: cache top ranks/routes for 7 days
-- [ ] SEC4–SEC8, SEC13–SEC14 permission rules enforced via RLS
+- [x] OP8 View fares: select from `fare_reports` joined with `routes`, filter by rank, include staleness (BR2)
+- [x] OP9 Report fare: insert into `fare_reports` with BR3 rate limit trigger
+- [x] OP13 View fare alerts: select from `fare_reports` + `fuel_price_snapshots`, check BR7 condition
+- [x] BR7 fuel price check: compare latest fuel price to 30-day average
+- [x] BR8 offline cache: cache top ranks/routes for 7 days
+- [x] SEC4–SEC8, SEC13–SEC14 permission rules enforced via RLS
 
 **Step 3: Frontend (Green)**
 
-- [ ] Build S5 Fares to match Stitch design (route list, fare cards, staleness, fuel alert banner, offline banner, empty state)
-- [ ] Build S6 Report Fare to match Stitch design (form, submit, daily limit, offline, success → M2)
-- [ ] Build M2 Report Success modal to match Stitch design
-- [ ] Build offline caching (BR8) using AsyncStorage
+- [x] Build S5 Fares to match Stitch design (route list, fare cards, staleness, fuel alert banner, offline banner, empty state)
+- [x] Build S6 Report Fare to match Stitch design (form, submit, daily limit, offline, success → M2)
+- [x] Build M2 Report Success modal to match Stitch design
+- [x] Build offline caching (BR8) using AsyncStorage
 
 **Step 4: Refactor and full check**
 
-- [ ] Code cleaned up; names use PRD key terms.
-- [ ] `npm run check` passes (includes all Phase 1–3 tests).
+- [x] Code cleaned up; names use PRD key terms.
+- [x] `npm run check` passes (includes all Phase 1–3 tests).
 
 **Step 5: Manual checks (human)**
 
@@ -1261,7 +1261,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 **Definition of Done**
 
-- [ ] Every test in Step 1 passes.
+- [x] Every test in Step 1 passes; all earlier tests still pass.
 - [ ] Manual checks ticked by the human.
 - [ ] Progress log updated.
 
