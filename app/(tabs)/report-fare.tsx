@@ -26,10 +26,6 @@ export default function ReportFare() {
   const [offline, setOffline] = useState(false);
   const [success, setSuccess] = useState<{ route: string } | null>(null);
 
-  useEffect(() => {
-    loadRanks();
-  }, []);
-
   const loadRanks = useCallback(async () => {
     const { data } = await supabase.from('ranks').select('id, name').order('name');
     setRanks(data || []);
@@ -59,6 +55,11 @@ export default function ReportFare() {
     }
     setSuccess({ route: selectedRoute.destination });
   }, [selectedRank, selectedRoute, amount]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadRanks();
+  }, []);
 
   if (loading) {
     return (

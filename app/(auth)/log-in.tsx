@@ -75,7 +75,7 @@ export default function LogIn({ navigation }: LogInProps = {}) {
             Log in
           </Button>
           <TouchableOpacity onPress={() => navigation?.navigate('(auth)/welcome')} style={styles.welcomeLink}>
-            <Text style={styles.welcomeLinkText}>Don't have an account? Sign up</Text>
+            <Text style={styles.welcomeLinkText}>Don&apos;t have an account? Sign up</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

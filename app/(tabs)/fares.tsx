@@ -19,52 +19,57 @@ export default function Fares() {
   const [hasCache, setHasCache] = useState(false);
   const [fuelAlert, setFuelAlert] = useState(false);
 
-  useEffect(() => {
-    load();
-  }, []);
-
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
+      const { data: profile } = await supabase
+        .from('users')
+        .select('nearest_rank_id')
+        .eq('id', user.id)
+        .single();
+      const rankId = profile?.nearest_rank_id;
+      if (!rankId) { setLoading(false); return; }
 
-    const { data: profile } = await supabase
-      .from('users')
-      .select('nearest_rank_id')
-      .eq('id', user.id)
-      .single();
-    const rankId = profile?.nearest_rank_id;
-    if (!rankId) { setLoading(false); return; }
+      const { data: rank } = await supabase
+        .from('ranks')
+        .select('fuel_alert_active')
+        .eq('id', rankId)
+        .single();
+      setFuelAlert(!!rank?.fuel_alert_active);
 
-    const { data: rank } = await supabase
-      .from('ranks')
-      .select('fuel_alert_active')
-      .eq('id', rankId)
-      .single();
-    setFuelAlert(!!rank?.fuel_alert_active);
+      const connected = await NetInfo.fetch();
+      if (!connected.isConnected) {
+        const cached = await getCachedFares(rankId);
+        setReports(cached || []);
+        setHasCache(!!cached);
+        setOffline(true);
+        setLoading(false);
+        return;
+      }
 
-    const connected = await NetInfo.fetch();
-    if (!connected.isConnected) {
-      const cached = await getCachedFares(rankId);
-      setReports(cached || []);
-      setHasCache(!!cached);
-      setOffline(true);
+      setOffline(false);
+      setHasCache(false);
+      const { data, error: faresError } = await viewFares(rankId);
+      if (faresError) {
+        setError(faresError);
+        setLoading(false);
+        return;
+      }
+      setReports(data || []);
       setLoading(false);
-      return;
-    }
-
-    setOffline(false);
-    setHasCache(false);
-    const { data, error: faresError } = await viewFares(rankId);
-    if (faresError) {
-      setError(faresError);
+    } catch {
+      setError(messages.fares.loadError);
       setLoading(false);
-      return;
     }
-    setReports(data || []);
-    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
   }, []);
 
   if (loading) {
