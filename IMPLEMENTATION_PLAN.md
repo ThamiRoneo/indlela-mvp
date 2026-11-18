@@ -1050,28 +1050,28 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | T-BR7-2 | Unit | `tests/unit/fuel.test.ts` | Fuel price check: compare latest to 30-day average; flag if up ≥ 5% |
 | T-INT-3 | Integration | `activity.int.test.ts` | View activity: trigger-created rows (fare report, alert, comment, follow, unlike) appear in the user_activity list |
 
-- [ ] All tests above are written, run, and fail for the expected reason.
+- [x] All tests above are written, run, and fail for the expected reason.
 
 **Step 2: Backend (Green)**
 
-- [ ] OP13 View fare alerts: select from `fare_reports` + `fuel_price_snapshots`, check BR7 condition
-- [ ] OP12 Set weekly budget: table update on `users.weekly_transport_budget`
-- [ ] OP14 View activity: select from `user_activity` (last 30 days, newest first)
-- [ ] BR7 fuel price check implemented
-- [ ] BR6 weekly budget defaults to unset
-- [ ] SEC11, SEC13–SEC14 permission rules enforced via RLS
+- [x] OP13 View fare alerts: select from `fare_reports` + `fuel_price_snapshots`, check BR7 condition
+- [x] OP12 Set weekly budget: table update on `users.weekly_transport_budget`
+- [x] OP14 View activity: select from `user_activity` (last 30 days, newest first)
+- [x] BR7 fuel price check implemented
+- [x] BR6 weekly budget defaults to unset
+- [x] SEC11, SEC13–SEC14 permission rules enforced via RLS
 
 **Step 3: Frontend (Green)**
 
-- [ ] Build S9 Fare Alerts to match Stitch design (alert list, empty state, loading, error, offline)
-- [ ] Build S10 Activity to match Stitch design (activity list, empty state, loading, error, offline)
-- [ ] Update S11 Profile/Settings to include weekly transport budget input with "Save" button
-- [ ] Wire fare alerts into S5 (banner on Fares screen)
+- [x] Build S9 Fare Alerts to match Stitch design (alert list, empty state, loading, error, offline)
+- [x] Build S10 Activity to match Stitch design (activity list, empty state, loading, error, offline)
+- [x] Update S11 Profile/Settings to include weekly transport budget input with "Save" button
+- [x] Wire fare alerts into S5 (banner on Fares screen)
 
 **Step 4: Refactor and full check**
 
-- [ ] Code cleaned up; names use PRD key terms.
-- [ ] `npm run check` passes (includes all Phase 1–5 tests).
+- [x] Code cleaned up; names use PRD key terms.
+- [x] `npm run check` passes (includes all Phase 1–5 tests).
 
 **Step 5: Manual checks (human)**
 
@@ -1082,9 +1082,9 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 **Definition of Done**
 
-- [ ] Every test in Step 1 passes; all earlier tests still pass.
+- [x] Every test in Step 1 passes; all earlier tests still pass.
 - [ ] Manual checks ticked by the human.
-- [ ] Progress log updated.
+- [x] Progress log updated.
 
 **Commit message:** `Phase 6: Fare Alerts & Budgeting`
 
