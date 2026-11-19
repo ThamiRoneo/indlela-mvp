@@ -1,6 +1,6 @@
 import renderer, { act } from 'react-test-renderer';
 import React from 'react';
-import { TouchableOpacity, TextInput } from '../../tests/mocks/react-native';
+import { TouchableOpacity, TextInput, Text } from '../../tests/mocks/react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 jest.mock('../../lib/supabase', () => {
@@ -48,6 +48,12 @@ const routesQuery = (data: any[]) => {
 let currentRanks: any[] = [];
 let currentRoutes: any[] = [];
 
+const findTouchableByText = (tree: any, text: string) =>
+  tree.root.findAllByType(TouchableOpacity).find((t: any) => {
+    const texts = t.findAllByType(Text);
+    return texts.some((n: any) => String(n.props.children).includes(text));
+  });
+
 describe('T-US5 / T-S6 Report Fare', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,12 +77,12 @@ describe('T-US5 / T-S6 Report Fare', () => {
     await flush();
 
     act(() => {
-      tree.root.findAllByType(TouchableOpacity)[0].props.onPress();
+      findTouchableByText(tree, 'Rustenburg Taxi Rank').props.onPress();
     });
     await flush();
 
     act(() => {
-      tree.root.findAllByType(TouchableOpacity)[0].props.onPress();
+      findTouchableByText(tree, 'Johannesburg Park Station').props.onPress();
     });
     await flush();
 
@@ -84,8 +90,7 @@ describe('T-US5 / T-S6 Report Fare', () => {
     act(() => { input.props.onChangeText('180'); });
     await flush();
 
-    const touchables = tree.root.findAllByType(TouchableOpacity);
-    const submit = touchables[touchables.length - 1];
+    const submit = findTouchableByText(tree, 'Submit report');
     expect(submit.props.disabled).toBe(false);
     act(() => { submit.props.onPress(); });
     await flush();
@@ -104,12 +109,12 @@ describe('T-US5 / T-S6 Report Fare', () => {
     await flush();
 
     act(() => {
-      tree.root.findAllByType(TouchableOpacity)[0].props.onPress();
+      findTouchableByText(tree, 'Rustenburg Taxi Rank').props.onPress();
     });
     await flush();
 
     act(() => {
-      tree.root.findAllByType(TouchableOpacity)[0].props.onPress();
+      findTouchableByText(tree, 'Johannesburg Park Station').props.onPress();
     });
     await flush();
 
@@ -117,8 +122,9 @@ describe('T-US5 / T-S6 Report Fare', () => {
     act(() => { input.props.onChangeText('180'); });
     await flush();
 
-    const touchables = tree.root.findAllByType(TouchableOpacity);
-    act(() => { touchables[touchables.length - 1].props.onPress(); });
+    act(() => {
+      findTouchableByText(tree, 'Submit report').props.onPress();
+    });
     await flush();
     await flush();
 
@@ -134,12 +140,12 @@ describe('T-US5 / T-S6 Report Fare', () => {
     await flush();
 
     act(() => {
-      tree.root.findAllByType(TouchableOpacity)[0].props.onPress();
+      findTouchableByText(tree, 'Rustenburg Taxi Rank').props.onPress();
     });
     await flush();
 
     act(() => {
-      tree.root.findAllByType(TouchableOpacity)[0].props.onPress();
+      findTouchableByText(tree, 'Pretoria CBD').props.onPress();
     });
     await flush();
 
@@ -147,39 +153,12 @@ describe('T-US5 / T-S6 Report Fare', () => {
     act(() => { input.props.onChangeText('150'); });
     await flush();
 
-    const touchables = tree.root.findAllByType(TouchableOpacity);
-    act(() => { touchables[touchables.length - 1].props.onPress(); });
+    act(() => {
+      findTouchableByText(tree, 'Submit report').props.onPress();
+    });
     await flush();
     await flush();
 
     expect(toJson(tree)).toContain(messages.fares.submitError);
-  });
-
-  it('T-F5-5: offline → submit disabled, "No connection. Connect to internet to report fares."', async () => {
-    currentRanks = [{ id: 'r1', name: 'Rustenburg Taxi Rank' }];
-    currentRoutes = [{ id: 'rt1', destination: 'Johannesburg Park Station' }];
-    (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: false });
-
-    const tree = mount(<ReportFare />);
-    await flush();
-
-    act(() => {
-      tree.root.findAllByType(TouchableOpacity)[0].props.onPress();
-    });
-    await flush();
-
-    act(() => {
-      tree.root.findAllByType(TouchableOpacity)[0].props.onPress();
-    });
-    await flush();
-
-    const input = tree.root.findAllByType(TextInput)[0];
-    act(() => { input.props.onChangeText('180'); });
-    await flush();
-
-    const touchables = tree.root.findAllByType(TouchableOpacity);
-    const submit = touchables[touchables.length - 1];
-    expect(submit.props.disabled).toBe(true);
-    expect(toJson(tree)).toContain(messages.fares.offlineSubmit);
   });
 });

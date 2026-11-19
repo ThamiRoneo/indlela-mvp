@@ -4,29 +4,36 @@ import { tokens } from '../theme/tokens';
 
 type TopAppBarProps = {
   title: string;
+  subtitle?: string;
   onBack?: () => void;
   action?: () => void;
-  accessibilityLabel?: string;
+  actionLabel?: string;
 };
 
-export const TopAppBar = ({ title, onBack, action, accessibilityLabel }: TopAppBarProps) => {
+export const TopAppBar = ({ title, subtitle, onBack, action, actionLabel }: TopAppBarProps) => {
   return (
     <View style={styles.bar}>
-      {onBack && (
-        <TouchableOpacity onPress={onBack} accessibilityLabel="Go back" style={styles.touchTarget}>
-          <Text>←</Text>
+      {onBack && <TouchableOpacity onPress={onBack}><Text>←</Text></TouchableOpacity>}
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>{title}</Text>
+        {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+      </View>
+      {actionLabel ? (
+        <TouchableOpacity onPress={action} style={styles.actionAvatar}>
+          <Text style={styles.avatarText}>{actionLabel}</Text>
         </TouchableOpacity>
+      ) : (
+        action && <TouchableOpacity onPress={action}><Text>Action</Text></TouchableOpacity>
       )}
-      <Text style={styles.title} accessibilityLabel={accessibilityLabel || title}>
-        {title}
-      </Text>
-      {action && <TouchableOpacity onPress={action} style={styles.touchTarget}><Text>Action</Text></TouchableOpacity>}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   bar: { padding: 16, flexDirection: 'row', alignItems: 'center' },
-  touchTarget: { minWidth: tokens.size.touchMin, minHeight: tokens.size.touchMin },
-  title: { fontSize: 24, fontWeight: '700', flex: 1 },
+  titleContainer: { flex: 1 },
+  title: { fontSize: tokens.font.h3.size, fontWeight: '600' },
+  subtitle: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary, marginTop: 2 },
+  actionAvatar: { padding: 4, borderRadius: 8, backgroundColor: '#f8f9fa' },
+  avatarText: { fontSize: tokens.font.caption.size, fontWeight: '600', color: tokens.color.text },
 });

@@ -25,6 +25,9 @@ export const messages = {
     submitError: 'Failed to submit. Try again.',
     offlineSubmit: 'No connection. Connect to internet to report fares.',
     reportSuccess: (route: string) => `Thanks! Fare reported for ${route}.`,
+    staleNotice: 'Some fares are out of date. Report current fares to stay accurate.',
+    amountHelper: 'Single minibus passenger seat fare.',
+    dailyLimitFooter: 'You can report up to 5 fares per day.',
   },
   jobs: {
     loadError: "Couldn't load jobs. Try again.",
