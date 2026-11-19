@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../../lib/supabase';
 import { messages } from '../../lib/messages';
 import { isValidPassword } from '../../lib/rules/password';
@@ -7,6 +8,7 @@ import { tokens } from '../../theme/tokens';
 import { Button } from '../../components/Button';
 import { TextInput } from '../../components/TextInput';
 import { TopAppBar } from '../../components/TopAppBar';
+import { Spinner } from '../../components/Spinner';
 
 type PasswordResetProps = {
   navigation?: { navigate: (screen: string) => void };
@@ -20,6 +22,7 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [offline, setOffline] = useState(false);
 
   const handleReset = useCallback(async () => {
     setError(null);
@@ -60,6 +63,14 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
     }
   }, [newPassword, confirmPassword, navigation]);
 
+  useEffect(() => {
+    const checkConnection = async () => {
+      const state = await NetInfo.fetch();
+      setOffline(!state.isConnected);
+    };
+    checkConnection();
+  }, []);
+
   if (mode === 'reset') {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
@@ -87,6 +98,11 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <TopAppBar title="Reset password" />
         <View style={styles.form}>
+          {offline && (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorText}>No connection. Please check your internet.</Text>
+            </View>
+          )}
           {success ? (
             <View style={styles.successContainer}>
               <Text style={styles.successText}>{messages.passwordReset.success}</Text>
@@ -96,13 +112,13 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
             </View>
           ) : (
             <>
-              <TextInput placeholder="Email" value={email} onChangeText={setEmail} />
-              {error && (
+              <TextInput placeholder="Email" value={email} onChangeText={setEmail} editable={!offline && !loading} />
+              {error && !offline && (
                 <View style={styles.errorBanner}>
                   <Text style={styles.errorText}>{error}</Text>
                 </View>
               )}
-              <Button variant="primary" disabled={loading} loading={loading} onPress={handleReset}>
+              <Button variant="primary" disabled={loading || offline} loading={loading} onPress={handleReset}>
                 Send reset link
               </Button>
             </>

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { tokens } from '../theme/tokens';
 
-type ModalButton = { label: string; onPress: () => void; style?: any; accessibilityLabel?: string };
+type ModalButton = { label: string; onPress: () => void; style?: any; accessibilityLabel?: string; disabled?: boolean };
 
 type ModalProps = {
   title: string;
@@ -18,7 +18,7 @@ export const Modal = ({ title, text, buttons, children }: ModalProps) => {
       <Text style={styles.body}>{text}</Text>
       {children && <View style={styles.children}>{children}</View>}
       {buttons.map((b, i) => (
-        <TouchableOpacity key={i} onPress={b.onPress} style={[styles.button, b.style]} accessibilityLabel={b.accessibilityLabel || b.label}>
+        <TouchableOpacity key={i} onPress={b.disabled ? undefined : b.onPress} disabled={b.disabled} style={[styles.button, b.style, b.disabled && styles.buttonDisabled]} accessibilityLabel={b.accessibilityLabel || b.label}>
           <Text>{b.label}</Text>
         </TouchableOpacity>
       ))}
@@ -31,5 +31,6 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '600', marginBottom: 12 },
   body: { fontSize: 14, marginBottom: 20 },
   button: { minWidth: tokens.size.touchMin, minHeight: tokens.size.touchMin, padding: 12, borderRadius: 8, backgroundColor: '#1a73e8' },
+  buttonDisabled: { opacity: 0.5, backgroundColor: '#bdc1c6' },
   children: { marginVertical: 12 },
 });

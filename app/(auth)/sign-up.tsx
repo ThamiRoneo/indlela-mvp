@@ -26,6 +26,7 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
 
   const emailInvalid = email && !isValidEmail(email);
   const passwordInvalid = password && !isValidPassword(password);
+  const isDuplicateEmail = error === messages.auth.duplicateEmail;
 
   const handleSignUp = useCallback(async () => {
     setSubmitted(true);
@@ -43,15 +44,12 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
         setLoading(false);
         return;
       }
-      navigation?.navigate('(auth)/log-in');
+      navigation?.navigate('/verify-email');
     } catch {
       setError(messages.auth.noConnection);
       setLoading(false);
     }
   }, [email, password, isFormValid, navigation]);
-
-  const showError = !!error;
-  const errorText = error || messages.auth.noConnection;
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
@@ -62,6 +60,7 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
+            error={emailInvalid || isDuplicateEmail ? messages.auth.passwordTooShort : undefined}
           />
           {emailInvalid && <Text style={styles.fieldError}>{messages.auth.passwordTooShort}</Text>}
           <TextInput
@@ -76,7 +75,7 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
             <TouchableOpacity onPress={() => setIs18(!is18)} style={[styles.checkbox, is18 && styles.checkboxChecked]}>
               {is18 && <Text style={styles.checkboxCheck}>✓</Text>}
             </TouchableOpacity>
-            <Text style={styles.checkboxLabel}>I am 18 or older</Text>
+            <Text style={styles.checkboxLabel}>I confirm I am 18 years or older</Text>
           </View>
           <View style={styles.checkboxRow}>
             <TouchableOpacity onPress={() => setAgreedPrivacy(!agreedPrivacy)} style={[styles.checkbox, agreedPrivacy && styles.checkboxChecked]}>
@@ -84,9 +83,17 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
             </TouchableOpacity>
             <Text style={styles.checkboxLabel}>I agree to the Privacy Policy</Text>
           </View>
-          {showError && (
+          {isDuplicateEmail && (
             <View style={styles.errorBanner}>
-              <Text style={styles.errorText}>{errorText}</Text>
+              <Text style={styles.errorText}>{messages.auth.duplicateEmail}</Text>
+              <TouchableOpacity onPress={() => navigation?.navigate('(auth)/log-in')} style={styles.loginLinkInline}>
+                <Text style={styles.loginLinkText}>Log in instead?</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {error && !isDuplicateEmail && (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
           <Button
@@ -116,8 +123,9 @@ const styles = StyleSheet.create({
   checkboxChecked: { backgroundColor: tokens.color.primary, borderColor: tokens.color.primary },
   checkboxCheck: { color: '#ffffff', fontSize: 16 },
   checkboxLabel: { fontSize: tokens.font.body.size, color: tokens.color.text },
-  errorBanner: { marginTop: tokens.space.sm },
-  errorText: { fontSize: tokens.font.body.size, color: tokens.color.error, textAlign: 'center' },
-  loginLink: { marginTop: tokens.space.lg, alignItems: 'center' },
+  errorBanner: { marginTop: tokens.space.sm, padding: tokens.space.md, backgroundColor: '#fdecea', borderRadius: 8 },
+  errorText: { fontSize: tokens.font.body.size, color: tokens.color.error },
+  loginLinkInline: { marginLeft: tokens.space.sm },
   loginLinkText: { fontSize: tokens.font.body.size, color: tokens.color.primary },
+  loginLink: { marginTop: tokens.space.lg, alignItems: 'center' },
 });
