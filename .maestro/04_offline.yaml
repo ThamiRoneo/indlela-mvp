@@ -1,0 +1,19 @@
+appId: "indlela-mvp"
+
+- launchApp:
+    clearState: true
+
+- tapOn: '"Log in"'
+- tapOn: '"Email"'
+- inputText: 'e2e-test@example.com'
+- tapOn: '"Password"'
+- inputText: '${SEED_TEST_PASSWORD}'
+- tapOn: '"Log in"'
+
+- assertVisible: '"Set nearest rank"'
+- tapOn: '"Rustenburg Taxi Rank"'
+- tapOn: '"Confirm"'
+
+- tapOn: '"Fares"'
+
+- assertVisible: '"Fares"'

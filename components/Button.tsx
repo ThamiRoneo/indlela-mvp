@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { tokens } from '../theme/tokens';
 
 type ButtonProps = {
   variant?: 'primary' | 'secondary' | 'text';
@@ -32,7 +33,7 @@ export const Button = ({ variant = 'primary', disabled = false, loading = false,
 };
 
 const styles = StyleSheet.create({
-  base: { height: 48, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  base: { minWidth: tokens.size.touchMin, minHeight: tokens.size.touchMin, height: tokens.size.touchMin, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   primary: { backgroundColor: '#1a73e8' },
   secondary: { backgroundColor: '#34a853' },
   text: { backgroundColor: 'transparent' },

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { tokens } from '../theme/tokens';
 
 type BottomNavProps = {
   activeTab: string;
@@ -16,6 +17,9 @@ export const BottomNav = ({ activeTab, onTabPress }: BottomNavProps) => {
           key={tab}
           onPress={() => onTabPress(tab)}
           style={[styles.tab, activeTab === tab && styles.active]}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeTab === tab }}
+          accessibilityLabel={tab}
         >
           <Text>{tab}</Text>
         </TouchableOpacity>
@@ -26,6 +30,6 @@ export const BottomNav = ({ activeTab, onTabPress }: BottomNavProps) => {
 
 const styles = StyleSheet.create({
   nav: { flexDirection: 'row', padding: 8 },
-  tab: { padding: 16, borderRadius: 8 },
+  tab: { minWidth: tokens.size.touchMin, minHeight: tokens.size.touchMin, padding: 16, borderRadius: 8 },
   active: { backgroundColor: '#1a73e8' },
 });
