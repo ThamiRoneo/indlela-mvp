@@ -13,7 +13,11 @@ type TopAppBarProps = {
 export const TopAppBar = ({ title, subtitle, onBack, action, actionLabel }: TopAppBarProps) => {
   return (
     <View style={styles.bar}>
-      {onBack && <TouchableOpacity onPress={onBack}><Text>←</Text></TouchableOpacity>}
+      {onBack && (
+        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+          <Text>←</Text>
+        </TouchableOpacity>
+      )}
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{title}</Text>
         {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
@@ -34,6 +38,7 @@ const styles = StyleSheet.create({
   titleContainer: { flex: 1 },
   title: { fontSize: tokens.font.h3.size, fontWeight: '600' },
   subtitle: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary, marginTop: 2 },
-  actionAvatar: { padding: 4, borderRadius: 8, backgroundColor: '#f8f9fa' },
+  actionAvatar: { padding: 4, borderRadius: 8, backgroundColor: '#f8f9fa', minWidth: tokens.size.touchMin, minHeight: tokens.size.touchMin },
   avatarText: { fontSize: tokens.font.caption.size, fontWeight: '600', color: tokens.color.text },
+  backButton: { minWidth: tokens.size.touchMin, minHeight: tokens.size.touchMin, padding: 8 },
 });

@@ -5,6 +5,7 @@ import { tokens } from '../theme/tokens';
 type TextInputProps = {
   value?: string;
   error?: string;
+  editable?: boolean;
   secureTextEntry?: boolean;
   onChangeText?: (text: string) => void;
   onTogglePassword?: () => void;
@@ -13,7 +14,7 @@ type TextInputProps = {
   accessibilityLabel?: string;
 };
 
-export const TextInput = ({ value, error, secureTextEntry, onChangeText, onTogglePassword, placeholder, label, accessibilityLabel }: TextInputProps) => {
+export const TextInput = ({ value, error, editable = true, secureTextEntry, onChangeText, onTogglePassword, placeholder, label, accessibilityLabel }: TextInputProps) => {
   const [showPassword, setShowPassword] = React.useState(!secureTextEntry);
   return (
     <>
@@ -24,6 +25,7 @@ export const TextInput = ({ value, error, secureTextEntry, onChangeText, onToggl
         onChangeText={onChangeText}
         secureTextEntry={showPassword ? false : secureTextEntry || false}
         placeholder={placeholder}
+        editable={editable}
         accessibilityLabel={accessibilityLabel || label || placeholder}
       />
     </>

@@ -44,7 +44,28 @@ export default function FareAlerts() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
-  }, []);
+  }, [load]);
+
+  const renderAlertCard = (alert: any) => (
+    <View style={styles.alertCard}>
+      <View style={styles.alertHeader}>
+        <View style={styles.alertPill}>
+          <Text style={styles.alertPillText}>FARE ALERT \u2022 FUEL INCREASE</Text>
+        </View>
+        <View style={styles.alertIcon}>
+          <Text style={styles.alertIconText}>!</Text>
+        </View>
+      </View>
+      <Text style={styles.alertDescription}>{alert.description}</Text>
+      <View style={styles.alertRoute}>
+        <Text style={styles.alertRouteLabel}>\u2192 Route:</Text>
+        <Text style={styles.alertRouteValue}>{alert.route || 'Your saved routes'}</Text>
+      </View>
+      <View style={styles.alertMeta}>
+        <Text style={styles.alertMetaText}>{daysAgo(alert.created_at)} days ago</Text>
+      </View>
+    </View>
+  );
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
@@ -63,7 +84,7 @@ export default function FareAlerts() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Fare Alerts" />
+        <TopAppBar title="Fare Alerts" actionLabel="U" />
         <View style={styles.loadingContainer}>
           <Spinner size="large" />
           <Text style={styles.loadingText}>Loading alerts...</Text>
@@ -76,11 +97,13 @@ export default function FareAlerts() {
   if (offline) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Fare Alerts" />
+        <TopAppBar title="Fare Alerts" actionLabel="U" />
         <Banner variant="alert">{messages.alerts.offlineCached}</Banner>
         {alerts.length > 0 ? (
           alerts.map((alert) => (
-            <ListItem key={alert.id} label={alert.description} subtitle={`${daysAgo(alert.created_at)} days ago`} />
+            <View key={alert.id} style={styles.listItem}>
+              <ListItem label={alert.description} subtitle={`${daysAgo(alert.created_at)} days ago`} />
+            </View>
           ))
         ) : (
           renderEmpty()
@@ -92,7 +115,7 @@ export default function FareAlerts() {
   if (error) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Fare Alerts" />
+        <TopAppBar title="Fare Alerts" actionLabel="U" />
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyTitle}>{error}</Text>
           <Text style={styles.emptySubtitle}>
@@ -111,7 +134,7 @@ export default function FareAlerts() {
   if (alerts.length === 0) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Fare Alerts" />
+        <TopAppBar title="Fare Alerts" actionLabel="U" />
         {renderEmpty()}
       </View>
     );
@@ -119,14 +142,8 @@ export default function FareAlerts() {
 
   return (
     <View style={styles.container}>
-      <TopAppBar title="Fare Alerts" />
-      {alerts.map((alert) => (
-        <ListItem
-          key={alert.id}
-          label={alert.description}
-          subtitle={`${daysAgo(alert.created_at)} days ago`}
-        />
-      ))}
+      <TopAppBar title="Fare Alerts" actionLabel="U" />
+      {alerts.map((alert) => renderAlertCard(alert))}
     </View>
   );
 }
@@ -140,4 +157,84 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: tokens.font.h3.size, fontWeight: '600', color: tokens.color.text, textAlign: 'center' },
   emptySubtitle: { fontSize: tokens.font.body.size, color: tokens.color.textSecondary, textAlign: 'center' },
   refreshButton: { marginTop: tokens.space.sm, alignSelf: 'center' },
+  alertCard: {
+    backgroundColor: '#fff8e1',
+    borderRadius: 12,
+    padding: tokens.space.md,
+    marginHorizontal: tokens.space.md,
+    marginBottom: tokens.space.sm,
+    borderLeftWidth: 4,
+    borderLeftColor: tokens.color.warning,
+  },
+  alertHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: tokens.space.sm,
+  },
+  alertPill: {
+    backgroundColor: '#ffe082',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  alertPillText: {
+    fontSize: tokens.font.caption.size,
+    fontWeight: '600',
+    color: '#8d6e00',
+  },
+  alertIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#fbc02d',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  alertIconText: {
+    color: '#ffffff',
+    fontSize: tokens.font.caption.size,
+    fontWeight: '700',
+  },
+  alertDescription: {
+    fontSize: tokens.font.body.size,
+    color: tokens.color.text,
+    marginBottom: tokens.space.xs,
+  },
+  alertRoute: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: tokens.space.xs,
+  },
+  alertRouteLabel: {
+    fontSize: tokens.font.caption.size,
+    color: tokens.color.textSecondary,
+    marginRight: tokens.space.xs,
+  },
+  alertRouteValue: {
+    fontSize: tokens.font.caption.size,
+    color: tokens.color.textSecondary,
+  },
+  alertMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  alertMetaText: {
+    fontSize: tokens.font.caption.size,
+    color: tokens.color.textSecondary,
+  },
+  listItem: {
+    paddingHorizontal: tokens.space.md,
+    marginBottom: tokens.space.sm,
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: tokens.color.primary,
+    color: '#ffffff',
+    textAlign: 'center',
+    fontSize: tokens.font.caption.size,
+    fontWeight: '600',
+  },
 });

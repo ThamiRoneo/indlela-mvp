@@ -4,12 +4,39 @@ import NetInfo from '@react-native-community/netinfo';
 import { viewActivity } from '../../lib/api/activity';
 import { messages } from '../../lib/messages';
 import { tokens } from '../../theme/tokens';
-import { ListItem } from '../../components/ListItem';
 import { TopAppBar } from '../../components/TopAppBar';
 import { Spinner } from '../../components/Spinner';
 import { Button } from '../../components/Button';
 import { Banner } from '../../components/Banner';
-import { daysAgo } from '../../lib/rules/fare';
+
+const formatTimestamp = (iso: string) => {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-ZA', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+};
+
+const activityIcon = (type: string) => {
+  switch (type) {
+    case 'fare_report':
+      return { bg: '#e8f5e9', color: '#2e7d32', glyph: '\u2713' };
+    case 'alert_received':
+      return { bg: '#fff8e1', color: '#f57f17', glyph: '!' };
+    case 'comment_received':
+      return { bg: '#e3f2fd', color: '#1565c0', glyph: '\u270D' };
+    case 'follow':
+      return { bg: '#f3e5f5', color: '#7b1fa2', glyph: '+' };
+    case 'unlike':
+      return { bg: '#ffebee', color: '#c62828', glyph: '\u2716' };
+    default:
+      return { bg: '#eceff1', color: '#546e7a', glyph: '\u2022' };
+  }
+};
 
 export default function Activity() {
   const [activities, setActivities] = useState<any[]>([]);
@@ -44,7 +71,22 @@ export default function Activity() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
-  }, []);
+  }, [load]);
+
+  const renderActivityItem = (activity: any) => {
+    const { bg, color, glyph } = activityIcon(activity.type);
+    return (
+      <View style={styles.activityItem}>
+        <View style={[styles.icon, { backgroundColor: bg }]}>
+          <Text style={[styles.iconGlyph, { color }]}>{glyph}</Text>
+        </View>
+        <View style={styles.itemBody}>
+          <Text style={styles.itemLabel}>{activity.description}</Text>
+          <Text style={styles.itemTime}>{formatTimestamp(activity.created_at)}</Text>
+        </View>
+      </View>
+    );
+  };
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
@@ -58,7 +100,7 @@ export default function Activity() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Activity" />
+        <TopAppBar title="Activity" actionLabel="U" />
         <View style={styles.loadingContainer}>
           <Spinner size="large" />
           <Text style={styles.loadingText}>Loading activity...</Text>
@@ -71,7 +113,7 @@ export default function Activity() {
   if (offline) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Activity" />
+        <TopAppBar title="Activity" actionLabel="U" />
         <Banner variant="alert">{messages.activity.offlineCached}</Banner>
         {activities.length > 0 ? (
           <>
@@ -80,11 +122,19 @@ export default function Activity() {
               <Text style={styles.recentCount}>{activities.length} entries</Text>
             </View>
             {activities.map((activity) => (
-              <ListItem
-                key={activity.id}
-                label={activity.description}
-                subtitle={`${daysAgo(activity.created_at)} days ago`}
-              />
+              <View key={activity.id} style={styles.listItem}>
+                <View style={styles.activityItem}>
+                  <View style={[styles.icon, { backgroundColor: activityIcon(activity.type).bg }]}>
+                    <Text style={[styles.iconGlyph, { color: activityIcon(activity.type).color }]}>
+                      {activityIcon(activity.type).glyph}
+                    </Text>
+                  </View>
+                  <View style={styles.itemBody}>
+                    <Text style={styles.itemLabel}>{activity.description}</Text>
+                    <Text style={styles.itemTime}>{formatTimestamp(activity.created_at)}</Text>
+                  </View>
+                </View>
+              </View>
             ))}
           </>
         ) : (
@@ -97,17 +147,17 @@ export default function Activity() {
   if (error) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Activity" />
+        <TopAppBar title="Activity" actionLabel="U" />
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyTitle}>{error}</Text>
           <Text style={styles.emptySubtitle}>
             Please check your data connection and tap below to reload.
           </Text>
-      <View style={styles.refreshButton}>
-        <Button variant="primary" onPress={load}>
-          Retry
-        </Button>
-      </View>
+          <View style={styles.refreshButton}>
+            <Button variant="primary" onPress={load}>
+              Retry
+            </Button>
+          </View>
         </View>
       </View>
     );
@@ -116,7 +166,7 @@ export default function Activity() {
   if (activities.length === 0) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Activity" />
+        <TopAppBar title="Activity" actionLabel="U" />
         {renderEmpty()}
       </View>
     );
@@ -124,18 +174,12 @@ export default function Activity() {
 
   return (
     <View style={styles.container}>
-      <TopAppBar title="Activity" />
+      <TopAppBar title="Activity" actionLabel="U" />
       <View style={styles.recentContainer}>
         <Text style={styles.recentTitle}>Recent activity</Text>
         <Text style={styles.recentCount}>{activities.length} entries</Text>
       </View>
-      {activities.map((activity) => (
-        <ListItem
-          key={activity.id}
-          label={activity.description}
-          subtitle={`${daysAgo(activity.created_at)} days ago`}
-        />
-      ))}
+      {activities.map((activity) => renderActivityItem(activity))}
     </View>
   );
 }
@@ -152,4 +196,38 @@ const styles = StyleSheet.create({
   recentContainer: { paddingHorizontal: tokens.space.xl, marginTop: tokens.space.md },
   recentTitle: { fontSize: tokens.font.h3.size, fontWeight: '600', color: tokens.color.text },
   recentCount: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary, marginTop: tokens.space.xs },
+  activityItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: tokens.space.md,
+    paddingVertical: tokens.space.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: '#dadce0',
+  },
+  icon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: tokens.space.md,
+  },
+  iconGlyph: { fontSize: tokens.font.caption.size, fontWeight: '700' },
+  itemBody: { flex: 1 },
+  itemLabel: { fontSize: tokens.font.body.size, color: tokens.color.text },
+  itemTime: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary, marginTop: tokens.space.xs },
+  listItem: {
+    paddingHorizontal: tokens.space.md,
+    marginBottom: tokens.space.sm,
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: tokens.color.primary,
+    color: '#ffffff',
+    textAlign: 'center',
+    fontSize: tokens.font.caption.size,
+    fontWeight: '600',
+  },
 });
