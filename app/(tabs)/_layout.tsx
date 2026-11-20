@@ -3,7 +3,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BottomNav } from '../../components/BottomNav';
 import { tokens } from '../../theme/tokens';
-import { useRouter } from 'expo-router';
+import { useRouter, usePathname } from 'expo-router';
 
 const TABS = [
   { name: 'Home', href: '/(tabs)/index' },
@@ -15,10 +15,12 @@ const TABS = [
 
 export default function TabsLayout() {
   const router = useRouter();
+  const pathname = usePathname();
+  const activeTab = TABS.find((t) => t.href === pathname)?.name || 'Home';
   return (
     <View style={styles.container}>
       <Slot />
-      <BottomNav activeTab="Home" onTabPress={(tab) => router.replace(TABS.find((t) => t.name === tab)?.href || '/(tabs)/index')} />
+      <BottomNav activeTab={activeTab} onTabPress={(tab) => router.replace(TABS.find((t) => t.name === tab)?.href || '/(tabs)/index')} />
     </View>
   );
 }

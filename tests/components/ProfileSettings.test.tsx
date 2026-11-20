@@ -35,10 +35,11 @@ const queryBuilder = (overrides: any = {}) => {
     single: jest.fn().mockResolvedValue({ data: null, error: null }),
     update: jest.fn(),
   };
-  base.select.mockReturnValue(base);
-  base.eq.mockReturnValue(base);
-  base.update.mockReturnValue(base);
-  return { ...base, ...overrides };
+  const mock = { ...base, ...overrides };
+  if (!overrides.select) mock.select.mockReturnValue(mock);
+  if (!overrides.eq) mock.eq.mockReturnValue(mock);
+  if (!overrides.update) mock.update.mockReturnValue(mock);
+  return mock;
 };
 
 const profileRow = () => ({
@@ -52,6 +53,26 @@ const profileRow = () => ({
 const loadProfileMock = (row: any) =>
   queryBuilder({ single: jest.fn().mockResolvedValue({ data: row, error: null }) });
 
+// Find a TouchableOpacity whose rendered tree contains "Save" text
+const findSaveButton = (touchables: any[]): any => {
+  const search = (node: any): boolean => {
+    if (!node) return false;
+    if (typeof node === 'string') return node.includes('Save');
+    if (node.props) {
+      const ch = node.props.children;
+      if (typeof ch === 'string' && ch.includes('Save')) return true;
+      if (ch) {
+        const arr = Array.isArray(ch) ? ch : [ch];
+        return arr.some(search);
+      }
+    }
+    return false;
+  };
+  // Prefer recursive search, fall back to index-based (TopAppBar action=0, Logout=1, Save=2, Delete=3)
+  const found = touchables.find((t: any) => search(t.props.children));
+  return found ?? touchables[2];
+};
+
 describe('T-S11 Profile/Settings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,52 +82,50 @@ describe('T-S11 Profile/Settings', () => {
     });
   });
 
-  it('T-S11-1: settings visible, inputs editable', async () => {
+  it('T-S11-1: email shown as read-only, budget input editable', async () => {
     (supabase.from as jest.Mock).mockReturnValue(loadProfileMock(profileRow()));
     const tree = mount(<ProfileSettings />);
     await flush();
+
     const inputs = findInputs(tree);
-    expect(inputs.length).toBe(3);
-    act(() => {
-      inputs[0].props.onChangeText('lerato@example.com');
-      inputs[1].props.onChangeText('lerato');
-      inputs[2].props.onChangeText('500');
-    });
-    expect(inputs[0].props.value).toBe('lerato@example.com');
-    expect(inputs[1].props.value).toBe('lerato');
-    expect(inputs[2].props.value).toBe('500');
+    expect(inputs.length).toBe(1);
+    expect(toJson(tree)).toContain('lerato@example.com');
+    expect(toJson(tree)).toContain(messages.profile.budgetLabel);
+    expect(toJson(tree)).toContain('Save');
   });
 
   it('T-S11-5: weekly transport budget input (ZAR)', async () => {
     (supabase.from as jest.Mock).mockReturnValue(loadProfileMock(profileRow()));
     const tree = mount(<ProfileSettings />);
     await flush();
+
     const inputs = findInputs(tree);
     act(() => {
-      inputs[2].props.onChangeText('500');
+      inputs[0].props.onChangeText('500');
     });
-    expect(inputs[2].props.value).toBe('500');
+    expect(inputs[0].props.value).toBe('500');
     expect(toJson(tree)).toContain(messages.profile.budgetLabel);
   });
 
-  it('T-S11-4: save success → Saved confirmation', async () => {
+  it('T-S11-4: save success → Saved confirmation toast', async () => {
     (supabase.from as jest.Mock)
       .mockReturnValueOnce(loadProfileMock(profileRow()))
       .mockReturnValue(queryBuilder({ update: jest.fn().mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: null }) }) }));
     const tree = mount(<ProfileSettings />);
     await flush();
+
     const inputs = findInputs(tree);
     act(() => {
-      inputs[2].props.onChangeText('500');
+      inputs[0].props.onChangeText('500');
     });
     const touchables = findTouchables(tree);
-    const saveButton = touchables[0];
+    const saveButton = findSaveButton(touchables);
     act(() => {
       saveButton.props.onPress();
     });
     await flush();
     await flush();
-    expect(toJson(tree)).toContain(messages.profile.saveSuccess);
+    expect(toJson(tree)).toContain('Saved.');
   });
 
   it('T-S11-2: error → Could not save + Retry', async () => {
@@ -115,12 +134,13 @@ describe('T-S11 Profile/Settings', () => {
       .mockReturnValue(queryBuilder({ update: jest.fn().mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: new Error('down') }) }) }));
     const tree = mount(<ProfileSettings />);
     await flush();
+
     const inputs = findInputs(tree);
     act(() => {
-      inputs[2].props.onChangeText('500');
+      inputs[0].props.onChangeText('500');
     });
     const touchables = findTouchables(tree);
-    const saveButton = touchables[0];
+    const saveButton = findSaveButton(touchables);
     act(() => {
       saveButton.props.onPress();
     });
@@ -136,5 +156,7 @@ describe('T-S11 Profile/Settings', () => {
     const tree = mount(<ProfileSettings />);
     await flush();
     expect(toJson(tree)).toContain(messages.profile.offline);
+    const inputs = findInputs(tree);
+    expect(inputs[0].props.editable).toBe(false);
   });
 });

@@ -1,0 +1,33 @@
+appId: "indlela-mvp"
+
+- launchApp:
+    clearState: true
+
+- assertVisible: '"Indlela"'
+- assertVisible: '"Sign up"'
+- assertVisible: '"Log in"'
+
+- tapOn: '"Sign up"'
+
+- tapOn: '"Email"'
+- inputText: 'e2e-test@example.com'
+- tapOn: '"Password"'
+- inputText: '${SEED_TEST_PASSWORD}'
+- tapOn: '"I am 18 or older"'
+- tapOn: '"I agree to the Privacy Policy"'
+- tapOn: '"Sign up"'
+
+- assertVisible: '"Log in"'
+- assertVisible: '"Forgot password?"'
+
+- tapOn: '"Email"'
+- inputText: 'e2e-test@example.com'
+- tapOn: '"Password"'
+- inputText: '${SEED_TEST_PASSWORD}'
+- tapOn: '"Log in"'
+
+- assertVisible: '"Set nearest rank"'
+- tapOn: '"Rustenburg Taxi Rank"'
+- tapOn: '"Confirm"'
+
+- assertVisible: '"Jobs I can afford this week"'

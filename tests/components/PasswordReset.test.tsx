@@ -1,6 +1,7 @@
 import renderer, { act } from 'react-test-renderer';
 import React from 'react';
 import { TextInput, TouchableOpacity } from '../../tests/mocks/react-native';
+import NetInfo from '@react-native-community/netinfo';
 
 jest.mock('../../lib/supabase', () => {
   const { SupabaseClient } = jest.requireMock('../../tests/mocks/supabase');
@@ -35,6 +36,7 @@ describe('T-S13 / T-US2-4 Password Reset', () => {
     jest.clearAllMocks();
     (supabase.auth.resetPasswordForEmail as jest.Mock).mockResolvedValue({ error: null });
     (supabase.auth.updateUser as jest.Mock).mockResolvedValue({ error: null });
+    (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: true });
   });
 
   it('T-S13-1: reset form visible, submit with empty email → error message', () => {
@@ -67,6 +69,17 @@ describe('T-S13 / T-US2-4 Password Reset', () => {
       touchables[0].props.onPress();
     });
     expect(nav.navigate).toHaveBeenCalledWith('(auth)/log-in');
+  });
+
+  it('T-S13-3: offline → No connection warning + disabled inputs', async () => {
+    (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: false });
+    const tree = mount(<PasswordReset navigation={nav as any} />);
+    await flush();
+    expect(toJson(tree)).toContain('No connection. Please check your internet.');
+    expect(toJson(tree)).toContain('"disabled":true');
+    const touchables = findTouchables(tree);
+    const sendButton = touchables.find((t: any) => t.props.disabled === true);
+    expect(sendButton).toBeTruthy();
   });
 
   it('T-US2-4: set new password from reset link: rules enforced, logged in after', async () => {

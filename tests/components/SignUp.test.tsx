@@ -64,7 +64,7 @@ describe('T-US2 Sign Up', () => {
       email: 'lerato@example.com',
       password: 'Password1',
     });
-    expect(nav.navigate).toHaveBeenCalledWith('(auth)/log-in');
+    expect(nav.navigate).toHaveBeenCalledWith('/verify-email');
   });
 
   it('T-US2-2: existing email → duplicate message with Log in link', async () => {
@@ -89,7 +89,7 @@ describe('T-US2 Sign Up', () => {
     await act(async () => {});
 
     expect(toJson(tree)).toContain(messages.auth.duplicateEmail);
-    expect(toJson(tree)).toContain('Log in');
+    expect(toJson(tree)).toContain('Log in instead?');
   });
 
   it('T-US2-3: invalid password → Sign up disabled; password error shown', async () => {

@@ -1,6 +1,7 @@
 import renderer, { act } from 'react-test-renderer';
 import React from 'react';
 import { TouchableOpacity } from '../../tests/mocks/react-native';
+import NetInfo from '@react-native-community/netinfo';
 
 jest.mock('../../lib/supabase', () => {
   const { SupabaseClient } = jest.requireMock('../../tests/mocks/supabase');
@@ -31,6 +32,7 @@ describe('T-M1 Delete Account', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     onDismiss.mockClear();
+    (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: true });
   });
 
   it('T-M1-1: confirmation dialog, spinner on delete, success → Account deleted.', async () => {
@@ -93,5 +95,15 @@ describe('T-M1 Delete Account', () => {
     });
     await flush();
     expect(supabase.functions.invoke).toHaveBeenCalledTimes(2);
+  });
+
+  it('T-M1-3: offline → No connection warning + disabled Delete button', async () => {
+    (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: false });
+    const tree = mount(<DeleteAccount onDismiss={onDismiss} />);
+    await flush();
+    expect(toJson(tree)).toContain('No connection. Try again when online.');
+    const touchables = findTouchables(tree);
+    const deleteButton = touchables.find((t: any) => t.props.disabled === true);
+    expect(deleteButton).toBeTruthy();
   });
 });

@@ -12,10 +12,11 @@ type CardProps = {
   netGain?: number | null;
   route?: string;
   amount?: number;
+  perSeat?: boolean;
   staleness?: string;
 };
 
-export const Card = ({ type = 'job', title, company, wage, transportCost, netGain, route, amount, staleness }: CardProps) => {
+export const Card = ({ type = 'job', title, company, wage, transportCost, netGain, route, amount, perSeat, staleness }: CardProps) => {
   if (type === 'job') {
     return (
       <View style={styles.card}>
@@ -33,8 +34,13 @@ export const Card = ({ type = 'job', title, company, wage, transportCost, netGai
   }
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{route}</Text>
-      <Text style={styles.wage}>R{amount}</Text>
+      <View style={styles.fareHeader}>
+        <Text style={styles.fareRoute}>{route}</Text>
+        <View style={styles.fareAmountWrap}>
+          <Text style={styles.fareAmount}>R{amount}</Text>
+          {perSeat && <Text style={styles.farePerSeat}>per seat</Text>}
+        </View>
+      </View>
       {staleness && <Text style={styles.staleness}>{staleness}</Text>}
     </View>
   );
@@ -48,4 +54,9 @@ const styles = StyleSheet.create({
   transport: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary },
   netGain: { fontSize: tokens.font.body.size, fontWeight: '600' },
   staleness: { fontSize: tokens.font.caption.size, color: tokens.color.warning },
+  fareHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  fareRoute: { fontSize: tokens.font.body.size, fontWeight: '600' },
+  fareAmountWrap: { alignItems: 'flex-end' },
+  fareAmount: { fontSize: tokens.font.body.size, fontWeight: '700' },
+  farePerSeat: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary, marginTop: 2 },
 });

@@ -1,0 +1,29 @@
+appId: "indlela-mvp"
+
+- launchApp:
+    clearState: true
+
+- tapOn: '"Log in"'
+- tapOn: '"Email"'
+- inputText: 'e2e-test@example.com'
+- tapOn: '"Password"'
+- inputText: '${SEED_TEST_PASSWORD}'
+- tapOn: '"Log in"'
+
+- assertVisible: '"Set nearest rank"'
+- tapOn: '"Rustenburg Taxi Rank"'
+- tapOn: '"Confirm"'
+
+- tapOn: '"Fares"'
+
+- assertVisible: '"Report fare"'
+- tapOn: '"Report fare"'
+
+- tapOn: '"Rustenburg Taxi Rank"'
+- tapOn: '"Johannesburg Park Station"'
+- tapOn: '"e.g. 180"'
+- inputText: '180'
+- tapOn: '"Submit"'
+
+- assertVisible: '"Thanks! Fare reported for"'
+- tapOn: '"OK"'

@@ -1,13 +1,15 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../../lib/supabase';
-import { viewJobFeed, type JobFeedItem } from '../../lib/api/jobs';
+import { viewJobFeed, cacheJobs, getCachedJobs, type JobFeedItem } from '../../lib/api/jobs';
 import { messages } from '../../lib/messages';
 import { tokens } from '../../theme/tokens';
 import { Card } from '../../components/Card';
 import { EmptyState } from '../../components/EmptyState';
 import { TopAppBar } from '../../components/TopAppBar';
 import { Spinner } from '../../components/Spinner';
+import { Banner } from '../../components/Banner';
 
 export default function HomeFeed() {
   const [jobs, setJobs] = useState<JobFeedItem[]>([]);
@@ -15,6 +17,7 @@ export default function HomeFeed() {
   const [error, setError] = useState<string | null>(null);
   const [affordableOnly, setAffordableOnly] = useState(false);
   const [budget, setBudget] = useState<number | null>(null);
+  const [offline, setOffline] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -30,6 +33,16 @@ export default function HomeFeed() {
         .single();
       setBudget(profile?.weekly_transport_budget ?? null);
 
+      const connected = await NetInfo.fetch();
+      if (!connected.isConnected) {
+        const cached = await getCachedJobs();
+        setJobs(cached || []);
+        setOffline(!!cached);
+        setLoading(false);
+        return;
+      }
+
+      setOffline(false);
       const { data, error: jobsError } = await viewJobFeed();
       if (jobsError) {
         setError(jobsError);
@@ -43,6 +56,11 @@ export default function HomeFeed() {
         return b.netGain - a.netGain;
       });
       setJobs(sorted);
+      try {
+        await cacheJobs(sorted);
+      } catch {
+        // cache write failure is non-fatal
+      }
       setLoading(false);
     } catch {
       setError(messages.jobs.loadError);
@@ -54,10 +72,6 @@ export default function HomeFeed() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, [load]);
-
-  const displayJobs = affordableOnly
-    ? jobs.filter((j) => j.netGain != null && j.netGain >= 0 && (budget == null || (j.transportCost ?? 0) <= budget))
-    : jobs;
 
   if (loading) {
     return (
@@ -75,6 +89,44 @@ export default function HomeFeed() {
       </View>
     );
   }
+
+  if (offline) {
+    const displayJobs = affordableOnly
+      ? jobs.filter((j) => j.netGain != null && j.netGain >= 0 && (budget == null || (j.transportCost ?? 0) <= budget))
+      : jobs;
+    if (displayJobs.length === 0) {
+      return (
+        <View style={styles.container}>
+          <TopAppBar title="Home Feed" />
+          <EmptyState text={messages.jobs.empty} />
+        </View>
+      );
+    }
+    return (
+      <View style={styles.container}>
+        <TopAppBar title="Home Feed" />
+        <Banner variant="info">{messages.jobs.offlineCached}</Banner>
+        <FlatList
+          data={displayJobs}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <Card
+              type="job"
+              title={item.title}
+              company={item.company || ''}
+              wage={item.wage_zar ?? undefined}
+              transportCost={item.transportCost ?? undefined}
+              netGain={item.netGain ?? undefined}
+            />
+          )}
+        />
+      </View>
+    );
+  }
+
+  const displayJobs = affordableOnly
+    ? jobs.filter((j) => j.netGain != null && j.netGain >= 0 && (budget == null || (j.transportCost ?? 0) <= budget))
+    : jobs;
 
   const hasJobs = displayJobs.length > 0;
   const emptyMessage = affordableOnly && jobs.length > 0
