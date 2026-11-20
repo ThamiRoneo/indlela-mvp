@@ -2,17 +2,26 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { tokens } from '../../theme/tokens';
 
+function LogoMark() {
+  return (
+    <View style={styles.logoMark}>
+      <View style={styles.logoDot} />
+      <View style={styles.logoStem} />
+    </View>
+  );
+}
+
 export default function Welcome() {
   return (
     <View style={styles.container}>
       <View style={styles.topLogoContainer}>
-        <View style={styles.blueDot} />
+        <LogoMark />
         <Text style={styles.topLogoText}>indlela</Text>
       </View>
 
       <View style={styles.centerContent}>
         <View style={styles.middleLogoContainer}>
-          <View style={styles.blueDot} />
+          <LogoMark />
           <Text style={styles.middleLogoText}>indlela</Text>
         </View>
         <Text style={styles.pitch}>
@@ -46,12 +55,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: tokens.space.lg,
   },
-  blueDot: {
-    width: 8,
-    height: 8,
-    backgroundColor: tokens.color.primary,
-    borderRadius: 4,
+  logoMark: {
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: tokens.space.xs,
+  },
+  logoDot: {
+    width: 6,
+    height: 6,
+    backgroundColor: tokens.color.primary,
+    borderRadius: 3,
+  },
+  logoStem: {
+    width: 2,
+    height: 14,
+    backgroundColor: tokens.color.primary,
+    borderRadius: 1,
+    marginTop: 2,
   },
   topLogoText: {
     fontSize: tokens.font.h2.size,

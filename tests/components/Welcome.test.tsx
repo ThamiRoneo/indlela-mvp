@@ -18,7 +18,7 @@ describe('T-S1-1 Welcome', () => {
     expect(() => mount(<Welcome />)).not.toThrow();
   });
 
-  it('T-S1-2: shows lowercase "indlela" logo with blue dot at top and middle', () => {
+  it('T-S1-2: shows lowercase "indlela" logos with blue dot-and-stem marks at top and middle', () => {
     const tree = mount(<Welcome />);
     const json = toJson(tree);
 
