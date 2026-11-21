@@ -1,20 +1,13 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'test-service-role-key';
-
-let supabase: SupabaseClient;
-
-beforeAll(async () => {
-  supabase = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-});
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 describe('T-INT-5 View privacy policy', () => {
   it('returns static privacy policy content', async () => {
-    const { data, error } = await supabase.from('profiles').select('*').limit(1);
-    expect(error).toBeNull();
-    expect(data).toBeDefined();
+    const content = readFileSync(join(process.cwd(), 'app/privacy-policy.tsx'), 'utf8');
+
+    expect(content).toContain('Privacy Policy');
+    expect(content).toContain('Data we collect');
+    expect(content).toContain('never shared');
+    expect(content).toContain('18');
   });
 });

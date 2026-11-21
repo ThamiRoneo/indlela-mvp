@@ -50,8 +50,9 @@ describe('T-SEC-9 job_listings read', () => {
     const client = createClient(supabaseUrl, supabaseAnonKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
-    const { error } = await client.from('job_listings').select('id');
-    expect(error).not.toBeNull();
+    const { data, error } = await client.from('job_listings').select('id');
+    expect(error).toBeNull();
+    expect(data).toEqual([]);
   });
 });
 
@@ -60,16 +61,42 @@ describe('T-SEC-10 job_listings write denied', () => {
     const { userClient } = await signUpAndSignIn(`sec10-${Date.now()}@example.com`);
     const jobId = await seedJob();
 
+    const { data: seededJob } = await serviceSupabase
+      .from('job_listings')
+      .select('id, wage_zar')
+      .eq('id', jobId)
+      .single();
+    const originalWage = seededJob!.wage_zar;
+
     const { error: insErr } = await userClient.from('job_listings').insert({
       title: 'Test Job', company: 'Test Co', wage_zar: 100,
     });
-    expect(insErr).not.toBeNull();
+    // INSERT is blocked by the WITH CHECK policy (42501); UPDATE/DELETE are silent RLS no-ops.
+    if (insErr) {
+      expect(insErr.code).toBe('42501');
+    }
 
     const { error: updErr } = await userClient.from('job_listings').update({ wage_zar: 200 }).eq('id', jobId);
-    expect(updErr).not.toBeNull();
+    expect(updErr).toBeNull();
 
     const { error: delErr } = await userClient.from('job_listings').delete().eq('id', jobId);
-    expect(delErr).not.toBeNull();
+    expect(delErr).toBeNull();
+
+    const { data: after, error: selectErr } = await serviceSupabase
+      .from('job_listings')
+      .select('id, wage_zar')
+      .eq('id', jobId)
+      .single();
+    expect(selectErr).toBeNull();
+    expect(after!.id).toBe(jobId);
+    expect(after!.wage_zar).toBe(originalWage);
+
+    const { data: newJobs, error: newJobsErr } = await serviceSupabase
+      .from('job_listings')
+      .select('id')
+      .eq('title', 'Test Job');
+    expect(newJobsErr).toBeNull();
+    expect(newJobs).toEqual([]);
   });
 });
 
@@ -87,7 +114,13 @@ describe('T-INT-4 Submit application', () => {
     });
     expect(error).toBeNull();
 
-    const { data } = await userClient.from('applications').select('*').eq('job_listing_id', jobId).single();
+    // applications has an INSERT policy but no SELECT policy, so read back as admin.
+    const { data } = await serviceSupabase
+      .from('applications')
+      .select('name, email')
+      .eq('job_listing_id', jobId)
+      .eq('user_id', userId)
+      .single();
     expect(data!.name).toBe('Lerato Mokoena');
     expect(data!.email).toBe('lerato@example.com');
   });

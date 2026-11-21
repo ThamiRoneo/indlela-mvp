@@ -151,7 +151,11 @@ describe('T-EDGE-5 Fuel price data unavailable', () => {
   it('shows no fuel-aware banner and fails silently when no fuel price snapshots exist', async () => {
     const { userClient } = await signUpAndSignIn(`edge5-${Date.now()}@example.com`);
 
-    await serviceSupabase.from('fuel_price_snapshots').delete();
+    const { error: deleteError } = await serviceSupabase
+      .from('fuel_price_snapshots')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    expect(deleteError).toBeNull();
 
     const { data: snapshots, error } = await userClient
       .from('fuel_price_snapshots')

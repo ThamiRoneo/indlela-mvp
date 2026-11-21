@@ -1,5 +1,5 @@
 module.exports = {
-  roots: ['<rootDir>/tests'],
+  roots: ['<rootDir>/tests/unit', '<rootDir>/tests/components'],
   testMatch: ['**/*.test.(ts|tsx|js|jsx)'],
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {

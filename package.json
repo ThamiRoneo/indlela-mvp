@@ -57,10 +57,10 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest",
-    "test:integration": "jest tests/integration",
+    "test": "jest --config jest.config.js",
+    "test:integration": "jest --config jest.integration.config.js",
     "typecheck": "tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm test"
+    "check": "npm run lint && npm run typecheck && npm test && npx supabase test db && npm run test:integration"
   },
   "private": true
 }
