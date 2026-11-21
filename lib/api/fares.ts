@@ -25,15 +25,23 @@ export async function viewFares(rankId: string): Promise<{ data: FareReport[] | 
 
   if (error) return { data: null, error: messages.fares.loadError };
 
-  const reports: FareReport[] = (data || []).map((r: any) => ({
-    id: r.id,
-    route_id: r.route_id,
-    destination: r.routes?.destination || 'Unknown route',
-    amount_zar: r.amount_zar,
-    created_at: r.created_at,
-    stale: isStale(r.created_at),
-    days_ago: daysAgo(r.created_at),
-  }));
+  // The query orders by created_at desc, so the first row per route is the latest fare.
+  const seenRoutes = new Set<string>();
+  const reports: FareReport[] = (data || [])
+    .filter((r: any) => {
+      if (seenRoutes.has(r.route_id)) return false;
+      seenRoutes.add(r.route_id);
+      return true;
+    })
+    .map((r: any) => ({
+      id: r.id,
+      route_id: r.route_id,
+      destination: r.routes?.destination || 'Unknown route',
+      amount_zar: r.amount_zar,
+      created_at: r.created_at,
+      stale: isStale(r.created_at),
+      days_ago: daysAgo(r.created_at),
+    }));
 
   try {
     await AsyncStorage.setItem(`${CACHE_PREFIX}${rankId}`, JSON.stringify({ reports, cachedAt: Date.now() }));
