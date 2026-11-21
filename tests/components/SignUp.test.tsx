@@ -19,8 +19,8 @@ const mount = (element: React.ReactElement) => {
   return tree;
 };
 
-const findInput = (tree: any, placeholder: string) =>
-  tree.root.findAllByType(TextInput).find((n: any) => n.props.placeholder === placeholder);
+const findInput = (tree: any, label: string) =>
+  tree.root.findAllByType(TextInput).find((n: any) => n.props.accessibilityLabel === label);
 
 const findTouchables = (tree: any) => tree.root.findAllByType(TouchableOpacity);
 
@@ -40,7 +40,7 @@ describe('T-US2 Sign Up', () => {
   it('T-US2-1: valid form + both boxes ticked → account created → navigate to log-in', async () => {
     const tree = mount(<SignUp navigation={nav as any} />);
 
-    const button = findTouchables(tree)[2];
+    const button = findTouchables(tree)[4];
     expect(button.props.disabled).toBe(true);
 
     act(() => {
@@ -48,14 +48,14 @@ describe('T-US2 Sign Up', () => {
       findInput(tree, 'Password').props.onChangeText('Password1');
     });
     act(() => {
-      findTouchables(tree)[0].props.onPress();
-      findTouchables(tree)[1].props.onPress();
+      findTouchables(tree)[2].props.onPress();
+      findTouchables(tree)[3].props.onPress();
     });
 
-    expect(findTouchables(tree)[2].props.disabled).toBe(false);
+    expect(findTouchables(tree)[4].props.disabled).toBe(false);
 
     await act(async () => {
-      findTouchables(tree)[2].props.onPress();
+      findTouchables(tree)[4].props.onPress();
     });
     await act(async () => {});
     await act(async () => {});
@@ -78,12 +78,12 @@ describe('T-US2 Sign Up', () => {
     act(() => {
       findInput(tree, 'Email').props.onChangeText('lerato@example.com');
       findInput(tree, 'Password').props.onChangeText('Password1');
-      findTouchables(tree)[0].props.onPress();
-      findTouchables(tree)[1].props.onPress();
+      findTouchables(tree)[2].props.onPress();
+      findTouchables(tree)[3].props.onPress();
     });
 
     await act(async () => {
-      findTouchables(tree)[2].props.onPress();
+      findTouchables(tree)[4].props.onPress();
     });
     await act(async () => {});
     await act(async () => {});
@@ -98,11 +98,11 @@ describe('T-US2 Sign Up', () => {
     act(() => {
       findInput(tree, 'Email').props.onChangeText('lerato@example.com');
       findInput(tree, 'Password').props.onChangeText('abcdefgh');
-      findTouchables(tree)[0].props.onPress();
-      findTouchables(tree)[1].props.onPress();
+      findTouchables(tree)[2].props.onPress();
+      findTouchables(tree)[3].props.onPress();
     });
 
-    expect(findTouchables(tree)[2].props.disabled).toBe(true);
+    expect(findTouchables(tree)[4].props.disabled).toBe(true);
     expect(toJson(tree)).toContain(messages.auth.passwordTooShort);
   });
 });

@@ -1,11 +1,11 @@
-import { Slot, useRouter, usePathname } from 'expo-router';
+import { Slot, useRouter, usePathname, type Href } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Spinner } from '../components/Spinner';
 import { tokens } from '../theme/tokens';
 import { StyleSheet, View } from 'react-native';
 
-function Redirect({ to }: { to: string }) {
+function Redirect({ to }: { to: Href }) {
   const router = useRouter();
   useEffect(() => {
     router.replace(to);
@@ -81,7 +81,7 @@ export default function RootLayout() {
     return <Redirect to="/set-nearest-rank" />;
   }
 
-  if (isAuthRoute) return <Redirect to="/(tabs)/index" />;
+  if (isAuthRoute) return <Redirect to="/" />;
   return <Slot />;
 }
 

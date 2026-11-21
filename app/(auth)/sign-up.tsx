@@ -6,7 +6,6 @@ import { isValidPassword } from '../../lib/rules/password';
 import { tokens } from '../../theme/tokens';
 import { Button } from '../../components/Button';
 import { TextInput } from '../../components/TextInput';
-import { TopAppBar } from '../../components/TopAppBar';
 
 type SignUpProps = {
   navigation?: { navigate: (screen: string) => void };
@@ -52,34 +51,41 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <TopAppBar title="Sign up" />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation?.navigate('(auth)/welcome')} style={styles.backButton}>
+            <Text style={styles.backArrow}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Signup</Text>
+        </View>
         <View style={styles.form}>
           <TextInput
-            placeholder="Email"
+            label="Email"
             value={email}
             onChangeText={setEmail}
             error={emailInvalid || isDuplicateEmail ? messages.auth.passwordTooShort : undefined}
           />
           {emailInvalid && <Text style={styles.fieldError}>{messages.auth.passwordTooShort}</Text>}
           <TextInput
-            placeholder="Password"
+            label="Password"
             secureTextEntry
             value={password}
             onChangeText={setPassword}
             error={passwordInvalid ? messages.auth.passwordTooShort : undefined}
+            onTogglePassword={() => {}}
           />
+          <Text style={styles.passwordHelper}>{messages.auth.passwordTooShort}</Text>
           {passwordInvalid && <Text style={styles.fieldError}>{messages.auth.passwordTooShort}</Text>}
           <View style={styles.checkboxRow}>
             <TouchableOpacity onPress={() => setIs18(!is18)} style={[styles.checkbox, is18 && styles.checkboxChecked]}>
               {is18 && <Text style={styles.checkboxCheck}>✓</Text>}
             </TouchableOpacity>
-            <Text style={styles.checkboxLabel}>I confirm I am 18 years or older</Text>
+            <Text style={styles.checkboxLabel}>I am 18 years or older</Text>
           </View>
           <View style={styles.checkboxRow}>
             <TouchableOpacity onPress={() => setAgreedPrivacy(!agreedPrivacy)} style={[styles.checkbox, agreedPrivacy && styles.checkboxChecked]}>
               {agreedPrivacy && <Text style={styles.checkboxCheck}>✓</Text>}
             </TouchableOpacity>
-            <Text style={styles.checkboxLabel}>I agree to the Privacy Policy</Text>
+            <Text style={styles.checkboxLabel}>I agree to the privacy policy</Text>
           </View>
           {isDuplicateEmail && (
             <View style={styles.errorBanner}>
@@ -94,14 +100,16 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
-          <Button
-            variant="primary"
-            disabled={!isFormValid() || loading}
-            loading={loading}
-            onPress={handleSignUp}
-          >
-            Sign up
-          </Button>
+          <View style={styles.buttonWrapper}>
+            <Button
+              variant="primary"
+              disabled={!isFormValid() || loading}
+              loading={loading}
+              onPress={handleSignUp}
+            >
+              Sign up
+            </Button>
+          </View>
           <TouchableOpacity onPress={() => navigation?.navigate('(auth)/log-in')} style={styles.loginLink}>
             <Text style={styles.loginLinkText}>Already have an account? Log in</Text>
           </TouchableOpacity>
@@ -114,16 +122,22 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: tokens.color.background },
   scrollContent: { padding: tokens.space.xl },
-  form: { gap: tokens.space.md },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: tokens.space.lg },
+  backButton: { marginRight: tokens.space.sm },
+  backArrow: { fontSize: 28, fontWeight: '300', color: tokens.color.text, lineHeight: 28 },
+  headerTitle: { fontSize: tokens.font.h3.size, fontWeight: '600', color: tokens.color.text },
+  form: { gap: tokens.space.md, marginTop: tokens.space.lg },
   fieldError: { fontSize: tokens.font.caption.size, color: tokens.color.error, marginBottom: tokens.space.sm },
+  passwordHelper: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary, marginBottom: 2 },
+  buttonWrapper: { marginTop: tokens.space.sm },
   checkboxRow: { flexDirection: 'row', alignItems: 'center', gap: tokens.space.sm },
-  checkbox: { width: tokens.size.touchMin, height: tokens.size.touchMin, borderWidth: 1, borderColor: tokens.color.border, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
+  checkbox: { width: 18, height: 18, borderWidth: 1, borderColor: tokens.color.border, borderRadius: 4, alignItems: 'center', justifyContent: 'center' },
   checkboxChecked: { backgroundColor: tokens.color.primary, borderColor: tokens.color.primary },
-  checkboxCheck: { color: '#ffffff', fontSize: 16 },
+  checkboxCheck: { color: '#ffffff', fontSize: 12 },
   checkboxLabel: { fontSize: tokens.font.body.size, color: tokens.color.text },
   errorBanner: { marginTop: tokens.space.sm, padding: tokens.space.md, backgroundColor: '#fdecea', borderRadius: 8 },
   errorText: { fontSize: tokens.font.body.size, color: tokens.color.error },
   loginLinkInline: { marginLeft: tokens.space.sm },
   loginLinkText: { fontSize: tokens.font.body.size, color: tokens.color.primary },
-  loginLink: { marginTop: tokens.space.lg, alignItems: 'center' },
+  loginLink: { marginTop: 22, alignItems: 'center' },
 });

@@ -2,11 +2,11 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { tokens } from '../../theme/tokens';
 
-function LogoMark() {
+function LogoMark({ large = false }: { large?: boolean }) {
   return (
-    <View style={styles.logoMark}>
-      <View style={styles.logoDot} />
-      <View style={styles.logoStem} />
+    <View style={[styles.logoMark, large ? styles.logoMarkLarge : styles.logoMarkSmall]}>
+      <View style={[styles.logoDot, large ? styles.logoDotLarge : styles.logoDotSmall]} />
+      <View style={[styles.logoStem, large ? styles.logoStemLarge : styles.logoStemSmall]} />
     </View>
   );
 }
@@ -16,13 +16,14 @@ export default function Welcome() {
     <View style={styles.container}>
       <View style={styles.topLogoContainer}>
         <LogoMark />
-        <Text style={styles.topLogoText}>indlela</Text>
+        {/* The blue dot-and-stem mark is the "i": the design word is "ndlela". */}
+        <Text style={styles.topLogoText}>ndlela</Text>
       </View>
 
       <View style={styles.centerContent}>
         <View style={styles.middleLogoContainer}>
-          <LogoMark />
-          <Text style={styles.middleLogoText}>indlela</Text>
+          <LogoMark large />
+          <Text style={styles.middleLogoText}>ndlela</Text>
         </View>
         <Text style={styles.pitch}>
           Find jobs you can afford to reach. Track{'\n'}minibus taxi fares from your rank.
@@ -58,21 +59,23 @@ const styles = StyleSheet.create({
   logoMark: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: tokens.space.xs,
   },
+  // Mark geometry follows Stitch S1. No right margin: the dot-and-stem mark is
+  // the "i", so it sits flush against "ndlela" to read as one word.
+  logoMarkSmall: { marginRight: 0 },
+  logoMarkLarge: { marginRight: 0 },
   logoDot: {
-    width: 6,
-    height: 6,
     backgroundColor: tokens.color.primary,
-    borderRadius: 3,
   },
+  logoDotSmall: { width: 5, height: 5, borderRadius: 2.5 },
+  logoDotLarge: { width: 6, height: 6, borderRadius: 3 },
   logoStem: {
     width: 2,
-    height: 14,
     backgroundColor: tokens.color.primary,
     borderRadius: 1,
-    marginTop: 2,
   },
+  logoStemSmall: { height: 20, marginTop: 2 },
+  logoStemLarge: { height: 35, marginTop: 1 },
   topLogoText: {
     fontSize: tokens.font.h2.size,
     lineHeight: tokens.font.h2.lineHeight,
