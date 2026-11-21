@@ -2,6 +2,10 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { tokens } from '../../theme/tokens';
 
+type WelcomeProps = {
+  navigation?: { navigate: (screen: string) => void };
+};
+
 function LogoMark({ large = false }: { large?: boolean }) {
   return (
     <View style={[styles.logoMark, large ? styles.logoMarkLarge : styles.logoMarkSmall]}>
@@ -11,7 +15,31 @@ function LogoMark({ large = false }: { large?: boolean }) {
   );
 }
 
-export default function Welcome() {
+export default function Welcome({ navigation }: WelcomeProps = {}) {
+  const handleSignUp = () => {
+    if (navigation?.navigate) {
+      navigation.navigate('(auth)/sign-up');
+    } else {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { router } = require('expo-router');
+        router?.push?.('/(auth)/sign-up');
+      } catch {}
+    }
+  };
+
+  const handleLogIn = () => {
+    if (navigation?.navigate) {
+      navigation.navigate('(auth)/log-in');
+    } else {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { router } = require('expo-router');
+        router?.push?.('/(auth)/log-in');
+      } catch {}
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.topLogoContainer}>
@@ -31,10 +59,20 @@ export default function Welcome() {
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.button} accessibilityRole="button">
+        <TouchableOpacity
+          style={styles.button}
+          accessibilityRole="button"
+          accessibilityLabel="Sign up"
+          onPress={handleSignUp}
+        >
           <Text style={styles.buttonText}>Sign up</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.outlineButton} accessibilityRole="button">
+        <TouchableOpacity
+          style={styles.outlineButton}
+          accessibilityRole="button"
+          accessibilityLabel="Log in"
+          onPress={handleLogIn}
+        >
           <Text style={styles.outlineButtonText}>Log in</Text>
         </TouchableOpacity>
       </View>
@@ -46,7 +84,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: tokens.color.background,
-    paddingHorizontal: tokens.space.xl,
+    paddingHorizontal: tokens.space.md,
     paddingTop: tokens.space.xl,
     paddingBottom: tokens.space.xl,
   },
@@ -60,22 +98,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // Mark geometry follows Stitch S1. No right margin: the dot-and-stem mark is
-  // the "i", so it sits flush against "ndlela" to read as one word.
-  logoMarkSmall: { marginRight: 0 },
-  logoMarkLarge: { marginRight: 0 },
+  logoMarkSmall: {
+    marginRight: 6,
+  },
+  logoMarkLarge: {
+    marginRight: 9,
+  },
   logoDot: {
     backgroundColor: tokens.color.primary,
   },
-  logoDotSmall: { width: 5, height: 5, borderRadius: 2.5 },
-  logoDotLarge: { width: 6, height: 6, borderRadius: 3 },
-  logoStem: {
-    width: 2,
-    backgroundColor: tokens.color.primary,
-    borderRadius: 1,
+  logoDotSmall: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
   },
-  logoStemSmall: { height: 20, marginTop: 2 },
-  logoStemLarge: { height: 35, marginTop: 1 },
+  logoDotLarge: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
+  logoStem: {
+    width: 3.5,
+    backgroundColor: tokens.color.primary,
+    borderRadius: 1.75,
+  },
+  logoStemSmall: {
+    height: 21,
+    marginTop: 0,
+  },
+  logoStemLarge: {
+    height: 36,
+    marginTop: 0,
+  },
   topLogoText: {
     fontSize: tokens.font.h2.size,
     lineHeight: tokens.font.h2.lineHeight,
@@ -92,11 +146,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: tokens.space.md,
+    marginBottom: 40,
   },
   middleLogoText: {
-    fontSize: tokens.font.h1.size,
-    lineHeight: tokens.font.h1.lineHeight,
+    fontSize: 22,
+    lineHeight: 30,
     fontWeight: '700',
     color: tokens.color.text,
   },
@@ -108,17 +162,16 @@ const styles = StyleSheet.create({
   },
   actions: {
     width: '100%',
-    paddingBottom: tokens.space.lg,
   },
   button: {
     backgroundColor: tokens.color.primary,
     minHeight: tokens.size.touchMin,
     paddingVertical: tokens.space.md,
     paddingHorizontal: tokens.space.lg,
-    borderRadius: 24,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: tokens.space.sm,
+    marginBottom: 12,
   },
   buttonText: {
     color: tokens.color.background,
@@ -130,7 +183,7 @@ const styles = StyleSheet.create({
     minHeight: tokens.size.touchMin,
     paddingVertical: tokens.space.md,
     paddingHorizontal: tokens.space.lg,
-    borderRadius: 24,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: tokens.color.border,
     alignItems: 'center',

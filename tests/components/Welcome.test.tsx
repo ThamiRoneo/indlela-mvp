@@ -1,5 +1,6 @@
 import renderer, { act } from 'react-test-renderer';
 import React from 'react';
+import { TouchableOpacity } from '../../tests/mocks/react-native';
 import Welcome from '../../app/(auth)/welcome';
 import { tokens } from '../../theme/tokens';
 
@@ -42,5 +43,29 @@ describe('T-S1-1 Welcome', () => {
     expect(json).toContain('minibus taxi fares from your rank.');
     expect(json).toContain('Sign up');
     expect(json).toContain('Log in');
+  });
+
+  it('T-S1-4: tapping Sign up navigates to S2 (sign-up)', () => {
+    const nav = { navigate: jest.fn() };
+    const tree = mount(<Welcome navigation={nav as any} />);
+    const buttons = tree.root.findAllByType(TouchableOpacity);
+    const signUpBtn = buttons.find((b: any) => b.props.accessibilityLabel === 'Sign up');
+    expect(signUpBtn).toBeDefined();
+    act(() => {
+      signUpBtn.props.onPress();
+    });
+    expect(nav.navigate).toHaveBeenCalledWith('(auth)/sign-up');
+  });
+
+  it('T-S1-5: tapping Log in navigates to S3 (log-in)', () => {
+    const nav = { navigate: jest.fn() };
+    const tree = mount(<Welcome navigation={nav as any} />);
+    const buttons = tree.root.findAllByType(TouchableOpacity);
+    const logInBtn = buttons.find((b: any) => b.props.accessibilityLabel === 'Log in');
+    expect(logInBtn).toBeDefined();
+    act(() => {
+      logInBtn.props.onPress();
+    });
+    expect(nav.navigate).toHaveBeenCalledWith('(auth)/log-in');
   });
 });
