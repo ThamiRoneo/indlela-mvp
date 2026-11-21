@@ -228,8 +228,10 @@ indlela-mvp/
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Public (anon / publishable) key | Same | Public. Safe only because every table and bucket has RLS. | App |
 | `SUPABASE_SERVICE_ROLE_KEY` | Admin (service role / secret) key | Same | **Secret** | `scripts/seed-storage.ts` and integration tests only. The Edge Function gets it automatically from Supabase. |
 | `SEED_TEST_PASSWORD` | Password for all seed test accounts | You choose it | **Secret** | `scripts/seed-storage.ts`, integration tests, Maestro |
-| Storage bucket `avatars` | User avatar images | Supabase Storage | Public (signed URLs) | App (read), scripts (write) |
-| Storage bucket `posts` | Job listing images (if any) | Supabase Storage | Public (signed URLs) | App (read), scripts (write) |
+| Storage bucket `avatars` | User avatar images | Supabase Storage | Private (`public = false`); app reads via signed URLs | App (read via signed URLs), scripts (service role, write only) |
+| Storage bucket `posts` | Job listing images (if any) | Supabase Storage | Private (`public = false`); app reads via signed URLs | App (read via signed URLs), scripts (service role, write only) |
+
+Both buckets are private because signed URLs are only meaningful for private buckets; this satisfies PRD §11 "Keys + RLS". The app reads objects through signed URLs (SEC16), all writes are service-role/script-only (SEC17), and the delete-account Edge Function removes the caller's avatar objects with the service role (SEC18).
 
 `.env.example`:
 
@@ -482,6 +484,8 @@ No status columns in v1. Fare staleness is computed from `created_at` (BR2: vali
 4. `0004_seed.sql`: seed data (ranks, routes, sample job listings)
 5. `0005_storage.sql`: storage buckets `avatars` (max 200KB, JPEG) and `posts` (max 1MB, JPEG) with policies SEC16-SEC18
 
+SEC16–SEC18 were referenced here but previously undefined in Section 9; they are now defined there and implemented in `0005_storage.sql`. Both buckets are private (`public = false`), with limits of 204800 bytes + `image/jpeg` for `avatars` and 1048576 bytes + `image/jpeg` for `posts`.
+
 ### 8.7 Seed data and test accounts
 
 - **Seed ranks:** "Rustenburg Taxi Rank", "Boitekong Taxi Rank", "Tlhabane Taxi Rank", "Phokeng Taxi Rank", "Geelhout Park Rank"
@@ -511,6 +515,9 @@ No status columns in v1. Fare staleness is computed from `created_at` (BR2: vali
 | SEC13 | fuel_price_snapshots | read | Any logged-in user | All snapshots readable | RLS select policy | T-SEC-13a / 13b |
 | SEC14 | fuel_price_snapshots | create / update / delete | Nobody (admin via dashboard) | No app-level write | No write policy for authenticated | T-SEC-14b (deny only) |
 | SEC15 | Edge Function `delete-account` | call | Logged-in user, for own account only | Uses caller's token; ignores any user id in request | Function code | T-SEC-15a / 15b |
+| SEC16 | Storage buckets `avatars` / `posts` | read objects | Any logged-in user | App reads objects via signed URLs; buckets are private (`public = false`) | RLS select policies on `storage.objects` (`SEC16 avatars read`, `SEC16 posts read`) | T-SEC-16a / 16b / 16c / 16d (`050_storage.test.sql`) |
+| SEC17 | Storage buckets `avatars` / `posts` | create / update / delete objects | Nobody in the app (service-role scripts only) | No INSERT/UPDATE/DELETE policies for anon or authenticated | No write policies; service role bypasses RLS | T-SEC-17a / 17b (`050_storage.test.sql`) |
+| SEC18 | Storage objects under `{user_id}/` in `avatars` | delete | Delete-account Edge Function only | Uses service role to delete the caller's own avatar objects | Function code (service role) | T-SEC-18 (`050_storage.test.sql`) |
 
 **Always-on security checks** (tested in the hardening phase):
 
@@ -1422,7 +1429,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | 5 | Exact Rustenburg rank names beyond those listed? | 8.7 Seed data | 5 ranks: Rustenburg Taxi Rank, Boitekong Taxi Rank, Tlhabane Taxi Rank, Phokeng Taxi Rank, Geelhout Park Rank | Answered |
 | 6 | Privacy Policy content? | S12, OP16 | Must be written before Phase 3. Content: data collected, storage, deletion rights, age gate. | Answered |
 | 7 | Application submission: in-app form or external link? | S14, OP15 | Both: in-app form (name, phone, email) with option to open employer's external URL | Answered |
-| 8 | Storage bucket for avatars/photos? | 6, 8.1, OP6 | Add storage bucket `avatars` (max 200KB, JPEG) and `posts` (max 1MB, JPEG) | Answered |
+| 8 | Storage bucket for avatars/photos? | 6, 8.1, OP6 | Add storage bucket `avatars` (max 200KB, JPEG) and `posts` (max 1MB, JPEG). Buckets are private (`public = false`); app reads via signed URLs (SEC16), writes are service-role/script-only (SEC17), delete-account removes the caller's avatar objects via service role (SEC18). | Answered |
 | 9 | handle_new_user writes is_18_or_older but users has no such column. | 8.1, 8.5 | Remove is_18_or_older from trigger. Age gate enforced at sign-up, not stored in DB. | Answered |
 | 10 | user_activity says "inserts only by database triggers" but no trigger defined. | 8.1, 8.5, SEC12 | Add triggers: activity_on_fare_report (was activity_on_like), activity_on_alert, activity_on_comment, activity_on_follow, activity_on_unlike. | Answered |
 | 11 | Username "Set on S4" vs "set (via S11)" contradiction. | 8.1, 11 | Username set during onboarding (S4), editable in S11. | Answered |
