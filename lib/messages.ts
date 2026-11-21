@@ -39,6 +39,11 @@ export const messages = {
     offlineSubmit: 'No connection. Please check your internet.',
     submitSuccess: 'Application submitted.',
     offlineCached: 'Offline - showing cached jobs',
+    affordabilityToggle: 'Jobs I can afford this week',
+    filterAll: 'All jobs',
+    filterAffordable: 'Affordable',
+    filterHighNetGain: 'High net gain',
+    sortedByNetGain: 'Jobs sorted by net gain',
   },
   profile: {
     saveError: "Couldn't save. Try again.",
