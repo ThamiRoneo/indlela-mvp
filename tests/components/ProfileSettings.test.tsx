@@ -53,24 +53,15 @@ const profileRow = () => ({
 const loadProfileMock = (row: any) =>
   queryBuilder({ single: jest.fn().mockResolvedValue({ data: row, error: null }) });
 
-// Find a TouchableOpacity whose rendered tree contains "Save" text
 const findSaveButton = (touchables: any[]): any => {
   const search = (node: any): boolean => {
     if (!node) return false;
     if (typeof node === 'string') return node.includes('Save');
-    if (node.props) {
-      const ch = node.props.children;
-      if (typeof ch === 'string' && ch.includes('Save')) return true;
-      if (ch) {
-        const arr = Array.isArray(ch) ? ch : [ch];
-        return arr.some(search);
-      }
-    }
+    if (Array.isArray(node)) return node.some(search);
+    if (node.props && node.props.children) return search(node.props.children);
     return false;
   };
-  // Prefer recursive search, fall back to index-based (TopAppBar action=0, Logout=1, Save=2, Delete=3)
-  const found = touchables.find((t: any) => search(t.props.children));
-  return found ?? touchables[2];
+  return touchables.find((t: any) => search(t.props.children));
 };
 
 describe('T-S11 Profile/Settings', () => {
@@ -120,6 +111,7 @@ describe('T-S11 Profile/Settings', () => {
     });
     const touchables = findTouchables(tree);
     const saveButton = findSaveButton(touchables);
+    expect(saveButton).toBeTruthy();
     act(() => {
       saveButton.props.onPress();
     });
@@ -141,6 +133,7 @@ describe('T-S11 Profile/Settings', () => {
     });
     const touchables = findTouchables(tree);
     const saveButton = findSaveButton(touchables);
+    expect(saveButton).toBeTruthy();
     act(() => {
       saveButton.props.onPress();
     });

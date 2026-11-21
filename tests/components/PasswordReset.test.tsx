@@ -29,6 +29,21 @@ const findTouchables = (tree: any) => tree.root.findAllByType(TouchableOpacity);
 
 const toJson = (tree: any) => JSON.stringify(tree.toJSON());
 
+const findButton = (tree: any, text: string) => {
+  const touchables = findTouchables(tree);
+  const matchText = (node: any): boolean => {
+    if (!node) return false;
+    if (typeof node === 'string' || typeof node === 'number') return String(node).includes(text);
+    if (Array.isArray(node)) return node.some(matchText);
+    if (node.props && node.props.children) return matchText(node.props.children);
+    return false;
+  };
+  return touchables.find((t: any) => {
+    if (t.props.accessibilityLabel === text) return true;
+    return matchText(t.props.children);
+  });
+};
+
 describe('T-S13 / T-US2-4 Password Reset', () => {
   const nav = { navigate: jest.fn() };
 
@@ -43,9 +58,10 @@ describe('T-S13 / T-US2-4 Password Reset', () => {
     const tree = mount(<PasswordReset navigation={nav as any} />);
     expect(findInput(tree, 'Email')).toBeTruthy();
 
-    const touchables = findTouchables(tree);
+    const sendBtn = findButton(tree, 'Send reset link');
+    expect(sendBtn).toBeTruthy();
     act(() => {
-      touchables[0].props.onPress();
+      sendBtn.props.onPress();
     });
     expect(toJson(tree)).toContain(messages.passwordReset.submitError);
   });
@@ -55,18 +71,21 @@ describe('T-S13 / T-US2-4 Password Reset', () => {
     act(() => {
       findInput(tree, 'Email').props.onChangeText('lerato@example.com');
     });
-    let touchables = findTouchables(tree);
+
+    const sendBtn = findButton(tree, 'Send reset link');
+    expect(sendBtn).toBeTruthy();
     act(() => {
-      touchables[0].props.onPress();
+      sendBtn.props.onPress();
     });
     await flush();
     await flush();
 
     expect(toJson(tree)).toContain(messages.passwordReset.success);
 
-    touchables = findTouchables(tree);
+    const returnBtn = findButton(tree, 'Return to log in') || findTouchables(tree)[0];
+    expect(returnBtn).toBeTruthy();
     act(() => {
-      touchables[0].props.onPress();
+      returnBtn.props.onPress();
     });
     expect(nav.navigate).toHaveBeenCalledWith('(auth)/log-in');
   });
@@ -89,9 +108,10 @@ describe('T-S13 / T-US2-4 Password Reset', () => {
       findInput(tree, 'New password').props.onChangeText('abc');
       findInput(tree, 'Confirm password').props.onChangeText('abc');
     });
-    let touchables = findTouchables(tree);
+    let submitBtn = findButton(tree, 'Set password');
+    expect(submitBtn).toBeTruthy();
     act(() => {
-      touchables[0].props.onPress();
+      submitBtn.props.onPress();
     });
     expect(toJson(tree)).toContain(messages.auth.passwordTooShort);
 
@@ -99,9 +119,10 @@ describe('T-S13 / T-US2-4 Password Reset', () => {
       findInput(tree, 'New password').props.onChangeText('Password1');
       findInput(tree, 'Confirm password').props.onChangeText('Password1');
     });
-    touchables = findTouchables(tree);
+    submitBtn = findButton(tree, 'Set password');
+    expect(submitBtn).toBeTruthy();
     act(() => {
-      touchables[0].props.onPress();
+      submitBtn.props.onPress();
     });
     await flush();
     await flush();
