@@ -1,6 +1,5 @@
-import { Slot } from 'expo-router';
+import { Slot, useRouter, usePathname } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'expo-router';
 import { supabase } from '../lib/supabase';
 import { Spinner } from '../components/Spinner';
 import { tokens } from '../theme/tokens';

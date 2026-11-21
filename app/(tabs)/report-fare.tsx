@@ -68,7 +68,7 @@ export default function ReportFare() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadRanks();
-  }, []);
+  }, [loadRanks]);
 
   if (loading) {
     return (

@@ -15,7 +15,7 @@ type TextInputProps = {
 };
 
 export const TextInput = ({ value, error, editable = true, secureTextEntry, onChangeText, onTogglePassword, placeholder, label, accessibilityLabel }: TextInputProps) => {
-  const [showPassword, setShowPassword] = React.useState(!secureTextEntry);
+  const [showPassword] = React.useState(!secureTextEntry);
   return (
     <>
       {label && <Text style={styles.label} accessibilityLabel={`${label} label`}>{label}</Text>}

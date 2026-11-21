@@ -37,7 +37,6 @@ export default function JobDetails({ jobId: jobIdProp }: JobDetailsProps) {
     }
   }, [jobIdProp]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();

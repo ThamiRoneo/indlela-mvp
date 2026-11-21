@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, StyleSheet, Platform } from 'react-native';
+import { View, FlatList, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../lib/supabase';
 import { messages } from '../lib/messages';
@@ -38,7 +38,7 @@ export default function SetNearestRank({ navigation }: SetNearestRankProps = {})
       } catch {
         setError(messages.rank.loadError);
       } finally {
-        if (!offline) setLoading(false);
+        setLoading(false);
       }
     };
     loadInitial();
@@ -61,7 +61,7 @@ export default function SetNearestRank({ navigation }: SetNearestRankProps = {})
     } catch {
       setError(messages.rank.loadError);
     } finally {
-      if (!offline) setLoading(false);
+      setLoading(false);
     }
   }, []);
 

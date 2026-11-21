@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { messages } from '../../lib/messages';
 import { isValidPassword } from '../../lib/rules/password';
@@ -19,17 +19,15 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
   const [agreedPrivacy, setAgreedPrivacy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
 
   const isValidEmail = useCallback((e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e), []);
-  const isFormValid = useCallback(() => isValidEmail(email) && isValidPassword(password) && is18 && agreedPrivacy, [email, password, is18, agreedPrivacy]);
+  const isFormValid = useCallback(() => isValidEmail(email) && isValidPassword(password) && is18 && agreedPrivacy, [email, password, is18, agreedPrivacy, isValidEmail]);
 
   const emailInvalid = email && !isValidEmail(email);
   const passwordInvalid = password && !isValidPassword(password);
   const isDuplicateEmail = error === messages.auth.duplicateEmail;
 
   const handleSignUp = useCallback(async () => {
-    setSubmitted(true);
     setError(null);
     if (!isFormValid()) return;
     setLoading(true);

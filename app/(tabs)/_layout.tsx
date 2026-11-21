@@ -1,9 +1,8 @@
-import { Slot } from 'expo-router';
+import { Slot, useRouter, usePathname } from 'expo-router';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BottomNav } from '../../components/BottomNav';
 import { tokens } from '../../theme/tokens';
-import { useRouter, usePathname } from 'expo-router';
 
 const TABS = [
   { name: 'Home', href: '/(tabs)/index' },
