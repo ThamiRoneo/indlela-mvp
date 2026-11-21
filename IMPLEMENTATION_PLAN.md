@@ -705,8 +705,8 @@ The same ID may be used at two levels when both prove the same criterion.
 
 **Step 2: Backend (Green)**
 
-- [ ] `npx supabase init`; `npx supabase start` works; pgTAP extension enabled for tests.
-- [ ] `lib/supabase.ts` creates the client from the `EXPO_PUBLIC_` variables only, with AsyncStorage for the session.
+- [x] `npx supabase init`; `npx supabase start` works; pgTAP extension enabled for tests.
+- [x] `lib/supabase.ts` creates the client from the `EXPO_PUBLIC_` variables only, with AsyncStorage for the session.
 
 **Step 3: Frontend (Green)**
 
@@ -778,7 +778,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 **Step 4: Refactor and full check**
 
 - [x] Every function has `set search_path = ''`. Triggers are security definer.
-- [ ] `npm run check` passes (includes all Phase 1 tests). — `supabase test db` requires Docker; validated directly on postgres:17 instead.
+- [x] `npm run check` passes (includes all Phase 1 tests).
 
 **Step 5: Manual checks (human)**
 
@@ -789,7 +789,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 - [ ] Every test in Step 1 passes; all Phase 1 tests still pass.
 - [ ] Reset + seed works from scratch with one command.
-- [ ] Progress log updated.
+- [x] Progress log updated.
 
 **Commit message:** `Phase 2: Data and security`
 
@@ -872,7 +872,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 **Step 4: Refactor and full check**
 
 - [x] Code cleaned up; names use PRD key terms.
-- [ ] `npm run check` passes (includes all Phase 1 and 2 tests). — 63/70 unit+component tests pass; 7 integration tests require full Supabase stack (Auth on port 54321) not available in this environment.
+- [x] `npm run check` passes (includes all Phase 1 and 2 tests).
 
 **Step 5: Manual checks (human)**
 
@@ -884,7 +884,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 - [ ] Every test in Step 1 passes; all earlier tests still pass.
 - [ ] Manual checks ticked by the human.
-- [ ] Progress log updated.
+- [x] Progress log updated.
 
 **Commit message:** `Phase 3: Onboarding & Accounts`
 
@@ -954,7 +954,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 - [ ] Every test in Step 1 passes; all earlier tests still pass.
 - [ ] Manual checks ticked by the human.
-- [ ] Progress log updated.
+- [x] Progress log updated.
 
 **Commit message:** `Phase 4: Dynamic Fare Index`
 
@@ -1147,7 +1147,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 - [ ] Every test in Step 1 passes; all earlier tests still pass.
 - [ ] Manual checks ticked by the human.
-- [ ] Progress log updated.
+- [x] Progress log updated.
 
 **Commit message:** `Phase 7: Data-light & Offline Support`
 
@@ -1201,7 +1201,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 **Step 4: Refactor and full check**
 
 - [x] Code cleaned up; names use PRD key terms.
-- [ ] `npm run check` passes (lint 0 errors, typecheck clean, unit+component tests pass; integration tests require live Supabase stack — no Docker available locally).
+- [x] `npm run check` passes (lint 0 warnings, typecheck clean, 149/149 unit+component, 94/94 pgTAP, 39/39 integration).
 - [ ] Maestro E2E suite passes (requires Android emulator — not available locally).
 
 **Step 5: Manual checks (human)**
@@ -1215,7 +1215,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 
 - [ ] Every test in Step 1 passes; all earlier tests still pass.
 - [ ] Manual checks ticked by the human.
-- [ ] Progress log updated.
+- [x] Progress log updated.
 
 **Commit message:** `Phase 8: Hardening`
 
@@ -1399,8 +1399,8 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 - [ ] Full check passes on a clean install (fresh clone → install → reset database → full check).
 - [ ] Release build installs and runs on a real Android device.
 - [ ] Demo script runs from start to finish without errors.
-- [ ] README explains setup, every command, test accounts, and how to run tests.
-- [ ] `.env.example` lists every variable; a secret scan finds no keys in the repository or its history.
+- [x] README explains setup, every command, test accounts, and how to run tests.
+- [x] `.env.example` lists every variable; a secret scan finds no keys in the repository or its history.
 - [ ] Final comparison of the app against the PRD shows no gaps.
 
 ---
@@ -1415,6 +1415,10 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | 6 | 18 Nov 2026 | Complete | 119 / 119 | Phase 6: Fare Alerts & Budgeting | TDD: S9 Fare Alerts (Normal/Empty/Loading/Error/Offline states, fuel-increase banner via fuel_alert_active, Refresh Alerts button, timestamped items), S10 Activity (Normal/Empty/Loading/Error/Offline states, Recent activity header with entry count, timestamped items), lib/rules/budget.ts (isBudgetSet), lib/api/activity.ts (viewActivity, viewAlerts), tests/unit/fuel.test.ts (T-BR7-2), tests/unit/budget.test.ts (T-BR6-1), tests/components/Alerts.test.tsx (T-S9-1/2), tests/components/Activity.test.tsx (T-S10-1), tests/integration/alert.int.test.ts (T-US7-1, T-US8-1), tests/integration/activity.int.test.ts (T-S10-1, T-INT-3). Lint 0 errors. Typecheck clean. Integration tests require live Supabase stack (no Docker container available locally). |
 | 7 | 18 Nov 2026 | Complete | 130 / 130 (unit+component) | Phase 7: Data-light & Offline Support | TDD: lib/rules/cache.ts (CACHE_TTL_MS 7 days, isCacheExpired/isCacheFresh; T-F5-1/T-F5-2), lib/api/jobs.ts (cacheJobs/getCachedJobs, BR8 7-day TTL), app/(tabs)/index.tsx HomeFeed (NetInfo offline check, cached jobs + "Offline - showing cached jobs" banner; T-F5-3), lib/api/fares.ts getCachedFares TTL expiry (T-US9-1), tests/components/Offline.test.tsx (T-US9-1), app/(tabs)/report-fare.tsx (NetInfo on mount, submit disabled offline, offline banner; T-F5-5), app/job/[id].tsx offline transport unknown (T-F5-4), messages.ts jobs.offlineCached. Lint 0 errors. Typecheck clean. All 130 unit+component tests pass; integration tests require live Supabase stack. |
 | 8 | 19 Nov 2026 | Complete | 142 / 142 (unit+component) | Phase 8: Hardening | TDD: tests/components/a11y.test.tsx (T-NFR-4/5/6: WCAG AA contrast for body text, >=48px touch targets, labels on all inputs — all pass); tests/integration/edge.int.test.ts (T-EDGE-1..5); tests/integration/nfr.int.test.ts (T-NFR-1 secretlint scan, T-NFR-2 no SERVICE_ROLE, T-NFR-3 no secrets in logs, T-NFR-7 DB trigger); .maestro/01–04.yaml (T-E2E-1..4); supabase/tests/090_rls_check.test.sql (T-DB-6, all 11 tables). Hardened components: Button, TextInput, Toggle, FilterChip, ListItem, BottomNav, TopAppBar, Modal, EmptyState (min 48px touch targets + accessibility labels/roles). Added secretlint + .secretlintrc (scan clean). Lint 0 errors. Typecheck clean. Integration tests require live Supabase stack; Maestro requires Android emulator (neither available locally). |
+| 2 | 21 Nov 2026 | Complete | 94 / 94 pgTAP | Phase 2: Data and security | Local Supabase `config.toml`; private storage buckets with SEC16–SEC18 policies, `050_storage.test.sql` and idempotent `scripts/seed-storage.ts`; OP15 applications INSERT policy; BR7 `fuel_price_check()` unfiltered UPDATE fix; SEC16–SEC18 documented in §6/§9 and PRD §11. |
+| 4 | 21 Nov 2026 | Complete | 149 / 149 (unit+component) | Phase 4: Dynamic Fare Index | `viewFares()` dedupes to the latest fare per route. |
+| 5 | 21 Nov 2026 | Complete | 149 / 149 (unit+component) | Phase 5: Affordability-First Job Feed | `viewJobFeed()` populates `fareSource`, `stale` and `daysAgo` from the latest nearest-rank fare; S7 uses shared Toggle + FilterChip with design labels and filter chips (Step 6b). |
+| 8 | 21 Nov 2026 | Complete | 149 / 149 unit+component; 94 / 94 pgTAP; 39 / 39 integration | Phase 8: Hardening | Test harness split into unit/component and integration configs; `npm run check` added; RLS/BR7/budget/rate-limit/privacy integration tests corrected for real Supabase behaviour; all 26 ESLint warnings resolved (Step 7). Lint 0 warnings, typecheck clean. Step 6b/7 files uncommitted pending the next commit request. |
 
 ---
 
@@ -1447,3 +1451,4 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | v1.0 | 3 Nov 2026 | First version | Generated from PRD v0.4 and Stitch designs |
 | v1.1 | 3 Nov 2026 | All sections updated per review feedback | Added S10 to Phase 6, fixed data model (applications table, rank_id/route_id, fuel_alert_active), resolved contradictions (username, T-DB IDs), fixed Phase 7 repeat tests, fixed deny tests, resolved undecided items (OP15, OP16, seed data), added storage buckets, filled Section 17 |
 | v1.2 | 3 Nov 2026 | Added user_activity triggers | activity_on_fare_report (renamed from activity_on_like), activity_on_alert, activity_on_comment, activity_on_follow, activity_on_unlike defined in 8.5; comments/follows/likes tables added; user_activity type check extended; T-INT-3 covers trigger-created rows |
+| v1.3 | 21 Nov 2026 | README rewritten; progress and change logs backfilled; stale status boxes corrected | §16 requires a README with setup, every command, test accounts and test instructions; local Supabase and the full check now work, so earlier "no Docker" annotations were inaccurate |
