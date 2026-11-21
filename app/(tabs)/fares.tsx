@@ -72,7 +72,7 @@ export default function Fares() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
-  }, []);
+  }, [load]);
 
   if (loading) {
     return (

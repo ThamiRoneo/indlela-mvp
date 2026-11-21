@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../../lib/supabase';
 import { messages } from '../../lib/messages';

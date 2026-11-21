@@ -18,18 +18,19 @@ describe('T-S1-1 Welcome', () => {
     expect(() => mount(<Welcome />)).not.toThrow();
   });
 
-  it('T-S1-2: shows lowercase "indlela" logos with blue dot-and-stem marks at top and middle', () => {
+  it('T-S1-2: shows lowercase "ndlela" after the blue dot-and-stem mark at top and middle', () => {
     const tree = mount(<Welcome />);
     const json = toJson(tree);
 
-    // Logo text is lowercase "indlela"
-    expect(json).toContain('indlela');
+    // Stitch S1: the blue mark is the "i", so the word itself is "ndlela".
+    expect(json).toContain('ndlela');
+    expect(json).not.toContain('indlela');
 
     // Blue dot uses the primary brand colour
     expect(json).toContain(tokens.color.primary);
 
     // Two logo instances (top + middle)
-    const logoCount = (json.match(/indlela/g) || []).length;
+    const logoCount = (json.match(/ndlela/g) || []).length;
     expect(logoCount).toBeGreaterThanOrEqual(2);
   });
 

@@ -8,7 +8,6 @@ import { tokens } from '../../theme/tokens';
 import { Button } from '../../components/Button';
 import { TextInput } from '../../components/TextInput';
 import { TopAppBar } from '../../components/TopAppBar';
-import { Spinner } from '../../components/Spinner';
 
 type PasswordResetProps = {
   navigation?: { navigate: (screen: string) => void };

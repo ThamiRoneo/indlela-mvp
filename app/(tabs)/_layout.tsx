@@ -1,17 +1,16 @@
-import { Slot } from 'expo-router';
+import { Slot, useRouter, usePathname } from 'expo-router';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BottomNav } from '../../components/BottomNav';
 import { tokens } from '../../theme/tokens';
-import { useRouter, usePathname } from 'expo-router';
 
 const TABS = [
-  { name: 'Home', href: '/(tabs)/index' },
+  { name: 'Home', href: '/' },
   { name: 'Fares', href: '/(tabs)/fares' },
   { name: 'Alerts', href: '/(tabs)/alerts' },
   { name: 'Activity', href: '/(tabs)/activity' },
   { name: 'Profile', href: '/(tabs)/profile' },
-];
+] as const;
 
 export default function TabsLayout() {
   const router = useRouter();
@@ -20,7 +19,7 @@ export default function TabsLayout() {
   return (
     <View style={styles.container}>
       <Slot />
-      <BottomNav activeTab={activeTab} onTabPress={(tab) => router.replace(TABS.find((t) => t.name === tab)?.href || '/(tabs)/index')} />
+      <BottomNav activeTab={activeTab} onTabPress={(tab) => router.replace(TABS.find((t) => t.name === tab)?.href || '/')} />
     </View>
   );
 }

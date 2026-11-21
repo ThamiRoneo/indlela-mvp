@@ -362,6 +362,8 @@ Font family: System default (Roboto on Android, system-ui on web).
 | Job source | Job listings | Manual/CSV in v1 | None | Yes |
 | Supabase Storage | Avatar and post images | SDK/REST | Keys + RLS | Yes |
 
+Storage resolution (implementation plan §6, §8.6, §9, §18 Q8): the `avatars` and `posts` buckets are private (`public = false`) and read by the app via signed URLs (SEC16); there are no client write policies — writes are service-role/script-only (SEC17); the delete-account function removes the caller's `{user_id}/` avatar objects via the service role (SEC18).
+
 ## 12. Permissions, privacy and security
 
 | Item | Answer |

@@ -74,15 +74,42 @@ describe('T-NFR-7 rate limits enforced by database triggers', () => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    const { data, error } = await admin
-      .from('information_schema.triggers')
-      .select('trigger_name')
-      .eq('event_object_schema', 'public')
-      .eq('event_object_table', 'fare_reports')
-      .ilike('trigger_name', '%limit_fare_reports%');
+    const email = `nfr7-${Date.now()}@example.com`;
+    const password = 'Password1' + Date.now();
+    const { data: created, error: createError } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    expect(createError).toBeNull();
+    const userId = created!.user!.id;
 
-    expect(error).toBeNull();
-    const names = (data || []).map((row: { trigger_name: string }) => row.trigger_name);
-    expect(names.some((name) => /limit_fare_reports/i.test(name))).toBe(true);
+    try {
+      const { data: ranks } = await admin.from('ranks').select('id').limit(1);
+      const { data: routes } = await admin.from('routes').select('id').limit(1);
+      const rankId = ranks![0].id;
+      const routeId = routes![0].id;
+
+      for (let i = 0; i < 5; i++) {
+        const { error } = await admin.from('fare_reports').insert({
+          user_id: userId,
+          rank_id: rankId,
+          route_id: routeId,
+          amount_zar: 20,
+        });
+        expect(error).toBeNull();
+      }
+
+      const { error } = await admin.from('fare_reports').insert({
+        user_id: userId,
+        rank_id: rankId,
+        route_id: routeId,
+        amount_zar: 20,
+      });
+      expect(error).not.toBeNull();
+      expect(error!.message).toContain('rate_limit_fare_reports');
+    } finally {
+      await admin.auth.admin.deleteUser(userId).catch(() => {});
+    }
   });
 });

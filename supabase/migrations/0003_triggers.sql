@@ -67,8 +67,11 @@ begin
   pct_change := ((latest_price - avg_price) / avg_price) * 100;
 
   if pct_change >= 5 then
+    -- An explicit WHERE clause is required: Supabase's role guard rejects
+    -- unfiltered UPDATEs issued through the API, even inside a SECURITY DEFINER.
     update public.ranks
-    set fuel_alert_active = true;
+    set fuel_alert_active = true
+    where fuel_alert_active is distinct from true;
 
     insert into public.user_activity (user_id, type, description)
     select u.id, 'alert_received', 'Fares may increase soon. Check updated fares for your rank.'

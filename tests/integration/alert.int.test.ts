@@ -33,8 +33,27 @@ async function signUpAndSignIn(email: string) {
   return { userId, userClient };
 }
 
-async function seedFuelSnapshot(price: number) {
-  await serviceSupabase.from('fuel_price_snapshots').insert({ date: new Date().toISOString().slice(0, 10), petrol_price_zar: price, source: 'AA' });
+async function seedFuelSnapshot(price: number, date = new Date().toISOString().slice(0, 10)) {
+  const { error } = await serviceSupabase
+    .from('fuel_price_snapshots')
+    .insert({ date, petrol_price_zar: price, source: 'AA' });
+  expect(error).toBeNull();
+}
+
+// fuel_price_check averages only snapshots with date < max(date), so start from a
+// clean slate with no existing same-day rows and a cleared alert flag.
+async function resetFuelAlertState() {
+  const { error: deleteError } = await serviceSupabase
+    .from('fuel_price_snapshots')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
+  expect(deleteError).toBeNull();
+
+  const { error: resetError } = await serviceSupabase
+    .from('ranks')
+    .update({ fuel_alert_active: false })
+    .neq('id', '00000000-0000-0000-0000-000000000000');
+  expect(resetError).toBeNull();
 }
 
 async function seedRankRoute() {
@@ -46,10 +65,12 @@ async function seedRankRoute() {
 describe('T-US8-1 Fare alerts integration', () => {
   it('viewFareAlerts returns fuelAlert true when price up >= 5% (BR7)', async () => {
     const { userClient } = await signUpAndSignIn(`us8-${Date.now()}@example.com`);
-    await seedFuelSnapshot(25.00);
-    await seedFuelSnapshot(30.00); // 20% increase over the 30-day average
+    await resetFuelAlertState();
+    const baselineDate = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    await seedFuelSnapshot(25.00, baselineDate);
+    await seedFuelSnapshot(30.00); // 20% increase over the older baseline average
 
-    const { data, error } = await userClient.rpc('fuel_price_check');
+    const { error } = await userClient.rpc('fuel_price_check');
     expect(error).toBeNull();
 
     const { data: ranks } = await serviceSupabase.from('ranks').select('fuel_alert_active').limit(1);
@@ -58,8 +79,13 @@ describe('T-US8-1 Fare alerts integration', () => {
 
   it('viewFareAlerts does not flag when price change is below 5%', async () => {
     const { userClient } = await signUpAndSignIn(`us8b-${Date.now()}@example.com`);
-    await seedFuelSnapshot(25.00);
-    await seedFuelSnapshot(26.00); // 4% increase
+    await resetFuelAlertState();
+    const baselineDate = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    await seedFuelSnapshot(25.00, baselineDate);
+    await seedFuelSnapshot(26.00); // 4% increase over the older baseline average
+
+    const { error } = await userClient.rpc('fuel_price_check');
+    expect(error).toBeNull();
 
     const { data: ranks } = await serviceSupabase.from('ranks').select('fuel_alert_active').limit(1);
     expect(ranks![0].fuel_alert_active).toBe(false);

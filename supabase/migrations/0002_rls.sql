@@ -1,4 +1,5 @@
 -- 0002_rls.sql: RLS on every table with all policies (Section 9)
+-- Note: applications write access is OP15; there is no SEC id for it in Section 9.
 
 alter table public.users enable row level security;
 alter table public.ranks enable row level security;
@@ -40,6 +41,11 @@ create policy fare_reports_select_authenticated on public.fare_reports
 
 -- SEC7: fare_reports create — logged-in user, user_id = auth.uid()
 create policy fare_reports_insert_owner on public.fare_reports
+  for insert to authenticated
+  with check (auth.uid() = user_id);
+
+-- OP15: applications create — logged-in user, user_id = auth.uid()
+create policy applications_insert_owner on public.applications
   for insert to authenticated
   with check (auth.uid() = user_id);
 

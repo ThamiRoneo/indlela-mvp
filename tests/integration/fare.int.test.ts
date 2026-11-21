@@ -49,8 +49,9 @@ describe('T-SEC-6 fare_reports read', () => {
 
   it('T-SEC-6b: logged out cannot read fare_reports', async () => {
     const client = createClient(supabaseUrl, supabaseAnonKey, { auth: { autoRefreshToken: false, persistSession: false } });
-    const { error } = await client.from('fare_reports').select('id');
-    expect(error).not.toBeNull();
+    const { data, error } = await client.from('fare_reports').select('id');
+    expect(error).toBeNull();
+    expect(data).toEqual([]);
   });
 });
 
@@ -79,10 +80,19 @@ describe('T-SEC-8 fare_reports update/delete denied', () => {
     const id = data![0].id;
 
     const { error: updErr } = await userClient.from('fare_reports').update({ amount_zar: 99 }).eq('id', id);
-    expect(updErr).not.toBeNull();
+    expect(updErr).toBeNull();
 
     const { error: delErr } = await userClient.from('fare_reports').delete().eq('id', id);
-    expect(delErr).not.toBeNull();
+    expect(delErr).toBeNull();
+
+    const { data: after, error: selectErr } = await userClient
+      .from('fare_reports')
+      .select('id, amount_zar')
+      .eq('id', id)
+      .single();
+    expect(selectErr).toBeNull();
+    expect(after!.id).toBe(id);
+    expect(after!.amount_zar).toBe(20);
   });
 });
 
@@ -96,8 +106,9 @@ describe('T-SEC-13 fuel_price_snapshots read', () => {
 
   it('T-SEC-13b: logged out cannot read fuel_price_snapshots', async () => {
     const client = createClient(supabaseUrl, supabaseAnonKey, { auth: { autoRefreshToken: false, persistSession: false } });
-    const { error } = await client.from('fuel_price_snapshots').select('id');
-    expect(error).not.toBeNull();
+    const { data, error } = await client.from('fuel_price_snapshots').select('id');
+    expect(error).toBeNull();
+    expect(data).toEqual([]);
   });
 });
 

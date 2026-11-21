@@ -1,7 +1,8 @@
 import renderer, { act } from 'react-test-renderer';
 import React from 'react';
-import { TouchableOpacity } from '../../tests/mocks/react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { Toggle } from '../../components/Toggle';
+import { FilterChip } from '../../components/FilterChip';
 
 jest.mock('../../lib/supabase', () => {
   const { SupabaseClient } = jest.requireMock('../../tests/mocks/supabase');
@@ -84,10 +85,9 @@ describe('T-US6 / T-S7 Home Feed', () => {
     let json = toJson(tree);
     expect(json).toContain('Call Centre Agent'); // shown before filter
 
-    const toggles = tree.root.findAllByType(TouchableOpacity);
-    const toggle = toggles[0];
-    expect(toggle).toBeDefined();
-    act(() => { toggle.props.onPress(); });
+    const toggle = tree.root.findByType(Toggle);
+    expect(toggle.props.label).toBe(messages.jobs.affordabilityToggle);
+    act(() => { toggle.props.onChange(true); });
     await flush();
 
     json = toJson(tree);
@@ -141,5 +141,38 @@ describe('T-US6 / T-S7 Home Feed', () => {
     const json = toJson(tree);
     expect(json).toContain(messages.jobs.offlineCached);
     expect(json).toContain('Cached Job');
+  });
+
+  it('T-S7-4: uses shared Toggle and FilterChip components with the design labels', async () => {
+    (viewJobFeed as jest.Mock).mockResolvedValue({ data: jobs, error: null });
+
+    const tree = mount(<HomeFeed />);
+    await flush();
+
+    const toggle = tree.root.findByType(Toggle);
+    expect(toggle.props.label).toBe(messages.jobs.affordabilityToggle);
+    const chips = tree.root.findAllByType(FilterChip);
+    expect(chips.map((chip: { props: { label: string } }) => chip.props.label)).toEqual([
+      messages.jobs.filterAll,
+      messages.jobs.filterAffordable,
+      messages.jobs.filterHighNetGain,
+    ]);
+    expect(toJson(tree)).toContain(messages.jobs.sortedByNetGain);
+  });
+
+  it('T-S7-5: High net gain chip keeps only jobs with positive net gain', async () => {
+    (viewJobFeed as jest.Mock).mockResolvedValue({ data: jobs, error: null });
+
+    const tree = mount(<HomeFeed />);
+    await flush();
+
+    const highNetGainChip = tree.root.findAllByType(FilterChip)[2];
+    act(() => { highNetGainChip.props.onPress(); });
+    await flush();
+
+    const json = toJson(tree);
+    expect(json).not.toContain('Call Centre Agent');
+    expect(json).toContain('Warehouse Packer');
+    expect(json).toContain('Retail Assistant');
   });
 });

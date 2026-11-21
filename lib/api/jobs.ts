@@ -1,6 +1,7 @@
 import { supabase } from '../supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { messages } from '../messages';
+import { isStale, daysAgo } from '../rules/fare';
 
 export interface JobFeedItem {
   id: string;
@@ -19,9 +20,11 @@ export interface JobFeedItem {
   daysAgo?: number;
 }
 
-async function jobToFeedItem(j: any, fareMap: Record<string, number>): Promise<JobFeedItem> {
-  const fareAmount = j.route_id ? fareMap[j.route_id] : undefined;
-  const transportCost = fareAmount != null ? fareAmount * 2 : null;
+type FareInfo = { amount: number; created_at: string; source: string };
+
+async function jobToFeedItem(j: any, fareMap: Record<string, FareInfo>): Promise<JobFeedItem> {
+  const fare = j.route_id ? fareMap[j.route_id] : undefined;
+  const transportCost = fare != null ? fare.amount * 2 : null;
   const wage = j.wage_zar ?? null;
   const netGain = wage != null && transportCost != null ? wage - transportCost : null;
   return {
@@ -36,6 +39,13 @@ async function jobToFeedItem(j: any, fareMap: Record<string, number>): Promise<J
     route_id: j.route_id,
     transportCost,
     netGain,
+    ...(fare != null
+      ? {
+          fareSource: fare.source,
+          stale: isStale(fare.created_at),
+          daysAgo: daysAgo(fare.created_at),
+        }
+      : {}),
   };
 }
 
@@ -66,17 +76,22 @@ export async function viewJobFeed(): Promise<{ data: JobFeedItem[] | null; error
 
   if (error) return { data: null, error: messages.jobs.loadError };
 
-  let fareMap: Record<string, number> = {};
+  let fareMap: Record<string, FareInfo> = {};
   if (rankId) {
     const { data: fares } = await supabase
       .from('fare_reports')
-      .select('route_id, amount_zar, created_at')
+      .select('route_id, amount_zar, created_at, ranks (name)')
       .eq('rank_id', rankId)
       .order('created_at', { ascending: false });
     if (fares) {
       for (const f of fares) {
         if (!(f.route_id in fareMap)) {
-          fareMap[f.route_id] = f.amount_zar;
+          const ranks = Array.isArray(f.ranks) ? f.ranks[0] : f.ranks;
+          fareMap[f.route_id] = {
+            amount: f.amount_zar,
+            created_at: f.created_at,
+            source: ranks?.name || 'Taxi rank',
+          };
         }
       }
     }
@@ -109,17 +124,23 @@ export async function viewJobDetails(jobId: string): Promise<{ data: JobFeedItem
 
   if (error) return { data: null, error: messages.jobs.detailsError };
 
-  let fareMap: Record<string, number> = {};
+  let fareMap: Record<string, FareInfo> = {};
   if (rankId && data?.route_id) {
     const { data: fares } = await supabase
       .from('fare_reports')
-      .select('amount_zar')
+      .select('amount_zar, created_at, ranks (name)')
       .eq('rank_id', rankId)
       .eq('route_id', data.route_id)
       .order('created_at', { ascending: false })
       .limit(1);
     if (fares && fares.length > 0) {
-      fareMap[data.route_id] = fares[0].amount_zar;
+      const f = fares[0];
+      const ranks = Array.isArray(f.ranks) ? f.ranks[0] : f.ranks;
+      fareMap[data.route_id] = {
+        amount: f.amount_zar,
+        created_at: f.created_at,
+        source: ranks?.name || 'Taxi rank',
+      };
     }
   }
 

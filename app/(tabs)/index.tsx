@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../../lib/supabase';
 import { viewJobFeed, cacheJobs, getCachedJobs, type JobFeedItem } from '../../lib/api/jobs';
@@ -10,12 +10,17 @@ import { EmptyState } from '../../components/EmptyState';
 import { TopAppBar } from '../../components/TopAppBar';
 import { Spinner } from '../../components/Spinner';
 import { Banner } from '../../components/Banner';
+import { Toggle } from '../../components/Toggle';
+import { FilterChip } from '../../components/FilterChip';
+
+type ChipFilter = 'all' | 'affordable' | 'high';
 
 export default function HomeFeed() {
   const [jobs, setJobs] = useState<JobFeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [affordableOnly, setAffordableOnly] = useState(false);
+  const [chipFilter, setChipFilter] = useState<ChipFilter>('all');
   const [budget, setBudget] = useState<number | null>(null);
   const [offline, setOffline] = useState(false);
 
@@ -81,90 +86,74 @@ export default function HomeFeed() {
     );
   }
 
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <TopAppBar title="Home Feed" />
-        <EmptyState text={error} actionLabel="Retry" onAction={load} />
-      </View>
-    );
-  }
+  const isAffordable = (job: JobFeedItem) =>
+    job.netGain != null &&
+    job.netGain >= 0 &&
+    (budget == null || (job.transportCost ?? 0) <= budget);
 
-  if (offline) {
-    const displayJobs = affordableOnly
-      ? jobs.filter((j) => j.netGain != null && j.netGain >= 0 && (budget == null || (j.transportCost ?? 0) <= budget))
-      : jobs;
-    if (displayJobs.length === 0) {
-      return (
-        <View style={styles.container}>
-          <TopAppBar title="Home Feed" />
-          <EmptyState text={messages.jobs.empty} />
-        </View>
-      );
-    }
-    return (
-      <View style={styles.container}>
-        <TopAppBar title="Home Feed" />
-        <Banner variant="info">{messages.jobs.offlineCached}</Banner>
-        <FlatList
-          data={displayJobs}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <Card
-              type="job"
-              title={item.title}
-              company={item.company || ''}
-              wage={item.wage_zar ?? undefined}
-              transportCost={item.transportCost ?? undefined}
-              netGain={item.netGain ?? undefined}
-            />
-          )}
-        />
-      </View>
-    );
-  }
+  const displayJobs = jobs.filter((job) => {
+    if ((affordableOnly || chipFilter === 'affordable') && !isAffordable(job)) return false;
+    if (chipFilter === 'high' && (job.netGain == null || job.netGain <= 0)) return false;
+    return true;
+  });
 
-  const displayJobs = affordableOnly
-    ? jobs.filter((j) => j.netGain != null && j.netGain >= 0 && (budget == null || (j.transportCost ?? 0) <= budget))
-    : jobs;
-
-  const hasJobs = displayJobs.length > 0;
-  const emptyMessage = affordableOnly && jobs.length > 0
+  const emptyMessage = (affordableOnly || chipFilter === 'affordable') && jobs.length > 0
     ? messages.jobs.emptyAffordable
     : messages.jobs.empty;
 
-  if (!hasJobs) {
-    return (
-      <View style={styles.container}>
-        <TopAppBar title="Home Feed" />
-        <EmptyState text={emptyMessage} />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <TopAppBar title="Home Feed" />
-      <TouchableOpacity
-        onPress={() => setAffordableOnly(!affordableOnly)}
-        style={styles.toggle}
-      >
-        {String(`Jobs I can afford this week (${affordableOnly ? 'On' : 'Off'})`)}
-      </TouchableOpacity>
-      <FlatList
-        data={displayJobs}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Card
-            type="job"
-            title={item.title}
-            company={item.company || ''}
-            wage={item.wage_zar ?? undefined}
-            transportCost={item.transportCost ?? undefined}
-            netGain={item.netGain ?? undefined}
-          />
-        )}
-      />
+      <TopAppBar title="Home" />
+      {error ? (
+        <EmptyState text={error} actionLabel="Retry" onAction={load} />
+      ) : (
+        <>
+          <View style={styles.controls}>
+            <Toggle
+              value={affordableOnly}
+              onChange={setAffordableOnly}
+              label={messages.jobs.affordabilityToggle}
+            />
+            <View style={styles.chips}>
+              <FilterChip
+                selected={chipFilter === 'all'}
+                label={messages.jobs.filterAll}
+                onPress={() => setChipFilter('all')}
+              />
+              <FilterChip
+                selected={chipFilter === 'affordable'}
+                label={messages.jobs.filterAffordable}
+                onPress={() => setChipFilter('affordable')}
+              />
+              <FilterChip
+                selected={chipFilter === 'high'}
+                label={messages.jobs.filterHighNetGain}
+                onPress={() => setChipFilter('high')}
+              />
+            </View>
+          </View>
+          <Text style={styles.sectionHeader}>{messages.jobs.sortedByNetGain}</Text>
+          {offline && <Banner variant="info">{messages.jobs.offlineCached}</Banner>}
+          {displayJobs.length === 0 ? (
+            <EmptyState text={emptyMessage} />
+          ) : (
+            <FlatList
+              data={displayJobs}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <Card
+                  type="job"
+                  title={item.title}
+                  company={item.company || ''}
+                  wage={item.wage_zar ?? undefined}
+                  transportCost={item.transportCost ?? undefined}
+                  netGain={item.netGain ?? undefined}
+                />
+              )}
+            />
+          )}
+        </>
+      )}
     </View>
   );
 }
@@ -172,5 +161,12 @@ export default function HomeFeed() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: tokens.color.background },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  toggle: { padding: tokens.space.sm, borderRadius: 8, borderWidth: 1, borderColor: tokens.color.border, marginHorizontal: tokens.space.md },
+  controls: { paddingHorizontal: tokens.space.md },
+  chips: { flexDirection: 'row', marginTop: tokens.space.sm },
+  sectionHeader: {
+    fontSize: tokens.font.h2.size,
+    fontWeight: '600',
+    paddingHorizontal: tokens.space.md,
+    paddingVertical: tokens.space.sm,
+  },
 });
