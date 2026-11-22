@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { AlertTriangle, Mail, ShieldCheck, ArrowLeft } from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
 import { messages } from '../../lib/messages';
 import { isValidPassword } from '../../lib/rules/password';
@@ -10,7 +11,7 @@ import { TextInput } from '../../components/TextInput';
 import { TopAppBar } from '../../components/TopAppBar';
 
 type PasswordResetProps = {
-  navigation?: { navigate: (screen: string) => void };
+  navigation?: { navigate: (screen: string) => void; goBack?: () => void };
   mode?: 'request' | 'reset';
 };
 
@@ -23,9 +24,20 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
   const [success, setSuccess] = useState(false);
   const [offline, setOffline] = useState(false);
 
+  useEffect(() => {
+    const checkConnection = async () => {
+      const state = await NetInfo.fetch();
+      setOffline(!state.isConnected);
+    };
+    checkConnection();
+  }, []);
+
   const handleReset = useCallback(async () => {
     setError(null);
-    if (!email.trim()) { setError(messages.passwordReset.submitError); return; }
+    if (!email.trim()) {
+      setError(messages.passwordReset.submitError);
+      return;
+    }
     setLoading(true);
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
@@ -45,8 +57,14 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
 
   const handleNewPassword = useCallback(async () => {
     setError(null);
-    if (!isValidPassword(newPassword)) { setError(messages.auth.passwordTooShort); return; }
-    if (newPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
+    if (!isValidPassword(newPassword)) {
+      setError(messages.auth.passwordTooShort);
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
     setLoading(true);
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
@@ -62,28 +80,43 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
     }
   }, [newPassword, confirmPassword, navigation]);
 
-  useEffect(() => {
-    const checkConnection = async () => {
-      const state = await NetInfo.fetch();
-      setOffline(!state.isConnected);
-    };
-    checkConnection();
-  }, []);
+  const handleBackToLogin = () => {
+    navigation?.navigate('(auth)/log-in');
+  };
 
   if (mode === 'reset') {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <TopAppBar title="Set new password" />
+          <TopAppBar title="Set new password" onBack={handleBackToLogin} />
           <View style={styles.form}>
-            <TextInput placeholder="New password" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
-            <TextInput placeholder="Confirm password" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
+            <TextInput
+              label="New password"
+              placeholder="New password"
+              secureTextEntry
+              value={newPassword}
+              onChangeText={setNewPassword}
+              error={error ? error : undefined}
+            />
+            <TextInput
+              label="Confirm password"
+              placeholder="Confirm password"
+              secureTextEntry
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              error={error ? error : undefined}
+            />
             {error && (
               <View style={styles.errorBanner}>
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             )}
-            <Button variant="primary" disabled={loading} loading={loading} onPress={handleNewPassword}>
+            <Button
+              variant="primary"
+              disabled={loading}
+              loading={loading}
+              onPress={handleNewPassword}
+            >
               Set password
             </Button>
           </View>
@@ -95,37 +128,106 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <TopAppBar title="Reset password" />
-        <View style={styles.form}>
-          {offline && (
-            <View style={styles.errorBanner}>
-              <Text style={styles.errorText}>No connection. Please check your internet.</Text>
+        <TopAppBar
+          title="Reset password"
+          onBack={handleBackToLogin}
+        />
+
+        {offline && (
+          <View style={styles.offlineBanner}>
+            <AlertTriangle size={16} color="#b06000" strokeWidth={2} style={{ marginRight: 6 }} />
+            <Text style={styles.offlineText}>No connection. Please check your internet.</Text>
+          </View>
+        )}
+
+        {success ? (
+          <View style={styles.successWrapper}>
+            <View style={styles.mailIconCircle}>
+              <Mail size={24} color="#1a73e8" strokeWidth={2} />
             </View>
-          )}
-          {success ? (
-            <View style={styles.successContainer}>
-              <Text style={styles.successText}>{messages.passwordReset.success}</Text>
-              <Button variant="primary" onPress={() => navigation?.navigate('(auth)/log-in')}>
-                Log in
+            <View style={styles.badgeSuccess}>
+              <Text style={styles.badgeSuccessText}>LINK DISPATCHED</Text>
+            </View>
+
+            <View style={styles.successCard}>
+              <Text style={styles.successTitle}>{messages.passwordReset.success}</Text>
+              <Text style={styles.successDescription}>
+                We&apos;ve sent reset instructions to <Text style={styles.boldText}>{email}</Text>. Please check your inbox and return here to sign in.
+              </Text>
+            </View>
+
+            <Text style={styles.expiryNote}>
+              Link valid for 15 minutes. If you do not see the email shortly, check your spam folder.
+            </Text>
+
+            <View style={styles.buttonWrapper}>
+              <Button variant="primary" onPress={handleBackToLogin}>
+                Return to log in
               </Button>
             </View>
-          ) : (
-            <>
-              <TextInput placeholder="Email" value={email} onChangeText={setEmail} editable={!offline && !loading} />
-              {error && !offline && (
-                <View style={styles.errorBanner}>
-                  <Text style={styles.errorText}>{error}</Text>
-                </View>
-              )}
-              <Button variant="primary" disabled={loading || offline} loading={loading} onPress={handleReset}>
-                Send reset link
-              </Button>
-            </>
-          )}
-          <TouchableOpacity onPress={() => navigation?.navigate('(auth)/log-in')} style={styles.loginLink}>
-            <Text style={styles.loginLinkText}>Remember your password? Log in</Text>
-          </TouchableOpacity>
-        </View>
+
+            <TouchableOpacity
+              onPress={handleBackToLogin}
+              style={styles.backLink}
+              accessibilityRole="button"
+            >
+              <Text style={styles.backLinkText}>Back to log in (S3)</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.form}>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>Account Recovery • F1 Identity</Text>
+            </View>
+
+            <Text style={styles.heading}>Enter your email to receive a password reset link.</Text>
+            <Text style={styles.subtitle}>
+              We&apos;ll send secure verification instructions to your registered Indlela address.
+            </Text>
+
+            {error && (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorText}>(!) {error}</Text>
+              </View>
+            )}
+
+            <TextInput
+              label="Email"
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              editable={!offline && !loading}
+              error={error ? error : undefined}
+            />
+
+            <Button
+              variant="primary"
+              disabled={loading || offline}
+              loading={loading}
+              onPress={handleReset}
+            >
+              {loading ? 'Sending reset link...' : 'Send reset link'}
+            </Button>
+
+            <View style={styles.infoBox}>
+              <ShieldCheck size={16} color="#174ea6" strokeWidth={2} />
+              <Text style={styles.infoText}>
+                Your taxi rank and daily commute route preferences remain protected and will be available once logged in.
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              onPress={handleBackToLogin}
+              style={styles.backLink}
+              accessibilityRole="button"
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                <ArrowLeft size={16} color={tokens.color.primary} strokeWidth={2} style={{ marginRight: 6 }} />
+                <Text style={styles.backLinkText}>Back to log in</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -133,12 +235,89 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: tokens.color.background },
-  scrollContent: { padding: tokens.space.xl },
+  scrollContent: { padding: tokens.space.md, paddingBottom: tokens.space.xl },
   form: { gap: tokens.space.md },
-  errorBanner: { marginTop: tokens.space.sm },
-  errorText: { fontSize: tokens.font.body.size, color: tokens.color.error, textAlign: 'center' },
-  successContainer: { alignItems: 'center', padding: tokens.space.lg },
-  successText: { fontSize: tokens.font.body.size, color: tokens.color.text, textAlign: 'center', marginBottom: tokens.space.lg },
-  loginLink: { marginTop: tokens.space.lg, alignItems: 'center' },
-  loginLinkText: { fontSize: tokens.font.body.size, color: tokens.color.primary },
+  badge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#e8f0fe',
+    borderColor: '#d2e3fc',
+    borderWidth: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    marginBottom: tokens.space.xs,
+  },
+  badgeText: { fontSize: tokens.font.caption.size, color: tokens.color.primary, fontWeight: '600' },
+  heading: {
+    fontSize: tokens.font.h2.size,
+    fontWeight: '700',
+    color: tokens.color.text,
+    lineHeight: 28,
+  },
+  subtitle: {
+    fontSize: tokens.font.body.size,
+    color: tokens.color.textSecondary,
+    lineHeight: 20,
+    marginBottom: tokens.space.xs,
+  },
+  offlineBanner: {
+    padding: tokens.space.md,
+    backgroundColor: '#fef7e0',
+    borderColor: '#f9ab00',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: tokens.space.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  offlineText: { fontSize: tokens.font.body.size, color: '#b06000', fontWeight: '500', flex: 1 },
+  errorBanner: { padding: tokens.space.md, backgroundColor: '#fce8e6', borderRadius: 8 },
+  errorText: { fontSize: tokens.font.body.size, color: tokens.color.error },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderColor: tokens.color.border,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: tokens.space.md,
+    gap: tokens.space.sm,
+    marginTop: tokens.space.sm,
+  },
+  infoIcon: { fontSize: 20 },
+  infoText: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary, flex: 1, lineHeight: 18 },
+  backLink: { marginTop: tokens.space.md, alignItems: 'center', paddingVertical: tokens.space.sm },
+  backLinkText: { fontSize: tokens.font.body.size, color: tokens.color.primary, fontWeight: '500' },
+  successWrapper: { alignItems: 'center', paddingHorizontal: tokens.space.sm, gap: tokens.space.md },
+  mailIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#e6f4ea',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: tokens.space.md,
+  },
+  mailIcon: { fontSize: 28, color: '#137333' },
+  badgeSuccess: {
+    backgroundColor: '#e6f4ea',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
+  badgeSuccessText: { fontSize: 11, fontWeight: '700', color: '#137333', letterSpacing: 0.5 },
+  successCard: {
+    backgroundColor: '#e6f4ea',
+    borderColor: '#ceead6',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: tokens.space.md,
+    width: '100%',
+    alignItems: 'center',
+  },
+  successTitle: { fontSize: tokens.font.body.size, fontWeight: '700', color: '#137333', marginBottom: 4, textAlign: 'center' },
+  successDescription: { fontSize: tokens.font.caption.size, color: '#137333', textAlign: 'center', lineHeight: 18 },
+  boldText: { fontWeight: '700' },
+  expiryNote: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary, textAlign: 'center', marginVertical: tokens.space.xs },
+  buttonWrapper: { width: '100%' },
 });

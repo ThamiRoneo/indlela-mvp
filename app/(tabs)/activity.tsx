@@ -1,6 +1,17 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import {
+  FileCheck2,
+  Bell,
+  MessageSquare,
+  Users,
+  ClipboardList,
+  Clock,
+  Receipt,
+  WifiOff,
+  AlertCircle,
+} from 'lucide-react-native';
 import { viewActivity } from '../../lib/api/activity';
 import { messages } from '../../lib/messages';
 import { tokens } from '../../theme/tokens';
@@ -24,17 +35,30 @@ const formatTimestamp = (iso: string) => {
 const activityIcon = (type: string) => {
   switch (type) {
     case 'fare_report':
-      return { bg: '#e8f5e9', color: '#2e7d32', glyph: '\u2713' };
+      return {
+        bg: '#e6f4ea',
+        icon: <FileCheck2 size={20} color="#137333" strokeWidth={2} />,
+      };
     case 'alert_received':
-      return { bg: '#fff8e1', color: '#f57f17', glyph: '!' };
+      return {
+        bg: '#fef7e0',
+        icon: <Bell size={20} color="#b06000" strokeWidth={2} />,
+      };
     case 'comment_received':
-      return { bg: '#e3f2fd', color: '#1565c0', glyph: '\u270D' };
+      return {
+        bg: '#e8f0fe',
+        icon: <MessageSquare size={20} color="#1a73e8" strokeWidth={2} />,
+      };
     case 'follow':
-      return { bg: '#f3e5f5', color: '#7b1fa2', glyph: '+' };
-    case 'unlike':
-      return { bg: '#ffebee', color: '#c62828', glyph: '\u2716' };
+      return {
+        bg: '#f3e8fd',
+        icon: <Users size={20} color="#9334e6" strokeWidth={2} />,
+      };
     default:
-      return { bg: '#eceff1', color: '#546e7a', glyph: '\u2022' };
+      return {
+        bg: '#f1f3f4',
+        icon: <ClipboardList size={20} color="#5f6368" strokeWidth={2} />,
+      };
   }
 };
 
@@ -54,6 +78,7 @@ export default function Activity() {
         setLoading(false);
         return;
       }
+      setOffline(false);
       const { data, error: activityError } = await viewActivity();
       if (activityError) {
         setError(messages.activity.loadError);
@@ -74,15 +99,18 @@ export default function Activity() {
   }, [load]);
 
   const renderActivityItem = (activity: any) => {
-    const { bg, color, glyph } = activityIcon(activity.type);
+    const { bg, icon } = activityIcon(activity.type);
     return (
-      <View style={styles.activityItem}>
-        <View style={[styles.icon, { backgroundColor: bg }]}>
-          <Text style={[styles.iconGlyph, { color }]}>{glyph}</Text>
+      <View key={activity.id || activity.description} style={styles.card}>
+        <View style={[styles.iconWrap, { backgroundColor: bg }]}>
+          {icon}
         </View>
         <View style={styles.itemBody}>
           <Text style={styles.itemLabel}>{activity.description}</Text>
-          <Text style={styles.itemTime}>{formatTimestamp(activity.created_at)}</Text>
+          <View style={styles.timeRow}>
+            <Clock size={12} color={tokens.color.textSecondary} strokeWidth={2} style={{ marginRight: 4 }} />
+            <Text style={styles.itemTime}>{formatTimestamp(activity.created_at)}</Text>
+          </View>
         </View>
       </View>
     );
@@ -90,6 +118,9 @@ export default function Activity() {
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
+      <View style={styles.emptyIconBadge}>
+        <Receipt size={28} color="#1a73e8" strokeWidth={2} />
+      </View>
       <Text style={styles.emptyTitle}>{messages.activity.empty}</Text>
       <Text style={styles.emptySubtitle}>
         When you report fares or receive alerts, you&apos;ll see them here.
@@ -100,7 +131,7 @@ export default function Activity() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Activity" actionLabel="U" />
+        <TopAppBar title="Activity" actionLabel="👤" />
         <View style={styles.loadingContainer}>
           <Spinner size="large" />
           <Text style={styles.loadingText}>Loading activity...</Text>
@@ -113,33 +144,30 @@ export default function Activity() {
   if (offline) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Activity" actionLabel="U" />
-        <Banner variant="alert">{messages.activity.offlineCached}</Banner>
-        {activities.length > 0 ? (
-          <>
-            <View style={styles.recentContainer}>
-              <Text style={styles.recentTitle}>Recent activity</Text>
-              <Text style={styles.recentCount}>{activities.length} entries</Text>
-            </View>
-            {activities.map((activity) => (
-              <View key={activity.id} style={styles.listItem}>
-                <View style={styles.activityItem}>
-                  <View style={[styles.icon, { backgroundColor: activityIcon(activity.type).bg }]}>
-                    <Text style={[styles.iconGlyph, { color: activityIcon(activity.type).color }]}>
-                      {activityIcon(activity.type).glyph}
-                    </Text>
-                  </View>
-                  <View style={styles.itemBody}>
-                    <Text style={styles.itemLabel}>{activity.description}</Text>
-                    <Text style={styles.itemTime}>{formatTimestamp(activity.created_at)}</Text>
-                  </View>
+        <TopAppBar title="Activity" actionLabel="👤" />
+        <View style={styles.bannerContainer}>
+          <Banner
+            variant="alert"
+            icon={<WifiOff size={18} color="#b06000" strokeWidth={2} />}
+          >
+            {messages.activity.offlineCached}
+          </Banner>
+        </View>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+          {activities.length > 0 ? (
+            <>
+              <View style={styles.recentHeader}>
+                <Text style={styles.recentTitle}>Recent activity</Text>
+                <View style={styles.cachedBadge}>
+                  <Text style={styles.cachedBadgeText}>Cached ({activities.length})</Text>
                 </View>
               </View>
-            ))}
-          </>
-        ) : (
-          renderEmpty()
-        )}
+              {activities.map((activity) => renderActivityItem(activity))}
+            </>
+          ) : (
+            renderEmpty()
+          )}
+        </ScrollView>
       </View>
     );
   }
@@ -147,8 +175,11 @@ export default function Activity() {
   if (error) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Activity" actionLabel="U" />
+        <TopAppBar title="Activity" actionLabel="👤" />
         <View style={styles.emptyContainer}>
+          <View style={styles.errorIconBadge}>
+            <AlertCircle size={28} color="#ea4335" strokeWidth={2} />
+          </View>
           <Text style={styles.emptyTitle}>{error}</Text>
           <Text style={styles.emptySubtitle}>
             Please check your data connection and tap below to reload.
@@ -166,7 +197,7 @@ export default function Activity() {
   if (activities.length === 0) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Activity" actionLabel="U" />
+        <TopAppBar title="Activity" actionLabel="👤" />
         {renderEmpty()}
       </View>
     );
@@ -174,60 +205,173 @@ export default function Activity() {
 
   return (
     <View style={styles.container}>
-      <TopAppBar title="Activity" actionLabel="U" />
-      <View style={styles.recentContainer}>
-        <Text style={styles.recentTitle}>Recent activity</Text>
-        <Text style={styles.recentCount}>{activities.length} entries</Text>
-      </View>
-      {activities.map((activity) => renderActivityItem(activity))}
+      <TopAppBar title="Activity" actionLabel="👤" />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.recentHeader}>
+          <Text style={styles.recentTitle}>Recent activity</Text>
+          <View style={styles.pillBadge}>
+            <Text style={styles.pillText}>{activities.length} entries</Text>
+          </View>
+        </View>
+        {activities.map((activity) => renderActivityItem(activity))}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: tokens.color.background },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: tokens.space.sm },
-  loadingText: { fontSize: tokens.font.body.size, color: tokens.color.text },
-  loadingSubtitle: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary },
-  emptyContainer: { padding: tokens.space.xl, alignItems: 'center', gap: tokens.space.md },
-  emptyTitle: { fontSize: tokens.font.h3.size, fontWeight: '600', color: tokens.color.text, textAlign: 'center' },
-  emptySubtitle: { fontSize: tokens.font.body.size, color: tokens.color.textSecondary, textAlign: 'center' },
-  refreshButton: { marginTop: tokens.space.sm, alignSelf: 'center' },
-  recentContainer: { paddingHorizontal: tokens.space.xl, marginTop: tokens.space.md },
-  recentTitle: { fontSize: tokens.font.h3.size, fontWeight: '600', color: tokens.color.text },
-  recentCount: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary, marginTop: tokens.space.xs },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: tokens.space.md,
-    paddingVertical: tokens.space.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: '#dadce0',
+  container: {
+    flex: 1,
+    backgroundColor: tokens.color.background,
   },
-  icon: {
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: tokens.space.lg,
+  },
+  bannerContainer: {
+    paddingHorizontal: tokens.space.lg,
+    paddingTop: tokens.space.md,
+  },
+  recentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: tokens.space.md,
+    marginTop: tokens.space.xs,
+  },
+  recentTitle: {
+    fontSize: tokens.font.h3.size,
+    fontWeight: '700',
+    color: tokens.color.text,
+  },
+  pillBadge: {
+    backgroundColor: '#e8f0fe',
+    paddingHorizontal: tokens.space.sm,
+    paddingVertical: tokens.space.xs,
+    borderRadius: 12,
+  },
+  pillText: {
+    fontSize: tokens.font.caption.size,
+    fontWeight: '600',
+    color: '#1a73e8',
+  },
+  cachedBadge: {
+    backgroundColor: '#fef7e0',
+    paddingHorizontal: tokens.space.sm,
+    paddingVertical: tokens.space.xs,
+    borderRadius: 12,
+  },
+  cachedBadgeText: {
+    fontSize: tokens.font.caption.size,
+    fontWeight: '600',
+    color: '#b06000',
+  },
+  card: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e8eaed',
+    borderRadius: 8,
+    padding: tokens.space.md,
+    marginBottom: tokens.space.sm,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  iconWrap: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: tokens.space.md,
   },
-  iconGlyph: { fontSize: tokens.font.caption.size, fontWeight: '700' },
-  itemBody: { flex: 1 },
-  itemLabel: { fontSize: tokens.font.body.size, color: tokens.color.text },
-  itemTime: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary, marginTop: tokens.space.xs },
-  listItem: {
-    paddingHorizontal: tokens.space.md,
+  iconGlyph: {
+    fontSize: 18,
+  },
+  itemBody: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  itemLabel: {
+    fontSize: tokens.font.body.size,
+    fontWeight: '600',
+    color: tokens.color.text,
+    marginBottom: tokens.space.xs,
+    lineHeight: 20,
+  },
+  timeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  clockIcon: {
+    fontSize: tokens.font.caption.size,
+    color: tokens.color.textSecondary,
+    marginRight: 4,
+  },
+  itemTime: {
+    fontSize: tokens.font.caption.size,
+    color: tokens.color.textSecondary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: tokens.space.sm,
+  },
+  loadingText: {
+    fontSize: tokens.font.body.size,
+    color: tokens.color.text,
+  },
+  loadingSubtitle: {
+    fontSize: tokens.font.caption.size,
+    color: tokens.color.textSecondary,
+  },
+  emptyContainer: {
+    padding: tokens.space.xl,
+    alignItems: 'center',
+    gap: tokens.space.md,
+    marginTop: tokens.space.xl,
+  },
+  emptyIconBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#e8f0fe',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: tokens.space.sm,
   },
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: tokens.color.primary,
-    color: '#ffffff',
-    textAlign: 'center',
-    fontSize: tokens.font.caption.size,
+  emptyIconText: {
+    fontSize: 28,
+  },
+  emptyTitle: {
+    fontSize: tokens.font.h3.size,
     fontWeight: '600',
+    color: tokens.color.text,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: tokens.font.body.size,
+    color: tokens.color.textSecondary,
+    textAlign: 'center',
+  },
+  errorIconBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#fce8e6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: tokens.space.sm,
+  },
+  errorIconText: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ea4335',
+  },
+  refreshButton: {
+    marginTop: tokens.space.sm,
+    alignSelf: 'center',
   },
 });

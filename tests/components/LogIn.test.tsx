@@ -26,6 +26,21 @@ const findTouchables = (tree: any) => tree.root.findAllByType(TouchableOpacity);
 
 const toJson = (tree: any) => JSON.stringify(tree.toJSON());
 
+const findButton = (tree: any, text: string) => {
+  const touchables = findTouchables(tree);
+  const matchText = (node: any): boolean => {
+    if (!node) return false;
+    if (typeof node === 'string' || typeof node === 'number') return String(node).includes(text);
+    if (Array.isArray(node)) return node.some(matchText);
+    if (node.props && node.props.children) return matchText(node.props.children);
+    return false;
+  };
+  return touchables.find((t: any) => {
+    if (t.props.accessibilityLabel === text) return true;
+    return matchText(t.props.children);
+  });
+};
+
 describe('T-US3 Log In', () => {
   const nav = { navigate: jest.fn() };
 
@@ -55,8 +70,11 @@ describe('T-US3 Log In', () => {
       findInput(tree, 'Password').props.onChangeText('Password1');
     });
 
+    const loginBtn = findButton(tree, 'Log in');
+    expect(loginBtn).toBeTruthy();
+
     await act(async () => {
-      findTouchables(tree)[0].props.onPress();
+      loginBtn.props.onPress();
     });
     await act(async () => {});
     await act(async () => {});
@@ -81,8 +99,9 @@ describe('T-US3 Log In', () => {
       findInput(tree, 'Password').props.onChangeText('Password1');
     });
 
+    const loginBtn = findButton(tree, 'Log in');
     await act(async () => {
-      findTouchables(tree)[0].props.onPress();
+      loginBtn.props.onPress();
     });
     await act(async () => {});
     await act(async () => {});
@@ -104,12 +123,33 @@ describe('T-US3 Log In', () => {
       findInput(tree, 'Password').props.onChangeText('Password1');
     });
 
+    const loginBtn = findButton(tree, 'Log in');
     await act(async () => {
-      findTouchables(tree)[0].props.onPress();
+      loginBtn.props.onPress();
     });
     await act(async () => {});
     await act(async () => {});
 
     expect(toJson(tree)).toContain(messages.auth.tooManyAttempts);
+  });
+
+  it('T-US3-4: Forgot password link navigates to forgot-password', () => {
+    const tree = mount(<LogIn navigation={nav as any} />);
+    const forgotBtn = findButton(tree, 'Forgot password?');
+    expect(forgotBtn).toBeTruthy();
+    act(() => {
+      forgotBtn.props.onPress();
+    });
+    expect(nav.navigate).toHaveBeenCalledWith('(auth)/forgot-password');
+  });
+
+  it('T-US3-5: Sign up link navigates to sign-up', () => {
+    const tree = mount(<LogIn navigation={nav as any} />);
+    const signupBtn = findButton(tree, 'Sign up');
+    expect(signupBtn).toBeTruthy();
+    act(() => {
+      signupBtn.props.onPress();
+    });
+    expect(nav.navigate).toHaveBeenCalledWith('(auth)/sign-up');
   });
 });

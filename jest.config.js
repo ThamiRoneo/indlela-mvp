@@ -17,6 +17,7 @@ module.exports = {
     '^@react-native-async-storage/async-storage$': '<rootDir>/tests/mocks/async-storage.js',
     '^@react-native-community/netinfo$': '<rootDir>/tests/mocks/netinfo.js',
     '^@supabase/supabase-js$': '<rootDir>/tests/mocks/supabase.js',
+    '^lucide-react-native$': '<rootDir>/tests/mocks/lucide-react-native.js',
   },
   setupFiles: ['<rootDir>/tests/setup.ts'],
 };

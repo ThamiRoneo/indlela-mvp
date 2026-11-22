@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { Fuel, CheckCircle2, AlertCircle, WifiOff } from 'lucide-react-native';
 import { viewAlerts } from '../../lib/api/activity';
 import { messages } from '../../lib/messages';
 import { tokens } from '../../theme/tokens';
-import { ListItem } from '../../components/ListItem';
 import { TopAppBar } from '../../components/TopAppBar';
 import { Spinner } from '../../components/Spinner';
 import { Button } from '../../components/Button';
@@ -27,6 +27,7 @@ export default function FareAlerts() {
         setLoading(false);
         return;
       }
+      setOffline(false);
       const { data, error: alertsError } = await viewAlerts();
       if (alertsError) {
         setError(messages.alerts.loadError);
@@ -46,29 +47,32 @@ export default function FareAlerts() {
     load();
   }, [load]);
 
-  const renderAlertCard = (alert: any) => (
-    <View style={styles.alertCard}>
+  const renderAlertCard = (alert: any, isCached = false) => (
+    <View key={alert.id || alert.description} style={[styles.alertCard, isCached && styles.cachedCard]}>
       <View style={styles.alertHeader}>
-        <View style={styles.alertPill}>
-          <Text style={styles.alertPillText}>FARE ALERT \u2022 FUEL INCREASE</Text>
+        <View style={styles.alertHeaderLeft}>
+          <Fuel size={16} color="#b06000" strokeWidth={2} style={styles.fuelIcon} />
+          <View style={[styles.alertPill, isCached && styles.cachedPill]}>
+            <Text style={[styles.alertPillText, isCached && styles.cachedPillText]}>
+              {isCached ? 'CACHED ALERT' : 'FARE ALERT • FUEL INCREASE'}
+            </Text>
+          </View>
         </View>
-        <View style={styles.alertIcon}>
-          <Text style={styles.alertIconText}>!</Text>
-        </View>
-      </View>
-      <Text style={styles.alertDescription}>{alert.description}</Text>
-      <View style={styles.alertRoute}>
-        <Text style={styles.alertRouteLabel}>\u2192 Route:</Text>
-        <Text style={styles.alertRouteValue}>{alert.route || 'Your saved routes'}</Text>
-      </View>
-      <View style={styles.alertMeta}>
         <Text style={styles.alertMetaText}>{daysAgo(alert.created_at)} days ago</Text>
+      </View>
+      <Text style={styles.alertDescription}>&quot;{alert.description}&quot;</Text>
+      <View style={styles.alertRoute}>
+        <Text style={styles.alertRouteLabel}>→ Route:</Text>
+        <Text style={styles.alertRouteValue}>{alert.route || 'Rustenburg ⮞ Johannesburg Park Station'}</Text>
       </View>
     </View>
   );
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
+      <View style={styles.emptyIconBadge}>
+        <CheckCircle2 size={28} color="#137333" strokeWidth={2} />
+      </View>
       <Text style={styles.emptyTitle}>{messages.alerts.empty}</Text>
       <Text style={styles.emptySubtitle}>
         Fuel prices have not fluctuated above 5% in the last 30 days. Taxi fares for your saved routes remain unchanged.
@@ -78,13 +82,14 @@ export default function FareAlerts() {
           Refresh Alerts
         </Button>
       </View>
+      <Text style={styles.disclaimerText}>&quot;Alerts shown when fuel prices rise by 5% or more in 30 days.&quot;</Text>
     </View>
   );
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Fare Alerts" actionLabel="U" />
+        <TopAppBar title="Fare Alerts" actionLabel="👤" />
         <View style={styles.loadingContainer}>
           <Spinner size="large" />
           <Text style={styles.loadingText}>Loading alerts...</Text>
@@ -97,17 +102,25 @@ export default function FareAlerts() {
   if (offline) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Fare Alerts" actionLabel="U" />
-        <Banner variant="alert">{messages.alerts.offlineCached}</Banner>
-        {alerts.length > 0 ? (
-          alerts.map((alert) => (
-            <View key={alert.id} style={styles.listItem}>
-              <ListItem label={alert.description} subtitle={`${daysAgo(alert.created_at)} days ago`} />
-            </View>
-          ))
-        ) : (
-          renderEmpty()
-        )}
+        <TopAppBar title="Fare Alerts" actionLabel="👤" />
+        <View style={styles.bannerContainer}>
+          <Banner
+            variant="alert"
+            icon={<WifiOff size={18} color="#b06000" strokeWidth={2} />}
+          >
+            {messages.alerts.offlineCached}
+          </Banner>
+        </View>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+          {alerts.length > 0 ? (
+            alerts.map((alert) => renderAlertCard(alert, true))
+          ) : (
+            renderEmpty()
+          )}
+          {alerts.length > 0 && (
+            <Text style={styles.disclaimerText}>&quot;Alerts shown when fuel prices rise by 5% or more in 30 days.&quot;</Text>
+          )}
+        </ScrollView>
       </View>
     );
   }
@@ -115,8 +128,11 @@ export default function FareAlerts() {
   if (error) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Fare Alerts" actionLabel="U" />
+        <TopAppBar title="Fare Alerts" actionLabel="👤" />
         <View style={styles.emptyContainer}>
+          <View style={styles.errorIconBadge}>
+            <AlertCircle size={24} color="#ea4335" strokeWidth={2} />
+          </View>
           <Text style={styles.emptyTitle}>{error}</Text>
           <Text style={styles.emptySubtitle}>
             Unable to reach Indlela alert service. Please verify your connection or try again.
@@ -134,7 +150,7 @@ export default function FareAlerts() {
   if (alerts.length === 0) {
     return (
       <View style={styles.container}>
-        <TopAppBar title="Fare Alerts" actionLabel="U" />
+        <TopAppBar title="Fare Alerts" actionLabel="👤" />
         {renderEmpty()}
       </View>
     );
@@ -142,99 +158,127 @@ export default function FareAlerts() {
 
   return (
     <View style={styles.container}>
-      <TopAppBar title="Fare Alerts" actionLabel="U" />
-      {alerts.map((alert) => renderAlertCard(alert))}
+      <TopAppBar title="Fare Alerts" actionLabel="👤" />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        {alerts.map((alert) => renderAlertCard(alert))}
+        <Text style={styles.disclaimerText}>&quot;Alerts shown when fuel prices rise by 5% or more in 30 days.&quot;</Text>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: tokens.color.background },
+  scroll: { flex: 1 },
+  scrollContent: { paddingVertical: tokens.space.sm, paddingBottom: 40 },
+  bannerContainer: { paddingHorizontal: tokens.space.md, marginBottom: tokens.space.xs },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: tokens.space.sm },
-  loadingText: { fontSize: tokens.font.body.size, color: tokens.color.text },
+  loadingText: { fontSize: tokens.font.body.size, fontWeight: '600', color: tokens.color.text },
   loadingSubtitle: { fontSize: tokens.font.caption.size, color: tokens.color.textSecondary },
   emptyContainer: { padding: tokens.space.xl, alignItems: 'center', gap: tokens.space.md },
-  emptyTitle: { fontSize: tokens.font.h3.size, fontWeight: '600', color: tokens.color.text, textAlign: 'center' },
-  emptySubtitle: { fontSize: tokens.font.body.size, color: tokens.color.textSecondary, textAlign: 'center' },
+  emptyIconBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#e6f4ea',
+    borderWidth: 2,
+    borderColor: '#ceead6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  emptyIconText: { fontSize: 28, color: '#137333', fontWeight: '700' },
+  errorIconBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#fce8e6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  errorIconText: { fontSize: 24, fontWeight: '700', color: '#ea4335' },
+  emptyTitle: { fontSize: tokens.font.h3.size, fontWeight: '700', color: tokens.color.text, textAlign: 'center' },
+  emptySubtitle: { fontSize: tokens.font.body.size, color: tokens.color.textSecondary, textAlign: 'center', lineHeight: 20 },
   refreshButton: { marginTop: tokens.space.sm, alignSelf: 'center' },
+  disclaimerText: {
+    fontSize: tokens.font.caption.size,
+    color: tokens.color.textSecondary,
+    textAlign: 'center',
+    marginVertical: tokens.space.md,
+    fontStyle: 'italic',
+    paddingHorizontal: tokens.space.lg,
+  },
   alertCard: {
-    backgroundColor: '#fff8e1',
-    borderRadius: 12,
+    backgroundColor: '#fffdf5',
+    borderRadius: 8,
     padding: tokens.space.md,
     marginHorizontal: tokens.space.md,
     marginBottom: tokens.space.sm,
-    borderLeftWidth: 4,
-    borderLeftColor: tokens.color.warning,
+    borderWidth: 1,
+    borderColor: '#f9ab00',
+  },
+  cachedCard: {
+    backgroundColor: tokens.color.surface,
+    borderColor: tokens.color.border,
   },
   alertHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: tokens.space.sm,
+    marginBottom: tokens.space.xs,
+  },
+  alertHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fuelIcon: {
+    fontSize: 16,
+    marginRight: 6,
   },
   alertPill: {
-    backgroundColor: '#ffe082',
+    backgroundColor: '#fef0c7',
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 4,
   },
   alertPillText: {
-    fontSize: tokens.font.caption.size,
-    fontWeight: '600',
-    color: '#8d6e00',
-  },
-  alertIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#fbc02d',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  alertIconText: {
-    color: '#ffffff',
-    fontSize: tokens.font.caption.size,
+    fontSize: 11,
     fontWeight: '700',
+    color: '#b06000',
+  },
+  cachedPill: {
+    backgroundColor: '#f1f3f4',
+  },
+  cachedPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: tokens.color.textSecondary,
   },
   alertDescription: {
     fontSize: tokens.font.body.size,
+    fontWeight: '600',
     color: tokens.color.text,
-    marginBottom: tokens.space.xs,
+    marginVertical: 4,
   },
   alertRoute: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: tokens.space.xs,
+    marginTop: 4,
   },
   alertRouteLabel: {
     fontSize: tokens.font.caption.size,
     color: tokens.color.textSecondary,
     marginRight: tokens.space.xs,
+    fontWeight: '500',
   },
   alertRouteValue: {
     fontSize: tokens.font.caption.size,
-    color: tokens.color.textSecondary,
-  },
-  alertMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    fontWeight: '600',
+    color: tokens.color.text,
   },
   alertMetaText: {
     fontSize: tokens.font.caption.size,
     color: tokens.color.textSecondary,
-  },
-  listItem: {
-    paddingHorizontal: tokens.space.md,
-    marginBottom: tokens.space.sm,
-  },
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: tokens.color.primary,
-    color: '#ffffff',
-    textAlign: 'center',
-    fontSize: tokens.font.caption.size,
-    fontWeight: '600',
   },
 });

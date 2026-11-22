@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { CheckCircle2 } from 'lucide-react-native';
 import { Modal } from '../../components/Modal';
 import { messages } from '../../lib/messages';
-import { tokens } from '../../theme/tokens';
 
 type ReportSuccessProps = {
   route: string;
@@ -11,7 +11,7 @@ type ReportSuccessProps = {
 
 export default function ReportSuccess({ route, onDismiss }: ReportSuccessProps) {
   return (
-    <View>
+    <View style={styles.overlay}>
       <Modal
         title="Report received"
         text={messages.fares.reportSuccess(route)}
@@ -19,7 +19,7 @@ export default function ReportSuccess({ route, onDismiss }: ReportSuccessProps) 
       >
         <View style={styles.checkmarkContainer}>
           <View style={styles.checkmarkBadge}>
-            <Text style={styles.checkmark}>✓</Text>
+            <CheckCircle2 size={32} color="#137333" strokeWidth={2.5} />
           </View>
         </View>
       </Modal>
@@ -28,7 +28,25 @@ export default function ReportSuccess({ route, onDismiss }: ReportSuccessProps) 
 }
 
 const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
   checkmarkContainer: { marginVertical: 12, alignItems: 'center' },
-  checkmarkBadge: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#e8f5e9', alignItems: 'center', justifyContent: 'center' },
-  checkmark: { fontSize: 24, color: tokens.color.success, fontWeight: '700' },
+  checkmarkBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#e6f4ea',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkmark: { fontSize: 28, color: '#34a853', fontWeight: '700' },
 });
