@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, FlatList, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ban, PlusCircle, WifiOff, Coins, AlertCircle } from 'lucide-react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../../lib/supabase';
 import { viewFares, getCachedFares, type FareReport } from '../../lib/api/fares';
@@ -97,7 +98,7 @@ export default function Fares({ navigation }: FaresProps = {}) {
         <EmptyState
           icon={
             <View style={styles.errorIconBadge}>
-              <Text style={styles.errorIconText}>!</Text>
+              <AlertCircle size={24} color="#ea4335" strokeWidth={2} />
             </View>
           }
           text={error}
@@ -157,7 +158,8 @@ export default function Fares({ navigation }: FaresProps = {}) {
       />
       {isOffline ? (
         <View style={[styles.reportCta, styles.reportCtaDisabled]}>
-          <Text style={styles.reportCtaDisabledText}>⃠ Reporting disabled offline</Text>
+          <Ban size={16} color="#80868b" strokeWidth={2} style={{ marginRight: 6 }} />
+          <Text style={styles.reportCtaDisabledText}>Reporting disabled offline</Text>
         </View>
       ) : (
         <TouchableOpacity
@@ -165,7 +167,8 @@ export default function Fares({ navigation }: FaresProps = {}) {
           onPress={() => navigation?.navigate?.('report-fare')}
           accessibilityLabel="Report a fare"
         >
-          <Text style={styles.reportCtaText}>⊕ Report a fare</Text>
+          <PlusCircle size={16} color="#1a73e8" strokeWidth={2} style={{ marginRight: 6 }} />
+          <Text style={styles.reportCtaText}>Report a fare</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -178,7 +181,7 @@ export default function Fares({ navigation }: FaresProps = {}) {
         <EmptyState
           icon={
             <View style={styles.offlineIconBadge}>
-              <Text style={styles.offlineIconText}>🛜</Text>
+              <WifiOff size={28} color="#b06000" strokeWidth={2} />
             </View>
           }
           text={messages.fares.offlineNoCache}
@@ -213,7 +216,7 @@ export default function Fares({ navigation }: FaresProps = {}) {
           <EmptyState
             icon={
               <View style={styles.moneyIconBadge}>
-                <Text style={styles.moneyIconText}>[$:]</Text>
+                <Coins size={28} color="#137333" strokeWidth={2} />
               </View>
             }
             text={messages.fares.empty}
@@ -259,6 +262,7 @@ const styles = StyleSheet.create({
   },
   cachedBadgeText: { fontSize: 11, fontWeight: '600', color: tokens.color.textSecondary },
   reportCta: {
+    flexDirection: 'row',
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',

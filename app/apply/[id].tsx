@@ -1,6 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import {
+  CheckCircle2,
+  Info,
+  ArrowLeft,
+  WifiOff,
+  AlertCircle,
+  Building2,
+  ShieldAlert,
+} from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
 import { submitApplication } from '../../lib/api/jobs';
 import { messages } from '../../lib/messages';
@@ -93,7 +102,7 @@ export default function ApplicationFlow({ jobId: jobIdProp, navigation }: Applic
         <ScrollView style={styles.scroll} contentContainerStyle={styles.successContent}>
           <View style={styles.successBadgeWrap}>
             <View style={styles.successCheckBadge}>
-              <Text style={styles.successCheckmark}>✓</Text>
+              <CheckCircle2 size={36} color="#137333" strokeWidth={2.5} />
             </View>
           </View>
 
@@ -126,8 +135,9 @@ export default function ApplicationFlow({ jobId: jobIdProp, navigation }: Applic
           </View>
 
           <View style={styles.activityNoteCard}>
+            <Info size={14} color="#174ea6" strokeWidth={2} style={{ marginRight: 6 }} />
             <Text style={styles.activityNoteText}>
-              ℹ We will log this application under your Indlela Activity tab (S10).
+              We will log this application under your Indlela Activity tab (S10).
             </Text>
           </View>
 
@@ -135,7 +145,10 @@ export default function ApplicationFlow({ jobId: jobIdProp, navigation }: Applic
             variant="primary"
             onPress={() => navigation?.goBack?.() || navigation?.navigate?.('index')}
           >
-            ← Back to Job Details (S8)
+            <View style={styles.buttonContentRow}>
+              <ArrowLeft size={16} color="#ffffff" strokeWidth={2} style={{ marginRight: 6 }} />
+              <Text style={styles.buttonText}>Back to Job Details (S8)</Text>
+            </View>
           </Button>
         </ScrollView>
       </View>
@@ -153,7 +166,7 @@ export default function ApplicationFlow({ jobId: jobIdProp, navigation }: Applic
         {offline && (
           <Banner
             variant="error"
-            icon="🛜"
+            icon={<WifiOff size={18} color="#ea4335" strokeWidth={2} />}
             title={messages.jobs.offlineSubmit}
           >
             Network Required for Submission: Applications cannot be queued without a verified carrier connection.
@@ -163,7 +176,7 @@ export default function ApplicationFlow({ jobId: jobIdProp, navigation }: Applic
         {error && (
           <Banner
             variant="error"
-            icon="!"
+            icon={<AlertCircle size={18} color="#ea4335" strokeWidth={2} />}
             title={messages.jobs.submitError}
           >
             Application payload timed out. Your information has been preserved.
@@ -172,7 +185,7 @@ export default function ApplicationFlow({ jobId: jobIdProp, navigation }: Applic
 
         {/* Position Selected Card */}
         <View style={styles.positionCard}>
-          <Text style={styles.positionIcon}>🏪</Text>
+          <Building2 size={20} color="#1a73e8" strokeWidth={2} style={styles.positionIcon} />
           <View style={styles.positionTextWrap}>
             <Text style={styles.positionTag}>POSITION SELECTED</Text>
             <Text style={styles.positionTitle}>
@@ -212,7 +225,7 @@ export default function ApplicationFlow({ jobId: jobIdProp, navigation }: Applic
 
           {/* Commute route attachment note */}
           <View style={styles.commuteNoticeCard}>
-            <Text style={styles.commuteNoticeIcon}>🛡</Text>
+            <ShieldAlert size={16} color="#b06000" strokeWidth={2} style={styles.commuteNoticeIcon} />
             <Text style={styles.commuteNoticeText}>
               Your verified Rustenburg commute route and weekly fare budget will be attached.
             </Text>
@@ -341,6 +354,19 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 10,
     marginBottom: tokens.space.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   activityNoteText: { fontSize: 12, color: '#174ea6', textAlign: 'center' },
+  buttonContentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: tokens.font.button.size,
+    fontWeight: '600',
+  },
 });

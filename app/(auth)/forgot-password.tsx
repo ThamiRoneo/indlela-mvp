@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { AlertTriangle, Mail, ShieldCheck, ArrowLeft } from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
 import { messages } from '../../lib/messages';
 import { isValidPassword } from '../../lib/rules/password';
@@ -134,14 +135,15 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
 
         {offline && (
           <View style={styles.offlineBanner}>
-            <Text style={styles.offlineText}>⚠ No connection. Please check your internet.</Text>
+            <AlertTriangle size={16} color="#b06000" strokeWidth={2} style={{ marginRight: 6 }} />
+            <Text style={styles.offlineText}>No connection. Please check your internet.</Text>
           </View>
         )}
 
         {success ? (
           <View style={styles.successWrapper}>
             <View style={styles.mailIconCircle}>
-              <Text style={styles.mailIcon}>✉</Text>
+              <Mail size={24} color="#1a73e8" strokeWidth={2} />
             </View>
             <View style={styles.badgeSuccess}>
               <Text style={styles.badgeSuccessText}>LINK DISPATCHED</Text>
@@ -208,7 +210,7 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
             </Button>
 
             <View style={styles.infoBox}>
-              <Text style={styles.infoIcon}>🛡️</Text>
+              <ShieldCheck size={16} color="#174ea6" strokeWidth={2} />
               <Text style={styles.infoText}>
                 Your taxi rank and daily commute route preferences remain protected and will be available once logged in.
               </Text>
@@ -219,7 +221,10 @@ export default function PasswordReset({ navigation, mode = 'request' }: Password
               style={styles.backLink}
               accessibilityRole="button"
             >
-              <Text style={styles.backLinkText}>← Back to log in</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                <ArrowLeft size={16} color={tokens.color.primary} strokeWidth={2} style={{ marginRight: 6 }} />
+                <Text style={styles.backLinkText}>Back to log in</Text>
+              </View>
             </TouchableOpacity>
           </View>
         )}
@@ -262,8 +267,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: tokens.space.md,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  offlineText: { fontSize: tokens.font.body.size, color: '#b06000', fontWeight: '500' },
+  offlineText: { fontSize: tokens.font.body.size, color: '#b06000', fontWeight: '500', flex: 1 },
   errorBanner: { padding: tokens.space.md, backgroundColor: '#fce8e6', borderRadius: 8 },
   errorText: { fontSize: tokens.font.body.size, color: tokens.color.error },
   infoBox: {

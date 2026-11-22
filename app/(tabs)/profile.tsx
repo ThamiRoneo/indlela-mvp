@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { AlertTriangle, Check } from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
 import { messages } from '../../lib/messages';
 import { tokens } from '../../theme/tokens';
@@ -103,7 +104,8 @@ export default function ProfileSettings({ navigation }: ProfileSettingsProps = {
 
         {offline && (
           <View style={styles.offlineBanner}>
-            <Text style={styles.offlineText}>⚠ {messages.profile.offline}</Text>
+            <AlertTriangle size={16} color="#b06000" strokeWidth={2} style={{ marginRight: 6 }} />
+            <Text style={styles.offlineText}>{messages.profile.offline}</Text>
           </View>
         )}
 
@@ -197,7 +199,8 @@ export default function ProfileSettings({ navigation }: ProfileSettingsProps = {
         {success && (
           <View style={styles.toastContainer}>
             <View style={styles.toast}>
-              <Text style={styles.toastText}>✓ Saved.</Text>
+              <Check size={16} color="#34a853" strokeWidth={2.5} style={{ marginRight: 6 }} />
+              <Text style={styles.toastText}>Saved.</Text>
             </View>
           </View>
         )}
@@ -223,8 +226,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     marginVertical: tokens.space.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  offlineText: { fontSize: tokens.font.body.size, color: '#b06000', fontWeight: '500' },
+  offlineText: { fontSize: tokens.font.body.size, color: '#b06000', fontWeight: '500', flex: 1 },
   errorBanner: {
     padding: tokens.space.md,
     backgroundColor: '#fce8e6',
@@ -306,6 +311,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   toastText: { color: '#ffffff', fontSize: tokens.font.body.size, fontWeight: '500' },
 });

@@ -1,6 +1,17 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import {
+  FileCheck2,
+  Bell,
+  MessageSquare,
+  Users,
+  ClipboardList,
+  Clock,
+  Receipt,
+  WifiOff,
+  AlertCircle,
+} from 'lucide-react-native';
 import { viewActivity } from '../../lib/api/activity';
 import { messages } from '../../lib/messages';
 import { tokens } from '../../theme/tokens';
@@ -24,15 +35,30 @@ const formatTimestamp = (iso: string) => {
 const activityIcon = (type: string) => {
   switch (type) {
     case 'fare_report':
-      return { bg: '#e6f4ea', color: '#137333', glyph: '🧾' };
+      return {
+        bg: '#e6f4ea',
+        icon: <FileCheck2 size={20} color="#137333" strokeWidth={2} />,
+      };
     case 'alert_received':
-      return { bg: '#fef7e0', color: '#b06000', glyph: '🔔' };
+      return {
+        bg: '#fef7e0',
+        icon: <Bell size={20} color="#b06000" strokeWidth={2} />,
+      };
     case 'comment_received':
-      return { bg: '#e8f0fe', color: '#1a73e8', glyph: '💬' };
+      return {
+        bg: '#e8f0fe',
+        icon: <MessageSquare size={20} color="#1a73e8" strokeWidth={2} />,
+      };
     case 'follow':
-      return { bg: '#f3e8fd', color: '#9334e6', glyph: '👥' };
+      return {
+        bg: '#f3e8fd',
+        icon: <Users size={20} color="#9334e6" strokeWidth={2} />,
+      };
     default:
-      return { bg: '#f1f3f4', color: '#5f6368', glyph: '📋' };
+      return {
+        bg: '#f1f3f4',
+        icon: <ClipboardList size={20} color="#5f6368" strokeWidth={2} />,
+      };
   }
 };
 
@@ -73,16 +99,16 @@ export default function Activity() {
   }, [load]);
 
   const renderActivityItem = (activity: any) => {
-    const { bg, color, glyph } = activityIcon(activity.type);
+    const { bg, icon } = activityIcon(activity.type);
     return (
       <View key={activity.id || activity.description} style={styles.card}>
         <View style={[styles.iconWrap, { backgroundColor: bg }]}>
-          <Text style={[styles.iconGlyph, { color }]}>{glyph}</Text>
+          {icon}
         </View>
         <View style={styles.itemBody}>
           <Text style={styles.itemLabel}>{activity.description}</Text>
           <View style={styles.timeRow}>
-            <Text style={styles.clockIcon}>⏱</Text>
+            <Clock size={12} color={tokens.color.textSecondary} strokeWidth={2} style={{ marginRight: 4 }} />
             <Text style={styles.itemTime}>{formatTimestamp(activity.created_at)}</Text>
           </View>
         </View>
@@ -93,7 +119,7 @@ export default function Activity() {
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconBadge}>
-        <Text style={styles.emptyIconText}>🧾</Text>
+        <Receipt size={28} color="#1a73e8" strokeWidth={2} />
       </View>
       <Text style={styles.emptyTitle}>{messages.activity.empty}</Text>
       <Text style={styles.emptySubtitle}>
@@ -120,7 +146,12 @@ export default function Activity() {
       <View style={styles.container}>
         <TopAppBar title="Activity" actionLabel="👤" />
         <View style={styles.bannerContainer}>
-          <Banner variant="alert" icon="🛜">{messages.activity.offlineCached}</Banner>
+          <Banner
+            variant="alert"
+            icon={<WifiOff size={18} color="#b06000" strokeWidth={2} />}
+          >
+            {messages.activity.offlineCached}
+          </Banner>
         </View>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
           {activities.length > 0 ? (
@@ -147,7 +178,7 @@ export default function Activity() {
         <TopAppBar title="Activity" actionLabel="👤" />
         <View style={styles.emptyContainer}>
           <View style={styles.errorIconBadge}>
-            <Text style={styles.errorIconText}>!</Text>
+            <AlertCircle size={28} color="#ea4335" strokeWidth={2} />
           </View>
           <Text style={styles.emptyTitle}>{error}</Text>
           <Text style={styles.emptySubtitle}>

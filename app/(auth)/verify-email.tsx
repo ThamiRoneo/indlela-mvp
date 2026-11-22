@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { CheckCircle2, Mail } from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
 import { tokens } from '../../theme/tokens';
 import { TopAppBar } from '../../components/TopAppBar';
@@ -47,13 +48,13 @@ export default function VerifyEmail({ email, navigation }: VerifyEmailProps) {
       />
 
       <View style={styles.successBanner}>
-        <Text style={styles.successBannerIcon}>✓</Text>
+        <CheckCircle2 size={16} color="#137333" strokeWidth={2} style={{ marginRight: 4 }} />
         <Text style={styles.successBannerText}>Account created. Please verify your email.</Text>
       </View>
 
       <View style={styles.centerHero}>
         <View style={styles.mailIconCircle}>
-          <Text style={styles.mailIcon}>✉</Text>
+          <Mail size={32} color="#137333" strokeWidth={2} />
         </View>
 
         <Text style={styles.heading}>Check your inbox</Text>

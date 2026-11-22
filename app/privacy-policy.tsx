@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { Check, Lock, ArrowLeft } from 'lucide-react-native';
 import { tokens } from '../theme/tokens';
 import { TopAppBar } from '../components/TopAppBar';
 
@@ -41,7 +42,7 @@ export default function PrivacyPolicy({ navigation }: PrivacyPolicyProps = {}) {
 
           <View style={styles.bulletList}>
             <View style={styles.bulletItem}>
-              <Text style={styles.checkIcon}>✓</Text>
+              <Check size={16} color="#137333" strokeWidth={2.5} style={{ marginTop: 2 }} />
               <Text style={styles.bulletText}>
                 <Text style={styles.bulletTitle}>Email & Rank: </Text>
                 Used strictly for route calculation and commute matching.
@@ -49,7 +50,7 @@ export default function PrivacyPolicy({ navigation }: PrivacyPolicyProps = {}) {
             </View>
 
             <View style={styles.bulletItem}>
-              <Text style={styles.checkIcon}>✓</Text>
+              <Check size={16} color="#137333" strokeWidth={2.5} style={{ marginTop: 2 }} />
               <Text style={styles.bulletText}>
                 <Text style={styles.bulletTitle}>Budget & Fares: </Text>
                 Powers your net gain calculations and taxi fare alerts.
@@ -57,7 +58,7 @@ export default function PrivacyPolicy({ navigation }: PrivacyPolicyProps = {}) {
             </View>
 
             <View style={styles.bulletItem}>
-              <Text style={styles.checkIcon}>✓</Text>
+              <Check size={16} color="#137333" strokeWidth={2.5} style={{ marginTop: 2 }} />
               <Text style={styles.bulletText}>
                 <Text style={styles.bulletTitle}>User Control: </Text>
                 Permanent account deletion available anytime in Profile & Settings.
@@ -66,7 +67,7 @@ export default function PrivacyPolicy({ navigation }: PrivacyPolicyProps = {}) {
           </View>
 
           <View style={styles.securityBox}>
-            <Text style={styles.lockIcon}>🔒</Text>
+            <Lock size={16} color="#1a73e8" strokeWidth={2} />
             <Text style={styles.securityText}>
               We never sell your commute data or personal information to third-party brokers.
             </Text>
@@ -79,7 +80,10 @@ export default function PrivacyPolicy({ navigation }: PrivacyPolicyProps = {}) {
           accessibilityRole="button"
           accessibilityLabel="Back"
         >
-          <Text style={styles.backButtonText}>← Back</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <ArrowLeft size={16} color={tokens.color.primary} strokeWidth={2} style={{ marginRight: 6 }} />
+            <Text style={styles.backButtonText}>Back</Text>
+          </View>
         </TouchableOpacity>
       </ScrollView>
     </View>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { CheckCircle2 } from 'lucide-react-native';
 import { Modal } from '../../components/Modal';
 import { messages } from '../../lib/messages';
 
@@ -18,7 +19,7 @@ export default function ReportSuccess({ route, onDismiss }: ReportSuccessProps) 
       >
         <View style={styles.checkmarkContainer}>
           <View style={styles.checkmarkBadge}>
-            <Text style={styles.checkmark}>✓</Text>
+            <CheckCircle2 size={32} color="#137333" strokeWidth={2.5} />
           </View>
         </View>
       </Modal>

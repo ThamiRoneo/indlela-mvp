@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react-native';
 import { messages } from '../lib/messages';
 import { tokens } from '../theme/tokens';
 
@@ -107,12 +108,13 @@ export const Card = ({
           <Text style={styles.fareRoute}>{displayRoute}</Text>
           {staleness ? (
             <View style={styles.statusRow}>
-              {staleActive && <Text style={styles.staleIcon}>⚠ </Text>}
+              {staleActive && <AlertTriangle size={13} color="#b06000" strokeWidth={2} style={{ marginRight: 4 }} />}
               <Text style={[styles.staleness, staleActive && styles.staleText]}>{staleness}</Text>
             </View>
           ) : statusText ? (
             <View style={styles.statusRow}>
-              <Text style={styles.statusText}>{statusText}</Text>
+              <CheckCircle2 size={13} color="#137333" strokeWidth={2} style={{ marginRight: 4 }} />
+              <Text style={styles.statusText}>{statusText.replace(/^[✓✔]\s*/, '')}</Text>
             </View>
           ) : null}
         </View>

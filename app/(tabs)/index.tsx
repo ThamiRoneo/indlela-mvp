@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { AlertCircle, SlidersHorizontal, Briefcase, Search, WifiOff } from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
 import { viewJobFeed, cacheJobs, getCachedJobs, type JobFeedItem } from '../../lib/api/jobs';
 import { messages } from '../../lib/messages';
@@ -102,7 +103,7 @@ export default function HomeFeed({ navigation }: HomeFeedProps = {}) {
         <EmptyState
           icon={
             <View style={styles.errorIconBadge}>
-              <Text style={styles.errorIconText}>!</Text>
+              <AlertCircle size={24} color="#ea4335" strokeWidth={2} />
             </View>
           }
           text={error}
@@ -130,7 +131,11 @@ export default function HomeFeed({ navigation }: HomeFeedProps = {}) {
       <View style={styles.content}>
         {offline && (
           <View style={styles.bannerWrap}>
-            <Banner variant="alert" icon="🛜" title={messages.jobs.offlineCached}>
+            <Banner
+              variant="alert"
+              icon={<WifiOff size={18} color="#b06000" strokeWidth={2} />}
+              title={messages.jobs.offlineCached}
+            >
               Showing cached opportunities. Transport costs and live fares will refresh once connected.
             </Banner>
           </View>
@@ -139,7 +144,7 @@ export default function HomeFeed({ navigation }: HomeFeedProps = {}) {
         <View style={styles.controls}>
           <View style={styles.toggleCard}>
             <View style={styles.toggleIconBadge}>
-              <Text style={styles.toggleIcon}>🗂</Text>
+              <SlidersHorizontal size={18} color="#1a73e8" strokeWidth={2} />
             </View>
             <View style={styles.toggleTextWrap}>
               <Text style={styles.toggleTitle}>{messages.jobs.affordabilityToggle}</Text>
@@ -184,7 +189,7 @@ export default function HomeFeed({ navigation }: HomeFeedProps = {}) {
           <EmptyState
             icon={
               <View style={styles.emptyIconBadge}>
-                <Text style={styles.emptyIconText}>💼</Text>
+                <Briefcase size={28} color="#5f6368" strokeWidth={2} />
               </View>
             }
             text={messages.jobs.empty}
@@ -194,7 +199,7 @@ export default function HomeFeed({ navigation }: HomeFeedProps = {}) {
         ) : displayJobs.length === 0 ? (
           <View style={styles.emptyFilterContainer}>
             <View style={styles.emptyIconBadge}>
-              <Text style={styles.emptyIconText}>🔍</Text>
+              <Search size={28} color="#5f6368" strokeWidth={2} />
             </View>
             <Text style={styles.emptyFilterTitle}>No affordable jobs found</Text>
             <Text style={styles.emptyFilterSubtitle}>{messages.jobs.emptyAffordable}</Text>

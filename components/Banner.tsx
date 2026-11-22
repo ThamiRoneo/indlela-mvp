@@ -1,10 +1,18 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import {
+  AlertTriangle,
+  Info,
+  AlertCircle,
+  CheckCircle2,
+  WifiOff,
+  Fuel,
+} from 'lucide-react-native';
 
 type BannerProps = {
   variant?: 'alert' | 'info' | 'error' | 'success';
   children: React.ReactNode;
-  icon?: string;
+  icon?: string | React.ReactNode;
   title?: string;
 };
 
@@ -14,42 +22,71 @@ const variantStyles = {
     border: '#f9ab00',
     text: '#202124',
     titleColor: '#b06000',
-    defaultIcon: '⚠',
   },
   info: {
     bg: '#e8f0fe',
     border: '#1a73e8',
     text: '#202124',
     titleColor: '#174ea6',
-    defaultIcon: 'ℹ',
   },
   error: {
     bg: '#fce8e6',
     border: '#ea4335',
     text: '#202124',
     titleColor: '#c5221f',
-    defaultIcon: '!',
   },
   success: {
     bg: '#e6f4ea',
     border: '#34a853',
     text: '#202124',
     titleColor: '#137333',
-    defaultIcon: '✓',
   },
 };
 
 export const Banner = ({ variant = 'info', children, icon, title }: BannerProps) => {
   const current = variantStyles[variant] || variantStyles.info;
-  const displayIcon = icon !== undefined ? icon : current.defaultIcon;
+
+  const renderIcon = () => {
+    if (React.isValidElement(icon)) return icon;
+    if (icon === '🛜') {
+      return <WifiOff size={18} color={current.titleColor} strokeWidth={2} />;
+    }
+    if (icon === '⛽') {
+      return <Fuel size={18} color={current.titleColor} strokeWidth={2} />;
+    }
+    if (icon === '⚠') {
+      return <AlertTriangle size={18} color={current.titleColor} strokeWidth={2} />;
+    }
+    if (icon === 'ℹ') {
+      return <Info size={18} color={current.titleColor} strokeWidth={2} />;
+    }
+    if (icon === '!') {
+      return <AlertCircle size={18} color={current.titleColor} strokeWidth={2} />;
+    }
+    if (icon === '✓') {
+      return <CheckCircle2 size={18} color={current.titleColor} strokeWidth={2} />;
+    }
+    if (typeof icon === 'string') {
+      return <Text style={[styles.iconText, { color: current.titleColor }]}>{icon}</Text>;
+    }
+
+    // Default variant icons
+    switch (variant) {
+      case 'alert':
+        return <AlertTriangle size={18} color={current.titleColor} strokeWidth={2} />;
+      case 'error':
+        return <AlertCircle size={18} color={current.titleColor} strokeWidth={2} />;
+      case 'success':
+        return <CheckCircle2 size={18} color={current.titleColor} strokeWidth={2} />;
+      case 'info':
+      default:
+        return <Info size={18} color={current.titleColor} strokeWidth={2} />;
+    }
+  };
 
   return (
     <View style={[styles.banner, { backgroundColor: current.bg, borderColor: current.border }]}>
-      {displayIcon ? (
-        <View style={styles.iconWrap}>
-          <Text style={[styles.iconText, { color: current.titleColor }]}>{displayIcon}</Text>
-        </View>
-      ) : null}
+      <View style={styles.iconWrap}>{renderIcon()}</View>
       <View style={styles.contentWrap}>
         {title ? (
           <Text style={[styles.title, { color: current.titleColor }]}>{title}</Text>

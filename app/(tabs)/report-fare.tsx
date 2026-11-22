@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, FlatList, TextInput, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Bus, ChevronDown } from 'lucide-react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../../lib/supabase';
 import { reportFare } from '../../lib/api/fares';
@@ -129,7 +130,7 @@ export default function ReportFare({ navigation }: ReportFareProps = {}) {
 
         {selectedRank && (
           <View style={styles.rankCard}>
-            <Text style={styles.rankIcon}>🚐</Text>
+            <Bus size={20} color="#1a73e8" strokeWidth={2} style={styles.rankIcon} />
             <View style={styles.rankCardTextWrap}>
               <Text style={styles.rankCardLabel}>Rank:</Text>
               <Text style={styles.rankCardName}>{selectedRank.name}</Text>
@@ -195,7 +196,7 @@ export default function ReportFare({ navigation }: ReportFareProps = {}) {
               <Text style={styles.selectedRouteName}>
                 {selectedRank.name.replace(/ Taxi Rank/i, '')} → {selectedRoute.destination}
               </Text>
-              <Text style={styles.chevron}>⌵</Text>
+              <ChevronDown size={18} color="#5f6368" strokeWidth={2} />
             </TouchableOpacity>
             <Text style={styles.helper}>Tap to select from verified rank routes</Text>
 

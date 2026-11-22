@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { Fuel, CheckCircle2, AlertCircle, WifiOff } from 'lucide-react-native';
 import { viewAlerts } from '../../lib/api/activity';
 import { messages } from '../../lib/messages';
 import { tokens } from '../../theme/tokens';
@@ -50,7 +51,7 @@ export default function FareAlerts() {
     <View key={alert.id || alert.description} style={[styles.alertCard, isCached && styles.cachedCard]}>
       <View style={styles.alertHeader}>
         <View style={styles.alertHeaderLeft}>
-          <Text style={styles.fuelIcon}>⛽</Text>
+          <Fuel size={16} color="#b06000" strokeWidth={2} style={styles.fuelIcon} />
           <View style={[styles.alertPill, isCached && styles.cachedPill]}>
             <Text style={[styles.alertPillText, isCached && styles.cachedPillText]}>
               {isCached ? 'CACHED ALERT' : 'FARE ALERT • FUEL INCREASE'}
@@ -70,7 +71,7 @@ export default function FareAlerts() {
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconBadge}>
-        <Text style={styles.emptyIconText}>✓</Text>
+        <CheckCircle2 size={28} color="#137333" strokeWidth={2} />
       </View>
       <Text style={styles.emptyTitle}>{messages.alerts.empty}</Text>
       <Text style={styles.emptySubtitle}>
@@ -103,7 +104,12 @@ export default function FareAlerts() {
       <View style={styles.container}>
         <TopAppBar title="Fare Alerts" actionLabel="👤" />
         <View style={styles.bannerContainer}>
-          <Banner variant="alert" icon="🛜">{messages.alerts.offlineCached}</Banner>
+          <Banner
+            variant="alert"
+            icon={<WifiOff size={18} color="#b06000" strokeWidth={2} />}
+          >
+            {messages.alerts.offlineCached}
+          </Banner>
         </View>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
           {alerts.length > 0 ? (
@@ -125,7 +131,7 @@ export default function FareAlerts() {
         <TopAppBar title="Fare Alerts" actionLabel="👤" />
         <View style={styles.emptyContainer}>
           <View style={styles.errorIconBadge}>
-            <Text style={styles.errorIconText}>!</Text>
+            <AlertCircle size={24} color="#ea4335" strokeWidth={2} />
           </View>
           <Text style={styles.emptyTitle}>{error}</Text>
           <Text style={styles.emptySubtitle}>

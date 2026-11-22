@@ -1,6 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import {
+  AlertCircle,
+  WifiOff,
+  Building2,
+  MapPin,
+  Bus,
+  CheckCircle2,
+  AlertTriangle,
+  CloudOff,
+  ArrowRight,
+} from 'lucide-react-native';
 import { viewJobDetails, type JobFeedItem } from '../../lib/api/jobs';
 import { messages } from '../../lib/messages';
 import { tokens } from '../../theme/tokens';
@@ -82,7 +93,7 @@ export default function JobDetails({ jobId: jobIdProp, navigation }: JobDetailsP
         <EmptyState
           icon={
             <View style={styles.errorIconBadge}>
-              <Text style={styles.errorIconText}>!</Text>
+              <AlertCircle size={24} color="#ea4335" strokeWidth={2} />
             </View>
           }
           text={error}
@@ -121,7 +132,7 @@ export default function JobDetails({ jobId: jobIdProp, navigation }: JobDetailsP
         {offline && (
           <Banner
             variant="alert"
-            icon="🛜"
+            icon={<WifiOff size={18} color="#b06000" strokeWidth={2} />}
             title="Offline — displaying cached job details"
           >
             Fare data could not be refreshed offline. Net gain may vary once live fare is verified.
@@ -139,7 +150,7 @@ export default function JobDetails({ jobId: jobIdProp, navigation }: JobDetailsP
 
           {job.company && (
             <View style={styles.companyRow}>
-              <Text style={styles.companyIcon}>🏪</Text>
+              <Building2 size={16} color="#5f6368" strokeWidth={2} style={{ marginRight: 6 }} />
               <Text style={styles.companyText}>{job.company}</Text>
             </View>
           )}
@@ -154,9 +165,12 @@ export default function JobDetails({ jobId: jobIdProp, navigation }: JobDetailsP
             </View>
             <View style={styles.headerCol}>
               <Text style={styles.colLabel}>Location</Text>
-              <Text style={styles.locationValue}>
-                📍 {job.location || 'Rustenburg CBD'}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <MapPin size={14} color="#5f6368" strokeWidth={2} style={{ marginRight: 4 }} />
+                <Text style={styles.locationValue}>
+                  {job.location || 'Rustenburg CBD'}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
@@ -165,7 +179,7 @@ export default function JobDetails({ jobId: jobIdProp, navigation }: JobDetailsP
         <View style={styles.breakdownCard}>
           <View style={styles.breakdownHeader}>
             <View style={styles.breakdownHeaderLeft}>
-              <Text style={styles.minibusIcon}>🚐</Text>
+              <Bus size={18} color="#1a73e8" strokeWidth={2} style={{ marginRight: 8 }} />
               <Text style={styles.breakdownTitle}>Transport cost breakdown</Text>
             </View>
             <View style={styles.commuteTag}>
@@ -197,14 +211,20 @@ export default function JobDetails({ jobId: jobIdProp, navigation }: JobDetailsP
           {job.fareSource && (
             <View style={styles.breakdownRow}>
               <Text style={styles.breakdownLabel}>Fare source</Text>
-              <Text style={styles.fareSourceValue}>✓ {job.fareSource}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <CheckCircle2 size={13} color="#137333" strokeWidth={2} style={{ marginRight: 4 }} />
+                <Text style={styles.fareSourceValue}>{job.fareSource}</Text>
+              </View>
             </View>
           )}
 
           {job.stale && job.daysAgo != null && (
             <View style={styles.breakdownRow}>
               <Text style={styles.breakdownLabel}>Staleness</Text>
-              <Text style={styles.staleValue}>⚠ {messages.fares.stale(job.daysAgo)}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <AlertTriangle size={13} color="#b06000" strokeWidth={2} style={{ marginRight: 4 }} />
+                <Text style={styles.staleValue}>{messages.fares.stale(job.daysAgo)}</Text>
+              </View>
             </View>
           )}
 
@@ -238,7 +258,17 @@ export default function JobDetails({ jobId: jobIdProp, navigation }: JobDetailsP
             variant="primary"
             onPress={() => navigation?.navigate?.('apply', { id: job.id })}
           >
-            {offline ? '☁ Apply (Queue offline)' : 'Apply →'}
+            {offline ? (
+              <View style={styles.buttonContentRow}>
+                <CloudOff size={16} color="#ffffff" strokeWidth={2} style={{ marginRight: 6 }} />
+                <Text style={styles.buttonText}>Apply (Queue offline)</Text>
+              </View>
+            ) : (
+              <View style={styles.buttonContentRow}>
+                <Text style={styles.buttonText}>Apply</Text>
+                <ArrowRight size={16} color="#ffffff" strokeWidth={2} style={{ marginLeft: 6 }} />
+              </View>
+            )}
           </Button>
         </View>
       </ScrollView>
@@ -376,5 +406,15 @@ const styles = StyleSheet.create({
     color: tokens.color.textSecondary,
     marginBottom: tokens.space.sm,
     textAlign: 'center',
+  },
+  buttonContentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: tokens.font.button.size,
+    fontWeight: '600',
   },
 });

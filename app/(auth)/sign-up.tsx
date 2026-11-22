@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { ArrowLeft, Check } from 'lucide-react-native';
 import { supabase } from '../../lib/supabase';
 import { messages } from '../../lib/messages';
 import { isValidPassword } from '../../lib/rules/password';
@@ -73,7 +74,7 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
             accessibilityRole="button"
             accessibilityLabel="Back to welcome"
           >
-            <Text style={styles.backArrow}>←</Text>
+            <ArrowLeft size={24} color={tokens.color.text} strokeWidth={2} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Sign up</Text>
         </View>
@@ -137,7 +138,7 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
               accessibilityRole="checkbox"
               accessibilityLabel="I confirm I am 18 years or older"
             >
-              {is18 && <Text style={styles.checkboxCheck}>✓</Text>}
+              {is18 && <Check size={14} color="#ffffff" strokeWidth={3} />}
             </TouchableOpacity>
             <Text style={styles.checkboxLabel}>I confirm I am 18 years or older</Text>
           </View>
@@ -149,7 +150,7 @@ export default function SignUp({ navigation }: SignUpProps = {}) {
               accessibilityRole="checkbox"
               accessibilityLabel="I agree to the privacy policy"
             >
-              {agreedPrivacy && <Text style={styles.checkboxCheck}>✓</Text>}
+              {agreedPrivacy && <Check size={14} color="#ffffff" strokeWidth={3} />}
             </TouchableOpacity>
             <Text style={styles.checkboxLabel}>
               I agree to the{' '}
