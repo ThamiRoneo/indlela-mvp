@@ -128,6 +128,14 @@ export default function HomeFeed({ navigation }: HomeFeedProps = {}) {
     <View style={styles.container}>
       <TopAppBar title="Home" actionLabel="👤" />
       <View style={styles.content}>
+        {offline && (
+          <View style={styles.bannerWrap}>
+            <Banner variant="alert" icon="🛜" title={messages.jobs.offlineCached}>
+              Showing cached opportunities. Transport costs and live fares will refresh once connected.
+            </Banner>
+          </View>
+        )}
+
         <View style={styles.controls}>
           <View style={styles.toggleCard}>
             <View style={styles.toggleIconBadge}>
@@ -171,12 +179,6 @@ export default function HomeFeed({ navigation }: HomeFeedProps = {}) {
           <Text style={styles.sectionHeader}>{messages.jobs.sortedByNetGain}</Text>
           <Text style={styles.opportunitiesCount}>{displayJobs.length} opportunities</Text>
         </View>
-
-        {offline && (
-          <Banner variant="info" icon="🛜">
-            {messages.jobs.offlineCached}
-          </Banner>
-        )}
 
         {jobs.length === 0 ? (
           <EmptyState
@@ -286,6 +288,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   chips: { flexDirection: 'row', marginTop: tokens.space.xs },
+  bannerWrap: {
+    marginBottom: tokens.space.sm,
+  },
   sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
