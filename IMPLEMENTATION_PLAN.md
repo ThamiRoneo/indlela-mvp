@@ -1418,7 +1418,7 @@ All tests in this phase are pgTAP tests in `supabase/tests/`.
 | 2 | 21 Nov 2026 | Complete | 94 / 94 pgTAP | Phase 2: Data and security | Local Supabase `config.toml`; private storage buckets with SEC16–SEC18 policies, `050_storage.test.sql` and idempotent `scripts/seed-storage.ts`; OP15 applications INSERT policy; BR7 `fuel_price_check()` unfiltered UPDATE fix; SEC16–SEC18 documented in §6/§9 and PRD §11. |
 | 4 | 21 Nov 2026 | Complete | 149 / 149 (unit+component) | Phase 4: Dynamic Fare Index | `viewFares()` dedupes to the latest fare per route. |
 | 5 | 21 Nov 2026 | Complete | 149 / 149 (unit+component) | Phase 5: Affordability-First Job Feed | `viewJobFeed()` populates `fareSource`, `stale` and `daysAgo` from the latest nearest-rank fare; S7 uses shared Toggle + FilterChip with design labels and filter chips (Step 6b). |
-| 8 | 21 Nov 2026 | Complete | 149 / 149 unit+component; 94 / 94 pgTAP; 39 / 39 integration | Phase 8: Hardening | Test harness split into unit/component and integration configs; `npm run check` added; RLS/BR7/budget/rate-limit/privacy integration tests corrected for real Supabase behaviour; all 26 ESLint warnings resolved (Step 7). Lint 0 warnings, typecheck clean. Step 6b/7 files uncommitted pending the next commit request. |
+| 8 | 22 Nov 2026 | Complete | 153 / 153 unit+component; 94 / 94 pgTAP; 39 / 39 integration | Phase 8: Hardening | Hardening audit complete: all edge cases verified (PRD 6.2); a11y tests pass (WCAG AA contrast, >=48px touch targets, input labels, readable text); secretlint scan clean; no SERVICE_ROLE or secret leaks in logs; all 11 tables have RLS; all Stitch screen designs aligned across Phases 3–7; 0 ESLint warnings, typecheck clean. |
 
 ---
 
