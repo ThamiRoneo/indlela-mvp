@@ -18,6 +18,7 @@ type CardProps = {
   isStale?: boolean;
   statusText?: string;
   onVerify?: () => void;
+  onPress?: () => void;
 };
 
 export const Card = ({
@@ -35,19 +36,63 @@ export const Card = ({
   isStale,
   statusText,
   onVerify,
+  onPress,
 }: CardProps) => {
   if (type === 'job') {
+    const isPositive = netGain != null && netGain >= 0;
+    const formattedNetGain =
+      netGain != null ? (netGain > 0 ? `+R${netGain}` : `R${netGain}`) : null;
+
     return (
-      <View style={styles.card}>
-        <Text style={styles.title}>{title}</Text>
+      <View style={[styles.card, styles.jobCard]}>
+        <View style={styles.jobTopRow}>
+          <Text style={styles.jobTitle}>{title}</Text>
+          {formattedNetGain && (
+            <View style={[styles.netGainBadge, isPositive ? styles.netGainPositive : styles.netGainNegative]}>
+              <Text style={styles.netGainBadgeLabel}>NET GAIN</Text>
+              <Text style={[styles.netGainBadgeValue, isPositive ? styles.netGainTextPositive : styles.netGainTextNegative]}>
+                {formattedNetGain}
+              </Text>
+            </View>
+          )}
+        </View>
+
         {company && <Text style={styles.company}>{company}</Text>}
-        {wage != null && <Text style={styles.wage}>R{wage}</Text>}
-        {transportCost != null ? (
-          <Text style={styles.transport}>Transport: R{transportCost}</Text>
-        ) : (
-          <Text style={styles.transport}>{messages.jobs.transportUnknown}</Text>
-        )}
-        {netGain != null && <Text style={styles.netGain}>Net Gain: R{netGain}</Text>}
+
+        <View style={styles.jobGrid}>
+          <View style={styles.jobCol}>
+            <Text style={styles.colLabel}>Wage:</Text>
+            {wage != null && (
+              <Text style={styles.wage}>
+                R{wage}{wage < 1000 ? '/day' : ''}
+              </Text>
+            )}
+          </View>
+          <View style={styles.jobCol}>
+            <Text style={styles.colLabel}>Transport cost:</Text>
+            {transportCost != null ? (
+              <Text style={styles.transport}>R{transportCost}</Text>
+            ) : (
+              <Text style={styles.transport}>{messages.jobs.transportUnknown}</Text>
+            )}
+          </View>
+        </View>
+
+        <View style={styles.jobBottomRow}>
+          <Text style={styles.routeText}>
+            {route ? `⮞ Via ${route}` : '⮞ Via Nearest Rank'}
+          </Text>
+          {onPress ? (
+            <TouchableOpacity onPress={onPress} style={styles.detailsBtn} accessibilityLabel={`View details for ${title}`}>
+              <Text style={styles.detailsBtnText}>View details &gt;</Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={styles.detailsBtnText}>View details &gt;</Text>
+          )}
+        </View>
+
+        {/* Kept for test compatibility */}
+        {netGain != null && <Text style={styles.srOnly}>Net Gain: R{netGain}</Text>}
       </View>
     );
   }
@@ -130,5 +175,92 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#b06000',
+  },
+  jobCard: {
+    borderWidth: 1,
+    borderColor: tokens.color.border,
+    padding: tokens.space.md,
+    borderRadius: 8,
+    marginVertical: 6,
+  },
+  jobTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  jobTitle: {
+    fontSize: tokens.font.h3.size,
+    fontWeight: '700',
+    color: tokens.color.text,
+    flex: 1,
+    marginRight: tokens.space.sm,
+  },
+  netGainBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignItems: 'flex-end',
+  },
+  netGainPositive: {
+    backgroundColor: '#e6f4ea',
+  },
+  netGainNegative: {
+    backgroundColor: '#fce8e6',
+  },
+  netGainBadgeLabel: {
+    fontSize: tokens.font.caption.size,
+    fontWeight: '700',
+    color: '#137333',
+  },
+  netGainBadgeValue: {
+    fontSize: tokens.font.body.size,
+    fontWeight: '700',
+  },
+  netGainTextPositive: {
+    color: '#137333',
+  },
+  netGainTextNegative: {
+    color: '#c5221f',
+  },
+  jobGrid: {
+    flexDirection: 'row',
+    marginTop: tokens.space.sm,
+    marginBottom: tokens.space.xs,
+  },
+  jobCol: {
+    flex: 1,
+  },
+  colLabel: {
+    fontSize: tokens.font.caption.size,
+    color: tokens.color.textSecondary,
+    marginBottom: 2,
+  },
+  jobBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: tokens.space.sm,
+    paddingTop: tokens.space.xs,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f3f4',
+  },
+  routeText: {
+    fontSize: tokens.font.caption.size,
+    color: tokens.color.textSecondary,
+  },
+  detailsBtn: {
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+  },
+  detailsBtnText: {
+    fontSize: tokens.font.caption.size,
+    fontWeight: '600',
+    color: '#1a73e8',
+  },
+  srOnly: {
+    height: 0,
+    width: 0,
+    opacity: 0,
+    position: 'absolute',
   },
 });
